@@ -499,8 +499,10 @@ function locateMe(){
     const K=Math.cos(me[0]*Math.PI/180); let best=null,bd=1e9;
     D.stops.forEach(s=>{const d=Math.hypot((s.lat-me[0])*111320,(s.lon-me[1])*111320*K); if(d<bd){bd=d;best=s;}});
     if(!best||bd>5000){ map.setView(me,13); geoMsg('Jūs esate toli nuo Ukmergės miesto autobusų stotelių.'); return; }
-    if(mapBig||!isPhone()) map.fitBounds(L.latLngBounds([me,[best.lat,best.lon]]),{padding:[60,60],maxZoom:17,animate:false});
-    else map.fitBounds(L.latLngBounds([me,[best.lat,best.lon]]),{paddingTopLeft:[40,90],paddingBottomRight:[40,20],maxZoom:17,animate:false});
+    // žemėlapis juda tik tada, kai jūsų ar stotelės nesimato, ir priartina saikingai (matosi aplinka ir langelis)
+    const both=L.latLngBounds([me,[best.lat,best.lon]]), inner=map.getBounds().pad(-.12);
+    if(!(inner.contains(me)&&inner.contains([best.lat,best.lon])))
+      map.fitBounds(both,{paddingTopLeft:[40,90],paddingBottomRight:[40,20],maxZoom:Math.max(14,Math.min(map.getZoom(),15)),animate:false});
     stopPopup(best.id,`📍 Arčiausia stotelė – ~${Math.round(bd/10)*10} m`);
   },err=>{ geoBtn.classList.remove('busy');
     geoMsg(err.code===1?'Vietos naudoti neleista. Leiskite naršyklei naudoti vietą (telefono nustatymuose) ir bandykite dar kartą.':'Nepavyko nustatyti vietos. Patikrinkite, ar telefone įjungta vietos funkcija.');
