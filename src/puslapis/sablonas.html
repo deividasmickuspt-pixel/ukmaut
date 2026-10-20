@@ -21,6 +21,7 @@ h1{font-size:1.4rem;line-height:1.2;margin:0 0 .3rem}
 .sub{color:var(--muted);font-size:.85rem;margin:0 0 1rem}
 button{font:inherit;color:inherit;cursor:pointer}
 :focus-visible{outline:4px solid var(--yellow);outline-offset:2px}
+@media (hover:none){#map:focus-visible{outline:none}}   /* telefone paspaudus žemėlapį – be geltono rėmelio */
 .b{display:inline-grid;place-items:center;min-width:2em;height:2em;padding:0 .35em;border-radius:999px;color:#fff;font-weight:700;font-size:.85rem;border:0}
 .b.lg{font-size:1.2rem;min-width:2.1em;height:2.1em}
 .rcard{display:grid;grid-template-columns:auto 1fr auto;gap:.8rem;align-items:center;width:100%;min-height:64px;padding:.6rem .8rem;margin:0 0 10px;border:2px solid var(--line);border-radius:14px;background:var(--card);text-align:left}
@@ -315,6 +316,10 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
   .stoppop{display:flex;flex-direction:column;gap:6px}
   .stoppop .spn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}.stoppop small{color:var(--muted)}
   .stoppop .spb{display:flex;gap:6px}
+  .stoppop:not(.sp-map) .spn>b{display:block;font-size:1.1rem;line-height:1.2}.stoppop:not(.sp-map) .spn small{display:block;margin-top:2px;font-size:.85rem;white-space:normal}   /* 1 eil. – pavadinimas, 2 – kryptis, 3 – mygtukai */
+  .stoppop:not(.sp-map) .spn{white-space:normal!important}
+  .stoppop:not(.sp-map) .spb button,.stoppop:not(.sp-map) .spb button:first-child{display:inline-flex;align-items:center;gap:5px;flex:1 1 auto;justify-content:center;min-height:40px;padding:.15rem .5rem;background:var(--card);color:var(--ink);font-size:.82rem}
+  .spi{width:11px;height:11px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px #14213D}.spg{background:#0B7A3E}.spr{background:#B42318}.spc{flex:none}
   .stoppop button{min-height:36px;padding:.15rem .7rem;border:2px solid var(--ink);border-radius:10px;background:var(--card);color:var(--ink);font:inherit;font-weight:700;font-size:.85rem;white-space:nowrap;cursor:pointer}
   .stoppop .spb button:first-child{background:var(--ink);color:#fff}
   body.popopen .mapexp{visibility:hidden}

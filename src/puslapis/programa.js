@@ -179,7 +179,7 @@ L.control.layers(Object.fromEntries(BASES.map(([n,l])=>[n,l])),null,{position:'t
 map.on('baselayerchange',e=>{baseI=BASES.findIndex(b=>b[1]===e.layer);baseErr=0;baseOk=0;});
 
 const W={};R.forEach((r,i)=>W[r]=7-i*0.55);
-const RND=L.canvas({tolerance:10});
+const RND=L.canvas({tolerance:10}), STOPRND=L.canvas({pane:'markerPane'});
 const lineLayers=[...D.layers].sort((a,b)=>W[b.r]-W[a.r]).map(x=>({x,pl:L.polyline(D.segs[x.g],{renderer:RND,color:C(x.r),weight:x.main?W[x.r]:2.5,dashArray:x.main?null:'5 7',opacity:.9,lineCap:'round',lineJoin:'round'}).addTo(map)}));
 function routesNear(latlng){
   const p=map.latLngToLayerPoint(latlng), hit=new Set();
@@ -210,7 +210,7 @@ function nextAt(id){
   return res.sort((a,b)=>a.t.t[a.i]-b.t.t[b.i]).slice(0,6);
 }
 D.stops.forEach(s=>{
-  const m=L.circleMarker([s.lat,s.lon],{radius:6,color:'#14213D',weight:3,fillColor:'#fff',fillOpacity:1,dashArray:s.approx?'3 3':null}).addTo(map);
+  const m=L.circleMarker([s.lat,s.lon],{radius:6,color:'#14213D',weight:3,fillColor:'#fff',fillOpacity:1,dashArray:s.approx?'3 3':null,...(isPhone()?{renderer:STOPRND,interactive:false}:{})}).addTo(map);   // telefone stotelė parenkama pagal artimiausią pirštui (žr. map.on('click'))
   m.bindTooltip(esc(sname(s.id)),{direction:'top',offset:[0,-8],className:'tip'});
   m.on('click',e=>{L.DomEvent.stopPropagation(e); if(simpleMap()||onMapPg()) stopPopup(s.id); else if(onRoutesPg()&&state.route&&!state.stop&&document.querySelector(`.rtab [data-selstop="${s.id}"]`)) pickStop(s.id); else openStop(s.id);});
   markers[s.id]=m;
@@ -251,7 +251,7 @@ function clearHL(){if(hl){map.removeLayer(hl);hl=null;}setArrows([]);}
 // telefono planuoklio žemėlapyje paspausta stotelė niekur neperjungia: langelis „Iš čia / Į čia“
 function stopPopup(id,note){ const st=STOP[id], box=document.createElement('div'); box.className='stoppop'+(onMapPg()?' sp-map':'');
   box.innerHTML=`${note?`<span class="spnote">${note}</span>`:''}<span class="spn"><b>${esc(st.name)}</b>${(onMapPg()?mapDirOf(id):dirTxt(id))?` <small>${esc(onMapPg()?mapDirOf(id):dirTxt(id))}</small>`:''}</span>
-    ${onMapPg()?`<button type="button" class="sptt" data-tt aria-label="Stotelės ${esc(st.name)} tvarkaraštis">Tvarkaraštis ›</button>`:''}<span class="spb"><button type="button" data-w="from" aria-label="Važiuosiu iš stotelės ${esc(st.name)}">Iš čia</button><button type="button" data-w="to" aria-label="Važiuosiu į stotelę ${esc(st.name)}">Į čia</button></span>${onMapPg()?'':`<button type="button" class="sptt2" data-tt aria-label="Stotelės ${esc(st.name)} tvarkaraštis">Tvarkaraštis ›</button>`}`;   // žemėlapio puslapyje pagrindinis – tvarkaraštis
+    ${onMapPg()?`<button type="button" class="sptt" data-tt aria-label="Stotelės ${esc(st.name)} tvarkaraštis">Tvarkaraštis ›</button>`:''}<span class="spb"><button type="button" data-w="from" aria-label="Važiuosiu iš stotelės ${esc(st.name)}"><span class="spi spg" aria-hidden="true"></span>Iš čia</button><button type="button" data-w="to" aria-label="Važiuosiu į stotelę ${esc(st.name)}"><span class="spi spr" aria-hidden="true"></span>Į čia</button>${onMapPg()?'':`<button type="button" data-tt aria-label="Stotelės ${esc(st.name)} tvarkaraštis"><svg class="spc" aria-hidden="true" viewBox="0 0 16 16" width="15" height="15"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 4.3V8l2.6 1.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Tvarkaraštis</button>`}</span>`;   // 3 mygtukai vienoje eilutėje: ikonėlė + žodis   // žemėlapio puslapyje pagrindinis – tvarkaraštis
   const pop=L.popup({closeButton:false,autoPanPadding:[6,6],maxWidth:300,className:'stoppopw'}).setLatLng([st.lat,st.lon]).setContent(box).openOn(map);
   box.querySelectorAll('[data-tt]').forEach(b=>b.onclick=()=>{ map.closePopup(pop); openStop(id); });
   box.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{ map.closePopup(pop); const w=b.dataset.w; if(onMapPg()){ setPage('plan','push'); state={route:null,day:today,trip:null,stop:null,dir:null,variant:null}; render(true); }   // iš žemėlapio – į planuoklį
@@ -267,7 +267,7 @@ function markSel(){ if(!simpleMap()||plan.res.length) return;
 // telefono planuoklio žemėlapis paprastas: be maršrutų linijų; telefone stotelės visur maži geltoni taškai
 const simpleMap=()=>isPhone()&&!onRoutesPg()&&!onMapPg();
 let wasSimple=null;
-const stopBase=()=>isPhone()?{opacity:1,fillOpacity:1,radius:4,weight:1.5,color:'#14213D',fillColor:'#F5B800'}:{opacity:1,fillOpacity:1,radius:6,weight:3,color:'#14213D',fillColor:'#fff'};
+const stopBase=()=>isPhone()?{opacity:1,fillOpacity:1,radius:5.5,weight:2,color:'#14213D',fillColor:'#F5B800'}:{opacity:1,fillOpacity:1,radius:6,weight:3,color:'#14213D',fillColor:'#fff'};
 function applyMode(){ if(wasSimple!==isPhone()){ wasSimple=isPhone(); D.stops.forEach(s=>markers[s.id].setStyle(stopBase())); }
   lineLayers.forEach(l=>{const on=layerOn(l.x)&&!simpleMap(); if(on&&!map.hasLayer(l.pl)) l.pl.addTo(map); else if(!on&&map.hasLayer(l.pl)) l.pl.remove();});
   const el=document.getElementById('modeinfo'); if(el) el.innerHTML=MODE()==='D'?'<b>Darbo dienų schema</b><span class="mi2"><br>į Užupį – apylanka per magistralę, visą dieną</span>':'<b>Poilsio dienų schema</b><span class="mi2"><br>be apylankos, tiltu abiem kryptimis</span>';}
@@ -706,7 +706,11 @@ setMapBig(false);
 map.on('popupopen',()=>document.body.classList.add('popopen')); map.on('popupclose',()=>document.body.classList.remove('popopen'));   // langelio neuždengia „Padidinti“
 let wasPhone=isPhone();
 addEventListener('resize',()=>{ if(isPhone()!==wasPhone){ wasPhone=isPhone(); setMapBig(false); render(false); } });
-map.on('click',()=>{ if(onMapPg()) return;
+// telefone: paspaudus žemėlapį atidaroma arčiausiai piršto esanti stotelė (iki 26 px) – taškai maži, o stotelės arti viena kitos
+map.on('click',e=>{ if(!isPhone()) return; let best=null,bd=26;
+  D.stops.forEach(st=>{const q=map.latLngToContainerPoint([st.lat,st.lon]), d=Math.hypot(q.x-e.containerPoint.x,q.y-e.containerPoint.y); if(d<bd){bd=d;best=st;}});
+  if(best) setTimeout(()=>stopPopup(best.id),0); });
+map.on('click',()=>{ if(onMapPg()||isPhone()) return;
   if(state.stop){state.stop=null;render(false);}
   else if(state.route){state={route:null,day:today,trip:null,stop:null};render(false);}
 });
