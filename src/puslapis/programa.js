@@ -412,6 +412,20 @@ function pickStop(id){ selStop=selStop&&selStop.id===id&&selStop.r===state.route
   const row=document.querySelector('.rtab li.sel'), pn=document.getElementById('panel');
   if(row){ const r=row.getBoundingClientRect(), p=pn.getBoundingClientRect(), top=p.top+(document.querySelector('.rthead,.rcard-open')||{offsetHeight:0}).offsetHeight+8;
     if(r.top<top||r.bottom>p.bottom) pn.scrollTop+=r.top-top-40; } }
+// telefono maršrutų puslapyje stotelės laikai – langas virš sąrašo (kaip instrukcija); sąrašas lieka po juo
+function syncStopDlg(){
+  const dlg=document.getElementById('stopdlg'), c=document.getElementById('stopdlg-c');
+  if(!(onRoutesPg()&&state.stop)){ const was=dlg.dataset.id; if(dlg.open){ dlg.close(); setTimeout(()=>{const b=document.querySelector(`#panel [data-openstop="${was}"]`); if(b) b.focus({preventScroll:true});},0); } dlg.dataset.id=''; return; }   // fokusas grįžta į paspaustą stotelę
+  const id=state.stop, st=STOP[id], r=state.route, bl0=[...(TTS[id]||[])], bl=r&&bl0.some(b=>b.r===r)?bl0.filter(b=>b.r===r):bl0, dt=dirTxt(id,r);
+  c.innerHTML=`<div class="rthead" style="--rc:${r?C(r):'var(--ink)'}">${r?badge(r,1):''}<h2 id="stopdlg-h">${esc(st.name)}${dt?` <small>${esc(dt)}</small>`:''}</h2><button type="button" class="clr" data-stopclose aria-label="Uždaryti tvarkaraštį">✕</button></div>
+    ${bl.length?bl.map(ttBlock).join(''):'<div class="empty">Šios stotelės tvarkaraščio plakate nėra.</div>'}
+    ${D.stops.filter(o=>o.name===st.name&&o.id!==id).map(o=>`<button class="back" data-openstop="${o.id}" style="margin-top:1rem">Kita gatvės pusė${dirTxt(o.id,r)?`: ${esc(dirTxt(o.id,r))}`:''} ›</button>`).join('')}
+    <p class="note">Jei laikas nesutampa su plakatu stotelėje, teisingas plakatas.</p>`;
+  c.querySelectorAll('[data-openstop]').forEach(x=>x.onclick=()=>openStop(x.dataset.openstop));
+  c.querySelectorAll('[data-stopclose]').forEach(x=>x.onclick=closeStop);
+  const nw=dlg.dataset.id!==id; if(nw){ dlg.scrollTop=0; dlg.dataset.id=id; }
+  if(!dlg.open) dlg.showModal(); if(nw) c.querySelector('[data-stopclose]').focus();
+}
 function render(fit){
   if(!state.route&&!state.stop) viewDay=dayInfo(isoDate(new Date())).day;
   applyMode();
@@ -419,7 +433,8 @@ function render(fit){
   const rto=onRoutesPg()&&!!(state.route||state.stop); if(!state.route) tabShown=null; if(!state.stop) stopShown=null; if(document.body.classList.contains('rtopen')!==rto){ document.body.classList.toggle('rtopen',rto); map.invalidateSize(); }
   const el=document.getElementById('panel'); const sc=el.scrollTop||0;
   const dayBtns=(cur,attr,avail)=>`<div class="days" role="group" aria-label="Diena">${['W','WE'].map(d=>`<button ${attr}="${d}" class="${d===cur?'on':''}"${avail&&!avail(d)?' disabled':''} aria-pressed="${d===cur}">${DAYS[d]}</button>`).join('')}</div>`;
-  if(state.stop){
+  syncStopDlg();
+  if(state.stop&&!onRoutesPg()){
     const id=state.stop, st=STOP[id], bl0=[...(TTS[id]||[])], bl=(onRoutesPg()&&state.route&&bl0.some(b=>b.r===state.route)?bl0.filter(b=>b.r===state.route):bl0).sort((x,y)=>(x.r===state.route?-1:0)-(y.r===state.route?-1:0));
     clearHL(); fade(true);
     markers[id].setStyle({opacity:1,fillOpacity:1,radius:9,fillColor:'#F5B800',color:'#14213D'}).bringToFront();
@@ -713,6 +728,9 @@ function doInstall(){
   if(instEv){ instEv.prompt(); instEv.userChoice.then(c=>{ if(c.outcome==='accepted') store.set('ap-inst',1); instEv=null; }).catch(()=>{}); return; }
   const d=document.getElementById('instdlg');
   d.querySelector('.inst-ios').hidden=!isIOS; d.querySelector('.inst-and').hidden=isIOS; if(d.showModal) d.showModal(); }
+{ const dlg=document.getElementById('stopdlg');   // Esc ir paspaudimas šalia lango – uždaro
+  dlg.addEventListener('cancel',e=>{e.preventDefault();closeStop();});
+  dlg.addEventListener('click',e=>{if(e.target===dlg) closeStop();}); }
 document.querySelector('.instclose').onclick=()=>document.getElementById('instdlg').close();
 const menu=document.getElementById('menudlg'), menuBtn=document.getElementById('menubtn');
 if(!store.get('ap-menu')) menuBtn.classList.add('new');   // geltonas taškelis, kol meniu dar neatidarytas

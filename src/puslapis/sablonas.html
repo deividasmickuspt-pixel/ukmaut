@@ -261,7 +261,10 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
 .missing summary{list-style:none;cursor:default}.missing summary::-webkit-details-marker{display:none}
 .pbtns{display:flex;gap:6px}
 #instdlg{max-width:30rem;width:calc(100% - 2rem);border:0;border-radius:14px;padding:1.2rem 1.4rem;color:var(--ink);box-shadow:0 10px 40px rgba(0,0,0,.35);font-size:.95rem;line-height:1.45}
-#instdlg::backdrop,#menudlg::backdrop{background:rgba(10,16,30,.55)}#instdlg h2{margin:0 2.4rem .6rem 0;font-size:1.2rem}#instdlg ol{padding-left:1.2rem;margin:.3rem 0}#instdlg li{margin:.3rem 0}
+#stopdlg{max-width:30rem;width:calc(100% - 1.5rem);max-height:86vh;max-height:86dvh;overflow-y:auto;overscroll-behavior:contain;border:0;border-radius:16px;padding:0 1rem 1rem;color:var(--ink);background:var(--card);box-shadow:0 10px 40px rgba(0,0,0,.35)}
+#stopdlg .rthead{margin-top:0;box-shadow:0 -12px 0 var(--card);top:0;margin-bottom:.8rem}#stopdlg-c{padding-top:.8rem}
+#stopdlg[open]{animation:sdlg .18s ease-out}@keyframes sdlg{from{opacity:0;transform:translateY(16px)}}@media (prefers-reduced-motion:reduce){#stopdlg[open]{animation:none}}
+#stopdlg::backdrop,#instdlg::backdrop,#menudlg::backdrop{background:rgba(10,16,30,.55)}#instdlg h2{margin:0 2.4rem .6rem 0;font-size:1.2rem}#instdlg ol{padding-left:1.2rem;margin:.3rem 0}#instdlg li{margin:.3rem 0}
 #menudlg{position:fixed;inset:0 0 0 auto;margin:0;width:min(320px,86vw);height:100%;max-height:none;max-width:none;border:0;padding:0;background:var(--card);color:var(--ink);box-shadow:-8px 0 30px rgba(0,0,0,.3)}
 #menudlg[open]{display:flex;flex-direction:column;animation:mslide .2s ease-out}
 @keyframes mslide{from{transform:translateX(100%)}}
@@ -397,6 +400,7 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
 </ul>
 <p class="mfoot">Bandomoji versija – galimi netikslumai.<br>Projekto autorius: Deividas Mickus</p>
 </dialog>
+<dialog id="stopdlg" aria-labelledby="stopdlg-h"><div id="stopdlg-c"></div></dialog>
 <dialog id="instdlg" aria-labelledby="inst-h">
 <button type="button" class="a11yclose instclose" aria-label="Uždaryti">✕</button>
 <h2 id="inst-h">Įsidėkite į telefono ekraną</h2>
