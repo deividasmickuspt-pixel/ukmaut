@@ -322,7 +322,10 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
   .mbd button{flex:1;min-height:38px;padding:.2rem .5rem;border:2px solid var(--ink);border-radius:10px;background:var(--card);color:var(--ink);font:700 .85rem "Atkinson Hyperlegible",system-ui,sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.25)}
   .mbd button.on{background:var(--ink);color:#fff}
   .mbn{align-self:flex-start;margin:0 0 .4rem;padding:.15rem .5rem;border-radius:6px;background:var(--card);font-size:.8rem;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.2)}
-  .rmap{display:block;margin:-.3rem 0 .7rem auto}
+  .slist{list-style:none;margin:0;padding:0}.slist li{border-bottom:1px solid var(--line)}
+  .slrow{display:grid;grid-template-columns:1fr auto auto;gap:.6rem;align-items:center;width:100%;min-height:58px;padding:.45rem .2rem;border:0;background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+  .sln b{display:block;font-size:1rem}.sln small{display:block;color:var(--muted);font-size:.82rem;line-height:1.25}
+  .stoppop .sptt2{align-self:flex-start;min-height:30px;padding:.1rem .6rem;border-color:var(--line);font-weight:400;font-size:.8rem}
   .sp-map{min-width:230px}.sp-map .spn{white-space:normal;max-width:260px}.sp-map .spn b{display:block;font-size:1.25rem;line-height:1.2}   /* akcentas – pavadinimas ir kryptis */
   .sp-map .spn small{display:block;margin-top:2px;color:var(--ink);font-size:.95rem;font-weight:700}
   .stoppop .sptt{min-height:38px;margin-top:4px;background:var(--card);color:var(--ink);font-size:.88rem}
@@ -417,8 +420,7 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
 <div class="mhead"><h2 id="menu-h">Meniu</h2><button type="button" class="mclose" aria-label="Uždaryti meniu">✕</button></div>
 <ul class="mlist">
 <li><button type="button" data-m="plan"><span class="mi" aria-hidden="true">🧭</span>Maršruto planuoklis</button></li>
-<li><button type="button" data-m="routes"><span class="mi" aria-hidden="true">🚌</span>Maršrutai ir tvarkaraščiai</button></li>
-<li><button type="button" data-m="map"><span class="mi" aria-hidden="true">🗺️</span>Žemėlapis</button></li>
+<li><button type="button" data-m="routes"><span class="mi" aria-hidden="true">🚏</span>Stotelių tvarkaraščiai</button></li>
 <li class="sep" aria-hidden="true"></li>
 <li><button type="button" data-m="tour"><span class="mi" aria-hidden="true">❓</span>Kaip naudotis</button></li>
 <li><button type="button" data-m="fb"><span class="mi" aria-hidden="true">❗</span>Pranešti apie klaidą ar pasiūlyti</button></li>
