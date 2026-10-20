@@ -1,8 +1,8 @@
-const TTS=TT.tt, HINT=TT.hint;
+const TTS=TT.tt;
 D.stops.forEach(s=>{const rs=new Set((TTS[s.id]||[]).map(b=>b.r));(s.routes||[]).forEach(r=>rs.add(r));s.routes=[...rs].sort((a,b)=>a-b);});
 D.stops=D.stops.filter(s=>TTS[s.id]||s.routes.length);
 const STOP=Object.fromEntries(D.stops.map(s=>[s.id,s]));
-const sname=id=>STOP[id].name+(HINT[id]?` (${HINT[id]})`:'');
+const sname=id=>STOP[id].name+(dirTxt(id)?` (${dirTxt(id)})`:'');
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const R=Object.keys(D.meta).filter(r=>D.trips.some(t=>t.r===r));
 const C=r=>D.meta[r].color;
@@ -29,6 +29,10 @@ function legNotes(l){const names=new Set(l.t.P.s.slice(l.i,l.j+1).map(nm)); cons
   l.t.n.forEach(n=>{const kw=NOTEKW.find(([k])=>n.includes(k)); if(kw&&(names.has(kw[1])||l.t.P.s.slice(l.j).map(nm).includes(kw[1])&&n.startsWith('iki')&&false)) out.push(n);});
   if(l.t.v&&l.i===0&&nm(l.t.P.s[0])==='Autobusų stotis') out.push('išvyksta iš Vytauto g. stotelės');
   return out;}
+// oficiali kryptis (galinė stotelė) kiekvienoje stotelėje – iš reisų, kurie iš jos išvyksta
+const DIRAT={}; D.trips.forEach(t=>t.P.s.forEach((id,i)=>{if(i>=t.P.s.length-1)return; const to=legTo({t,i}).replace(/ \(.*\)$/,'').replace(/ ir atgal į AS$/,''), a=DIRAT[id]||(DIRAT[id]={}), e=a[to]||(a[to]={n:0}); e.n++; e[t.r]=(e[t.r]||0)+1;}));
+const dirList=(id,r)=>{const c=e=>r?e[r]||0:e.n, a=DIRAT[id]||{}, tot=Object.values(a).reduce((s,e)=>s+c(e),0); return Object.entries(a).filter(([,e])=>c(e)&&c(e)>=tot*.2).sort((x,y)=>c(y[1])-c(x[1])).slice(0,3).map(([to])=>to);};
+const dirTxt=(id,r)=>{const l=r&&dirList(id,r).length?dirList(id,r):dirList(id); return l.length?'kryptis '+l.join(', '):(STOP[id].routes.length?'galinė stotelė':'');};
 const noteTxt=t=>[...t.n,...(t.v?['išvyksta iš Vytauto g. stotelės']:[])];
 let state={route:null,day:today,trip:null,stop:null,dir:null};
 const FEEDBACK_URL='https://docs.google.com/forms/d/e/1FAIpQLSefqI5RnqKLAv2Im7MOOdJfc2lZa6WOSzsKa1mEMKBBlVPFwQ/viewform';   // ← čia įrašyti Google formos nuorodą
@@ -234,7 +238,7 @@ map.on('zoomend',drawArrows);
 function clearHL(){if(hl){map.removeLayer(hl);hl=null;}setArrows([]);}
 // telefono planuoklio žemėlapyje paspausta stotelė niekur neperjungia: langelis „Iš čia / Į čia“
 function stopPopup(id,note){ const st=STOP[id], box=document.createElement('div'); box.className='stoppop';
-  box.innerHTML=`${note?`<span class="spnote">${note}</span>`:''}<span class="spn"><b>${esc(st.name)}</b>${HINT[id]?` <small>${esc(HINT[id])}</small>`:''}</span>
+  box.innerHTML=`${note?`<span class="spnote">${note}</span>`:''}<span class="spn"><b>${esc(st.name)}</b>${dirTxt(id)?` <small>${esc(dirTxt(id))}</small>`:''}</span>
     <span class="spb"><button type="button" data-w="from" aria-label="Važiuosiu iš stotelės ${esc(st.name)}">Iš čia</button><button type="button" data-w="to" aria-label="Važiuosiu į stotelę ${esc(st.name)}">Į čia</button></span>`;
   const pop=L.popup({closeButton:false,autoPanPadding:[6,6],maxWidth:300,className:'stoppopw'}).setLatLng([st.lat,st.lon]).setContent(box).openOn(map);
   box.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{ map.closePopup(pop); const w=b.dataset.w;
@@ -348,11 +352,11 @@ function routeBody(r){
     <p class="sub" style="margin:.1rem 0 .4rem">Retesni reisai, kurie važiuoja kitur nei pagrindinis maršrutas. Paspauskite – parodysiu žemėlapyje.</p>
     <ul class="vlist">${VARS.map(v=>`<li><button data-var="${esc(v.label)}" class="${state.variant===v.label?'on':''}" aria-pressed="${state.variant===v.label}"><b>${esc(v.label)}</b><small>${v.from?`išvyksta iš stotelės „${esc(v.from)}“: `:'išvyksta: '}${v.times.map(hm).join(', ')}</small></button>
       ${state.variant===v.label&&v.seq&&v.seq.length?`<p class="sub" style="margin:.4rem 0 .2rem">Stotelės ir laikai ${v.times.length>1?`(${hm(v.seq[0][1])} reiso; kitų reisų laikai atitinkamai vėlesni)`:''}:</p>
-      <ol class="strip vstrip" style="--rc:${C(r)}">${v.seq.filter(([i])=>STOP[i]).map(([i,t],k)=>`<li><button class="srow" data-openstop="${i}"><span class="dot"></span><span>${esc(nm(i))}${HINT[i]?`<small>${esc(HINT[i])}</small>`:''}</span><span class="tm">${hm(t)}</span></button></li>`).join('')}</ol>`:''}</li>`).join('')}</ul>`:'';
+      <ol class="strip vstrip" style="--rc:${C(r)}">${v.seq.filter(([i])=>STOP[i]).map(([i,t],k)=>`<li><button class="srow" data-openstop="${i}"><span class="dot"></span><span>${esc(nm(i))}</span><span class="tm">${hm(t)}</span></button></li>`).join('')}</ol>`:''}</li>`).join('')}</ul>`:'';
   const dirBtns=Object.keys(DR).length>=1?`<div class="days dirs" role="group" aria-label="Kryptis">
     ${['A','B'].filter(d=>DR[d]).map(d=>`<button data-dir="${d}" class="${state.dir===d?'on':''}" aria-pressed="${state.dir===d}">→ ${esc(DR[d].to)}</button>`).join('')}</div>`:'';
   const pick=onRoutesPg(), sel=pick&&selStop&&selStop.r===r?selStop.id:null;   // telefone stotelė pirmiausia tik pažymima
-  const item=i=>`<li class="${VAR.has(i)?'var':''}${i===sel?' sel':''}"><button class="srow${i===sel?' on':''}" ${pick?`data-selstop="${i}" aria-expanded="${i===sel}"`:''} data-openstop="${i}"><span class="dot"></span><span>${esc(nm(i))}${HINT[i]?`<small>${esc(HINT[i])}</small>`:''}${VAR.has(i)?'<small>tik dalis reisų</small>':''}</span><span class="xfer">${STOP[i].routes.filter(x=>x!==r).map(x=>badge(x)).join('')}</span></button>${i===sel?`<button type="button" class="srtt" data-ttstop="${i}">Žiūrėti tvarkaraštį ›</button>`:''}</li>`;
+  const item=i=>`<li class="${VAR.has(i)?'var':''}${i===sel?' sel':''}"><button class="srow${i===sel?' on':''}" ${pick?`data-selstop="${i}" aria-expanded="${i===sel}"`:''} data-openstop="${i}"><span class="dot"></span><span>${esc(nm(i))}${VAR.has(i)?'<small>tik dalis reisų</small>':''}</span><span class="xfer">${STOP[i].routes.filter(x=>x!==r).map(x=>badge(x)).join('')}</span></button>${i===sel?`<button type="button" class="srtt" data-ttstop="${i}">Žiūrėti tvarkaraštį ›</button>`:''}</li>`;
   return `${dayTog(r)}${viewDay!=='W'&&D.trips.some(t=>t.r===r&&t.d==='Sat')&&!D.trips.some(t=>t.r===r&&t.d==='WE')?'<p class="sub" style="margin-top:.5rem"><b>Važiuoja tik šeštadieniais.</b></p>':''}${runsOn(r)?dirBtns:`<div class="empty" style="margin-top:.8rem">Pasirinktą dieną (${DAYS[viewDay].toLowerCase()}) šis maršrutas nevažiuoja.</div>`}
   <p class="sub" style="margin-top:.6rem">${pick?'Paspauskite stotelę – ji bus parodyta žemėlapyje, o po ja – nuoroda į tvarkaraštį.':'Paspauskite stotelę – pamatysite jos tvarkaraštį.'}</p>
   <ol class="strip" style="--rc:${C(r)}">${rs.main.map(item).join('')}</ol>
@@ -386,11 +390,11 @@ function render(fit){
     if(state.route){lineLayers.forEach(({x,pl})=>{if(x.r===state.route)pl.setStyle({opacity:.8});});setArrows(state.dir?lineLayers.filter(l=>l.x.r===state.route&&layerOn(l.x)&&(l.x.ds||[l.x.d]).includes(state.dir)).map(l=>({pts:D.segs[l.x.g],color:C(state.route)})):[]);}
     const tab=onRoutesPg(), nw=tab&&stopShown!==id; stopShown=tab?id:null;   // telefone tvarkaraštis – skirtuke virš maršruto
     if(tab&&!map.getBounds().pad(-.1).contains([st.lat,st.lon])) map.panTo([st.lat,st.lon],{animate:false});
-    el.innerHTML=(tab?`<section class="rtab${nw?' rtab-in':''}" aria-label="Stotelės ${esc(st.name)} tvarkaraštis"><div class="rthead" style="--rc:${state.route?C(state.route):'var(--ink)'}">${state.route?badge(state.route,1):''}<h2>${esc(st.name)}${HINT[id]?` <small>${esc(HINT[id])}</small>`:''}</h2><button type="button" class="clr" data-stopclose aria-label="Uždaryti tvarkaraštį">✕</button></div>`   // be dienos mygtukų – lentelėje matomos abi dienos
+    el.innerHTML=(tab?`<section class="rtab${nw?' rtab-in':''}" aria-label="Stotelės ${esc(st.name)} tvarkaraštis"><div class="rthead" style="--rc:${state.route?C(state.route):'var(--ink)'}">${state.route?badge(state.route,1):''}<h2>${esc(st.name)}${dirTxt(id,state.route)?` <small>${esc(dirTxt(id,state.route))}</small>`:''}</h2><button type="button" class="clr" data-stopclose aria-label="Uždaryti tvarkaraštį">✕</button></div>`   // be dienos mygtukų – lentelėje matomos abi dienos
       :`<button class="back" data-stopback>‹ ${state.route?`${state.route} maršrutas`:'Atgal'}</button>
-    <h1 class="sh">${esc(st.name)}</h1>${HINT[id]?`<p class="shint">${esc(HINT[id])}</p>`:''}${dayTog()}`)+`
+    <h1 class="sh">${esc(st.name)}</h1>${dirTxt(id)?`<p class="shint">${esc(dirTxt(id))}</p>`:''}${dayTog()}`)+`
     ${bl.length?bl.map(ttBlock).join(''):'<div class="empty">Šios stotelės tvarkaraščio plakate nėra.</div>'}
-    ${D.stops.filter(o=>o.name===st.name&&o.id!==id).map(o=>`<button class="back" data-openstop="${o.id}" style="margin-top:1rem">Kita gatvės pusė: ${esc(HINT[o.id]||o.name)} ›</button>`).join('')}
+    ${D.stops.filter(o=>o.name===st.name&&o.id!==id).map(o=>`<button class="back" data-openstop="${o.id}" style="margin-top:1rem">Kita gatvės pusė${dirTxt(o.id)?`: ${esc(dirTxt(o.id))}`:''} ›</button>`).join('')}
     <p class="note">Jei laikas nesutampa su plakatu stotelėje, teisingas plakatas.</p>${tab?'</section>':''}`;
     el.querySelectorAll('[data-openstop]').forEach(x=>x.onclick=()=>openStop(x.dataset.openstop));
     el.querySelectorAll('[data-stopback]').forEach(x=>x.onclick=()=>{state.stop=null;render(true);});
