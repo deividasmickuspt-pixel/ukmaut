@@ -370,7 +370,7 @@ function routeBodyPhone(r){
     :DD[d]?`<p class="sub" style="margin-top:.3rem">Kryptis: <b>${esc(DD[d].to)}</b></p>`:'';
   const item=(i,k)=>`<li class="${rare(i)?'var':''}"><button class="srow" data-openstop="${i}"><span class="dot"></span><span>${esc(nm(i))}${note(i)&&!(k&&rare(ord[k-1]))?`<small>${note(i)}</small>`:''}</span></button></li>`;   // užrašas – tik pirmoje punktyrinės dalies stotelėje
   return `${dayLine}${dirBtns}
-  <p class="sub" style="margin-top:.6rem">Paspauskite stotelę – pamatysite jos laikus.${ord.some(rare)?' Punktyru – stotelės, pro kurias važiuoja ne visi reisai.':''}</p>
+  <h3 class="ph sth">Stotelės</h3><p class="sub" style="margin-top:.1rem">Paspauskite stotelę – pamatysite jos laikus.${ord.some(rare)?' Punktyru – stotelės, pro kurias važiuoja ne visi reisai.':''}</p>
   <ol class="strip" style="--rc:${C(r)}">${ord.map(item).join('')}</ol>`;
 }
 // maršruto turinys: diena, kryptis, stotelės, kiti reisai (kompiuteryje – atskiras vaizdas, telefone – skirtuke virš sąrašo)

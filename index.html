@@ -298,6 +298,7 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
   .planner .phead{align-items:center}.planner .pnames{font-size:1.05rem;line-height:1.25}
   body.pg-routes #planbar{display:none}
   body.pg-routes>#left{display:none!important}
+  .sth{margin:1.1rem 0 0;font-size:1.05rem}
   .rbday .srtt{display:inline;margin:0;padding:0;min-height:0;font-size:inherit}   /* maršrutų puslapis – tik sąrašas, be žemėlapio */
   /* maršrutų puslapis: antraštė, žemėlapis ir poraštė vietoje, slenkamas tik sąrašas (be matomos slinkties juostos) */
   html:has(body.pg-routes){height:100%;overflow:hidden}
@@ -780,7 +781,7 @@ function routeBodyPhone(r){
     :DD[d]?`<p class="sub" style="margin-top:.3rem">Kryptis: <b>${esc(DD[d].to)}</b></p>`:'';
   const item=(i,k)=>`<li class="${rare(i)?'var':''}"><button class="srow" data-openstop="${i}"><span class="dot"></span><span>${esc(nm(i))}${note(i)&&!(k&&rare(ord[k-1]))?`<small>${note(i)}</small>`:''}</span></button></li>`;   // užrašas – tik pirmoje punktyrinės dalies stotelėje
   return `${dayLine}${dirBtns}
-  <p class="sub" style="margin-top:.6rem">Paspauskite stotelę – pamatysite jos laikus.${ord.some(rare)?' Punktyru – stotelės, pro kurias važiuoja ne visi reisai.':''}</p>
+  <h3 class="ph sth">Stotelės</h3><p class="sub" style="margin-top:.1rem">Paspauskite stotelę – pamatysite jos laikus.${ord.some(rare)?' Punktyru – stotelės, pro kurias važiuoja ne visi reisai.':''}</p>
   <ol class="strip" style="--rc:${C(r)}">${ord.map(item).join('')}</ol>`;
 }
 // maršruto turinys: diena, kryptis, stotelės, kiti reisai (kompiuteryje – atskiras vaizdas, telefone – skirtuke virš sąrašo)
