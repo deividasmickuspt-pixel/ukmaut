@@ -5,7 +5,7 @@ Statinis puslapis **ukmaut.vercel.app** (failas `index.html`, ~460 KB): žemėla
 Autorius: Deividas Mickus (asmeninė iniciatyva, bandomoji versija). Atsiliepimai – Google forma (mygtukas „!“, `FEEDBACK_URL` `src/puslapis/programa.js` pradžioje).
 
 ## Duomenų šaltiniai
-1. **AP darbo grafikai nuo 2026-10-05** (Excel iš J. Skapienės; `2.xlsx`, `4.xlsx`, `nauji_darbo_dienomis.xlsx`, savaitgalio failas). Visi 7 maršrutai, darbo ir poilsio dienos → `src/duomenys/reisai.json`. Plakatų laikai nebenaudojami.
+1. **AP darbo grafikai nuo 2026-10-05, atnaujinti nuo 2026-10-19** (Excel iš J. Skapienės; `2.xlsx`, `4.xlsx`, `nauji_darbo_dienomis.xlsx`, savaitgalio failas; 2026-10-20 gauti nauji `nauji_darbo_dienomis.xlsx` ir `NAUJAUSIAS (AST MIEST. Savaitgaliais)` – Excel failai į saugyklą nekeliami). Visi 7 maršrutai, darbo ir poilsio dienos → `src/duomenys/reisai.json`. Plakatų laikai nebenaudojami.
 2. Stotelės: VINTRA GTFS + rankinės pataisos (`src/duomenys/stoteles.json`, `confirmed`); 24 dar nepatikrintos vietoje.
 3. OSM (`duomenys/export.osm`) – gatvės ir įmontuotas žemėlapio pagrindas (`basemap.json`).
 
@@ -16,10 +16,10 @@ Darbo dienomis visą dieną į Užupį – apylanka per magistralę; poilsio die
 | Autobusas | Diena |
 |---|---|
 | 1-1, 1-2 | tik 1 |
-| 2-1 | 4:40 AS→Biofabrikas (2), ratai 2; paskutinis Deltuva 20:50 → Narbuto 21:56 (atvykimas įvertintas); 23:15 Narbute → **4** iki Pašilės 0:06 → **5** iki Žiedo 0:18 (*spėjimas*) |
+| 2-1 | 4:15 AS→Biofabrikas (2); 4:36 Biofabrikas → Pašilė 5:20, 5:40 Pašilė → Deltuva; ratai 2; vakare 19:47 AS→Biofabrikas, 20:35 Biofabrikas → Pašilė 21:20, 21:40 Pašilė → Žiedo 21:59 (visi **2**); 23:15 Narbute → **4** iki Pašilės 0:06 → **5** iki Žiedo 0:21 (*spėjimas*) |
 | 2-2 | tik 2 |
-| 4-1 | tik 4 |
-| 4-2 | 4 → Pašilėje **5** (5:10) → Narbute **1** (5:50); popietė 4 → Pašilėje **5** (13:42) → Narbute **4** (14:45, „TIKRINTI“) |
+| 4-1 | tik 4; nuo 10-19 pradeda 4:45 pilna trasa (Pašilė 5:16), 5:25 atgal, 6:19 iš Pašilės |
+| 4-2 | 4:45 trumpuoju keliu (Boruvka → Pušų) → Pašilėje **5** (5:10) → Narbute **1** (5:50) – tebegalioja nuo 10-19; popietė 4 → Pašilėje **5** (13:42) → Narbute **4** (14:45, „TIKRINTI“) |
 | 6-1 / 6-2 | 6 (AS→Žaliasis) → **7** iki Narbuto → **1** (6:00 / 14:45) → 6 ratai |
 
 ## Planuoklio taisyklės (`computePlan`, `findTrips` – `src/puslapis/programa.js`)
@@ -53,7 +53,8 @@ axe-core (WCAG 2.0/2.1/2.2 A+AA) – 0 pažeidimų. Žemėlapio elementai be fok
 - 2026-10-20 failai pervadinti pagal paskirtį; seni pagalbiniai ir `ovr_*.py` skriptai nebeįkelti (jų rezultatas – `duomenys/reisai.json`). Perstatytas puslapis patikrintas: visos 17 296 planuoklio paieškos sutampa su ankstesne versija.
 
 ## Atviri klausimai AS
-2-1 naktiniai numeriai (23:15, 0:06); 14:45 nuo Narbuto („TIKRINTI“); 4:37 iš Kęstučio a. keleivinis?; „narbutas pietinis“; Biofabrikas link Deltuvos – atskira stotelė?; įvertintas atvykimas Narbuto 21:56.
+2026-10-19 Excel'yje rasta ir pataisyta: 2-2 Dariaus ir Girėno 6:29→6:19, 2-1P 15:24→15:09, 4-1 4:45 reise Sodai/Dukstynos k. 4:45/4:47→4:47/4:48; 4-2 lape du 6:51/6:55 stulpeliai – galioja 6:55; 2-1 lape senas 4:40 rytinis – galioja 4:15; 2-1P 13:38 reise Smėlių 14:02 → Kęstučio a. 14:03 (1 min) – palikta kaip Excel'yje.
+2-1 naktiniai numeriai (23:15, 0:06); 14:45 nuo Narbuto („TIKRINTI“); ~~4:37 iš Kęstučio a.~~ (nuo 10-19 nebėra); „narbutas pietinis“; Biofabrikas link Deltuvos – atskira stotelė?; įvertintas atvykimas Narbuto 21:56.
 
 ## Kiti žingsniai
 1. **Vienas duomenų šaltinis**: lentelė Stotelės (ID, pavadinimas, pusė, koord.) / Reisai (ID, maršruto Nr., dienos, autobusas `blk`, kryptis, pastaba) / Laikai (reiso ID, eilė, stotelė, laikas); generavimas tik iš jos; automatinis patikrinimas; GTFS eksportas (stops.lt / Google Maps).
