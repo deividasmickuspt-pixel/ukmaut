@@ -39,6 +39,7 @@ const VSEL=()=>state.route&&state.variant?((D.variants[state.route]||{})[MODE()]
 const layerOn=x=>x.m===MODE()&&runsOn(x.r)&&(x.main||(VSEL()&&x.r===state.route&&VSEL().vars.includes(x.v)));
 const runsOn=r=>D.trips.some(t=>t.r===r&&inDay(t,SHOWDAY()));
 const DIRS=r=>(D.dirs[r]||{})[MODE()]&&Object.keys(D.dirs[r][MODE()]).length?D.dirs[r][MODE()]:((D.dirs[r]||{}).D||{});
+let routesOpen=false;   // telefone maršrutų sąrašas išskleidžiamas mygtuku
 let plan={from:'',to:'',day:today,time:nowMin,opt:0,res:[],userTime:false};   // userTime: laiką pasirinko pats žmogus (tada jo neatnaujiname)
 
 const WALK=(()=>{const W=new Map(),k=Math.cos(55.25*Math.PI/180);
@@ -240,7 +241,7 @@ function drawLegs(legs,fit){
   pin(a.t.P.s[a.i],'start',`<b>${hm(a.t.t[a.i])}</b> ${badge(a.t.r)} ${esc(nm(a.t.P.s[a.i]))}`);
   if(legs.length>1&&legs[1].t.r!==legs[0].t.r&&!legs[1].cont){const b=legs[1];pin(b.t.P.s[b.i],'xfer',`🔁 <b>${hm(b.t.t[b.i])}</b> ${badge(b.t.r)} ${esc(nm(b.t.P.s[b.i]))}`);}
   pin(z.t.P.s[z.j],'end',`<b>${hm(z.t.t[z.j])}</b> ${esc(nm(z.t.P.s[z.j]))}`);
-  if(fit) map.fitBounds(all,{padding:[60,60],maxZoom:16});
+  if(fit) map.fitBounds(all,{padding:isPhone()&&!mapBig?[18,18]:[60,60],maxZoom:16});
 }
 function openStop(id){state.stop=id;render(false);announce(`Stotelės ${sname(id)} tvarkaraštis.`);}
 const DCOL=[['W','Darbo dienomis'],['WE','Poilsio dienomis']];
@@ -330,10 +331,11 @@ function render(fit){
     el.innerHTML=`
     ${plan.from&&plan.to?`<section class="planner"><div class="phead"><h2 class="ph">Pasiūlymai kelionei <span class="pnames">${esc(plan.from)} → ${esc(plan.to)}</span></h2><span class="pbtns">${canShare()?'<button class="clr" data-share aria-label="Dalintis šios kelionės nuoroda" title="Dalintis nuoroda">🔗</button>':''}<button class="clr" data-clear aria-label="Išvalyti paiešką">✕</button></span></div>
       ${plan.res.nextDate?`<p class="walkhint">Šiandien po ${hm(plan.time)} reisų nebėra. Artimiausi – ${plan.res.nextDate} (${dayInfo(plan.res.nextDate).label}).</p>`:''}${plan.res.wide?`<p class="walkhint">🚶 Tiesioginių reisų iš šios vietos nėra – siūlome nueiti iki netoliese esančios stotelės, kur autobusai važiuoja dažniau.</p>`:''}${plan.res.walkAB?`<p class="walkhint">🚶 ${plan.res.walkBetter?'Pėsčiomis bus greičiau':'Šios stotelės arti viena kitos'} – ~${plan.res.walkAB.m} m (≈${plan.res.walkAB.min} min).</p>`:''}<p class="sub">${plan.date} (${dayInfo(plan.date).label}), nuo ${hm(plan.time)}</p>${res}</section>`:''}
-    <div class="routesbox" ${plan.from&&plan.to?"hidden":""}>
-    <h2 class="ph" style="margin-top:1.4rem">Maršrutai ir tvarkaraščiai</h2>
+    <div class="routesbox" ${plan.from&&plan.to&&!isPhone()?"hidden":""}>
+    ${isPhone()?`<h2 class="rtogh"><button type="button" class="rtog" data-rtog aria-expanded="${routesOpen}"><span aria-hidden="true">🚌</span> Maršrutai ir tvarkaraščiai <span class="chev" aria-hidden="true">${routesOpen?'▴':'▾'}</span></button></h2>`
+      :'<h2 class="ph" style="margin-top:1.4rem">Maršrutai ir tvarkaraščiai</h2>'}
 
-    ${R.map(r=>`<button class="rcard" data-sel="${r}">${badge(r,1)}<span>${esc(D.meta[r].legend)}<small>${(()=>{const w=D.trips.some(t=>t.r===r&&t.d==='W'),we=D.trips.some(t=>t.r===r&&t.d==='WE'),sa=D.trips.some(t=>t.r===r&&t.d==='Sat');return [w?'darbo dienomis':'',we?'poilsio dienomis':(sa?'tik šeštadieniais':'')].filter(Boolean).join(', ');})()}</small></span><span class="chev" aria-hidden="true">›</span></button>`).join('')}
+    ${isPhone()&&!routesOpen?'':R.map(r=>`<button class="rcard" data-sel="${r}">${badge(r,1)}<span>${esc(D.meta[r].legend)}<small>${(()=>{const w=D.trips.some(t=>t.r===r&&t.d==='W'),we=D.trips.some(t=>t.r===r&&t.d==='WE'),sa=D.trips.some(t=>t.r===r&&t.d==='Sat');return [w?'darbo dienomis':'',we?'poilsio dienomis':(sa?'tik šeštadieniais':'')].filter(Boolean).join(', ');})()}</small></span><span class="chev" aria-hidden="true">›</span></button>`).join('')}
     <details class="missing"${isPhone()?'':' open'}><summary><b>Tilto remonto laikotarpis.</b><span class="sumph"> Darbo dienomis į Užupį – apylanka.</span></summary> Darbo dienomis (visą dieną, ir po 18 val.) autobusai į Užupį važiuoja apylanka per magistralę, o atgal – tiesiai per tiltą.<br>Savaitgaliais ir švenčių dienomis apylankos nėra – važiuojama per tiltą abiem kryptimis.</details>
     </div>
 
@@ -370,6 +372,7 @@ function render(fit){
   el.querySelectorAll('[data-var]').forEach(b=>b.onclick=()=>{state.variant=state.variant===b.dataset.var?null:b.dataset.var;render(false);});
   el.querySelectorAll('[data-clear]').forEach(b=>b.onclick=()=>{plan.from='';plan.to='';plan.res=[];setUrl();renderBar();render(true);});   // (paskutinės paieškos lieka)
   el.querySelectorAll('[data-share]').forEach(b=>b.onclick=shareTrip);
+  el.querySelectorAll('[data-rtog]').forEach(b=>b.onclick=()=>{routesOpen=!routesOpen; render(false);});
   el.querySelectorAll('[data-rday]').forEach(b=>b.onclick=()=>{state.day=b.dataset.rday;state.trip=null;render(false);});
   el.querySelectorAll('[data-opt]').forEach(b=>b.onclick=()=>{plan.opt=+b.dataset.opt;render(true);showMapOnPhone();});
   el.querySelectorAll('[data-openstop]').forEach(b=>{b.onclick=()=>{unhoverStop();openStop(b.dataset.openstop);};
@@ -401,7 +404,7 @@ function dayInfo(iso){const [y,m,d]=iso.split('-').map(Number),dt=new Date(y,m-1
   return {day:(wd===0||wd===6||hol)?'WE':'W',label:hol?'šventinė diena':(wd===0||wd===6)?'poilsio diena':'darbo diena'};}
 plan.date=isoDate(now); plan.day=dayInfo(plan.date).day;
 // phone: after a search / choosing a trip, show the map first (results are below it)
-function showMapOnPhone(){ if(isPhone()&&mapOpen) document.getElementById('planbar').scrollIntoView({behavior:SMOOTH,block:'start'}); }   // planner on top, map right under it
+function showMapOnPhone(){ if(isPhone()&&mapBig) document.getElementById('planbar').scrollIntoView({behavior:SMOOTH,block:'start'}); }   // planner on top, map right under it
 // narrow phones: the long hint does not fit into half of the screen
 const PH=()=>innerWidth<1200?'Pasirinkite…':'Pasirinkite stotelę';
 // ---- atsimenamos paieškos (šiame telefone ir naršyklėje) ir nuoroda su stotelėmis: ?is=Kauno&i=Pašilė ----
@@ -435,19 +438,28 @@ function renderBar(){
   bar.querySelector('#pswap').onclick=()=>{[plan.from,plan.to]=[plan.to,plan.from];renderBar();};
   bar.querySelector('#pgo').onclick=()=>{
     if(!plan.from||!plan.to){(plan.from?bar.querySelector('#pt'):bar.querySelector('#pf')).focus();return;}
-    updPlan(); if(isPhone()&&mapOpen) document.getElementById('map').scrollIntoView({behavior:SMOOTH,block:'start'});};
+    updPlan(); if(isPhone()&&mapBig) document.getElementById('map').scrollIntoView({behavior:SMOOTH,block:'start'});};
 }
 renderBar();
-// ---- telefone žemėlapis suskleistas po mygtuku (dauguma ateina tik į planuoklį) ----
-let mapOpen=false;
-const mapTog=document.createElement('button'); mapTog.id='maptog'; mapTog.type='button'; mapTog.setAttribute('aria-controls','map');
-document.getElementById('map').before(mapTog);
-function setMapOpen(o){ mapOpen=o; document.body.classList.toggle('mapopen',o); mapTog.setAttribute('aria-expanded',String(o));
-  mapTog.innerHTML=o?'Slėpti žemėlapį <span aria-hidden="true">▴</span>':'<span aria-hidden="true">🗺️</span> Rodyti žemėlapį <span aria-hidden="true">▾</span>';
-  if(o){ map.invalidateSize(); if(state.stop){const st=STOP[state.stop]; map.setView([st.lat,st.lon],16);} else if(state.route||plan.res.length) render(true); else map.fitBounds(allBounds,{padding:[20,20]}); } }
-mapTog.onclick=()=>setMapOpen(!mapOpen);
-setMapOpen(false);
+// ---- telefone: mažas žemėlapis (peržiūra) ir mygtukas jam padidinti ----
+let mapBig=false;
+const MapBtn=L.Control.extend({options:{position:'topright'},onAdd(){
+  const b=L.DomUtil.create('button','mapexp'); b.type='button'; b.setAttribute('aria-controls','map');
+  L.DomEvent.disableClickPropagation(b); b.onclick=()=>{ setMapBig(!mapBig); if(mapBig) document.getElementById('map').scrollIntoView({behavior:SMOOTH,block:'start'}); };
+  return b; }});
+const mapExp=new MapBtn().addTo(map).getContainer();
+function setMapBig(o){ mapBig=o; document.body.classList.toggle('mapbig',o); mapExp.setAttribute('aria-expanded',String(o));
+  mapExp.innerHTML=o?'<span aria-hidden="true">⤡</span> Sumažinti':'<span aria-hidden="true">⤢</span> Padidinti';
+  const touch=!isPhone()||o;   // mažame žemėlapyje pirštas slenka puslapį, o ne žemėlapį
+  ['dragging','touchZoom','doubleClickZoom'].forEach(k=>touch?map[k].enable():map[k].disable());
+  map.options.zoomSnap=isPhone()&&!o?0.25:1;   // mažame žemėlapyje tikslesnis priartinimas
+  map.invalidateSize();
+  if(state.stop){const st=STOP[state.stop]; map.setView([st.lat,st.lon],o?16:15);} else if(state.route||plan.res.length) render(true); else map.fitBounds(allBounds,{padding:isPhone()&&!o?[4,4]:[20,20]}); }
+setMapBig(false);
+let wasPhone=isPhone();
+addEventListener('resize',()=>{ if(isPhone()!==wasPhone){ wasPhone=isPhone(); setMapBig(false); render(false); } });
 map.on('click',()=>{
+  if(isPhone()&&!mapBig){ setMapBig(true); return; }   // paspaudus mažą žemėlapį – jis padidinamas
   if(state.stop){state.stop=null;render(false);}
   else if(state.route){state={route:null,day:today,trip:null,stop:null};render(false);}
 });
@@ -458,9 +470,9 @@ const TOUR=[
  {sel:null,t:'Sveiki!',x:'Tai Ukmergės miesto viešojo transporto žemėlapis: visi miesto autobusų maršrutai, stotelės, tvarkaraščiai ir kelionės planuoklis vienoje vietoje.<br>Per minutę parodysime, kaip juo naudotis.',
   demo:()=>tourHome()},
  {sel:'#map',t:'Žemėlapis',x:'Balti taškai yra stotelės, spalvotos linijos – autobusų maršrutai (kiekvienas savo spalvos).<br>Paspauskite stotelę – pamatysite jos tvarkaraštį. Paspauskite liniją – bus parodytas tas maršrutas. Paspaudus tuščią vietą, pasirinkimas nuimamas.',
-  demo:()=>{tourHome(); if(isPhone()&&!mapOpen) setMapOpen(true); const s=D.stops.find(x=>x.name==='Autobusų stotis'); if(s) hoverStop(s.id);}, pad:-40},
+  demo:()=>{tourHome(); if(isPhone()&&!mapBig) setMapBig(true); const s=D.stops.find(x=>x.name==='Autobusų stotis'); if(s) hoverStop(s.id);}, pad:-40},
  {sel:'.routesbox',t:'Maršrutai ir tvarkaraščiai',x:'Čia – visų maršrutų sąrašas. Paspaudę maršrutą pamatysite jo stoteles eilės tvarka, o paspaudę stotelę – jos tvarkaraštį.',
-  demo:()=>tourHome()},
+  demo:()=>{tourHome(); if(isPhone()&&!routesOpen){routesOpen=true; render(false);}}},
  {sel:'.rhead',also:'.dirs',t:'Kryptis ir diena',x:'Pavyzdžiui, atidarytas 4 maršrutas. Pasirinkite kryptį – žemėlapyje atsiras rodyklės, o sąraše liks tos krypties stotelės. Darbo ir poilsio dienomis maršrutai gali skirtis, todėl pasirinkite dieną.',
   demo:()=>{tourHome(); viewDay='W'; selectRoute('4'); state.dir='A'; render(false);}},
  {sel:'.vhead',also:'.vlist',t:'Kiti reisai',x:'Čia – retesni, netipiniai reisai, pavyzdžiui, iki Varinės ar per Dukstyną. Paspaudus parodomas visas reiso kelias žemėlapyje, stotelės ir laikai.',
@@ -469,9 +481,11 @@ const TOUR=[
   demo:()=>{tourHome(); plan.from='Kauno'; plan.to='Pašilė'; renderBar();}},
  {sel:'.planner',t:'Kelionės pasiūlymai',x:'Planuoklis parodo geriausius pasiūlymus: kada išvykti, kur persėsti ar kiek eiti pėsčiomis. Pasirinkta kelionė nupiešiama ir žemėlapyje.',
   demo:()=>{tourHome(); plan.from='Kauno'; plan.to='Pašilė'; plan.date=isoDate(new Date()); plan.day=dayInfo(plan.date).day; plan.time=8*60; if(plan.day!=='W'){const d=new Date(); while(dayInfo(isoDate(d)).day!=='W') d.setDate(d.getDate()+1); plan.date=isoDate(d); plan.day='W';} renderBar(); updPlan();}},
- {sel:'#fbbtn',t:'Pastebėjote klaidą?',x:'Jei radote netikslumą ar turite pasiūlymą, paspauskite šauktuko (!) mygtuką viršuje ir užpildykite trumpą formą – tai padės puslapį patobulinti.',
+ {sel:'#fbbtn',selm:'#menubtn',t:'Pastebėjote klaidą?',x:'Jei radote netikslumą ar turite pasiūlymą, paspauskite šauktuko (!) mygtuką viršuje ir užpildykite trumpą formą – tai padės puslapį patobulinti.',
+  xm:'Meniu (☰) viršuje rasite „Pranešti apie klaidą“ – trumpa forma padės puslapį patobulinti. Ten pat galite įsidėti puslapį į telefono ekraną.',
   demo:()=>tourHome()},
- {sel:'#tourbtn',t:'Viskas!',x:'Šią instrukciją galėsite peržiūrėti dar kartą paspaudę klaustuko (?) mygtuką viršuje. Gero kelio!',
+ {sel:'#tourbtn',selm:'#menubtn',t:'Viskas!',x:'Šią instrukciją galėsite peržiūrėti dar kartą paspaudę klaustuko (?) mygtuką viršuje. Gero kelio!',
+  xm:'Šią instrukciją galėsite peržiūrėti dar kartą meniu (☰) – „Kaip naudotis“. Gero kelio!',
   demo:()=>tourHome()}
 ];
 let tourI=-1, tourEl=null, tourSnap=null, tourPrevFocus=null;
@@ -492,14 +506,14 @@ function tourShow(i){
   if(st.demo) st.demo();
   const hole=tourEl.querySelector('.tour-hole'), card=tourEl.querySelector('.tour-card');
   const last=i+1===TOUR.length, first=i===0;
-  card.innerHTML=`${first?'':`<div class="tour-step">${i} / ${TOUR.length-1}</div>`}<h3 id="tour-h">${st.t}</h3><p>${st.x}</p>
+  card.innerHTML=`${first?'':`<div class="tour-step">${i} / ${TOUR.length-1}</div>`}<h3 id="tour-h">${st.t}</h3><p>${tourMobile()&&st.xm?st.xm:st.x}</p>
     <div class="tour-btns"><button data-t="skip" class="tour-link">${last?'Uždaryti':'Praleisti'}</button><span></span>
     ${i>0?'<button data-t="prev">Atgal</button>':''}<button data-t="next" class="pri">${first?'Pradėti →':last?'Baigti':'Toliau'}</button></div>`;
   card.querySelector('[data-t="next"]').onclick=()=>last?tourEnd():tourShow(i+1);
   const pv=card.querySelector('[data-t="prev"]'); if(pv) pv.onclick=()=>tourShow(i-1);
   card.querySelector('[data-t="skip"]').onclick=tourEnd;
   const vw=innerWidth,vh=innerHeight;
-  let el=st.sel?document.querySelector(st.sel):null; if(el&&!el.getClientRects().length) el=null;
+  const sel=tourMobile()&&st.selm?st.selm:st.sel; let el=sel?document.querySelector(sel):null; if(el&&!el.getClientRects().length) el=null;
   if(tourMobile()){
     // phone: card docked at the bottom, highlighted part scrolled into view above it, no dimming
     Object.assign(card.style,{left:'8px',right:'8px',width:'auto',top:'auto',bottom:'8px'});
@@ -531,12 +545,11 @@ function tourShow(i){
   card.querySelector('[data-t="next"]').focus({preventScroll:true});
 }
 function tourStart(){ tourPrevFocus=document.activeElement;
-  tourSnap={state:JSON.parse(JSON.stringify({...state})),viewDay,mapOpen,plan:{from:plan.from,to:plan.to,date:plan.date,day:plan.day,time:plan.time,res:plan.res,opt:plan.opt}};
+  tourSnap={state:JSON.parse(JSON.stringify({...state})),viewDay,mapBig,routesOpen,plan:{from:plan.from,to:plan.to,date:plan.date,day:plan.day,time:plan.time,res:plan.res,opt:plan.opt}};
   setTimeout(()=>tourShow(0),50); }
 function tourEnd(){ if(tourEl){tourEl.remove();tourEl=null;} const was=tourI; tourI=-1;
-  if(tourSnap){ tourHome(); if(mapOpen!==tourSnap.mapOpen) setMapOpen(tourSnap.mapOpen); tourSnap=null; }
+  if(tourSnap){ routesOpen=tourSnap.routesOpen; tourHome(); if(mapBig!==tourSnap.mapBig) setMapBig(tourSnap.mapBig); tourSnap=null; }
   try{localStorage.setItem('ap-tour','1')}catch(e){}
-  updTip();
   if(tourPrevFocus&&tourPrevFocus.focus) try{tourPrevFocus.focus({preventScroll:true})}catch(e){}
   if(was>=0&&tourMobile()) scrollTo(0,0); }
 document.addEventListener('keydown',e=>{ if(tourI<0)return;
@@ -547,31 +560,37 @@ document.getElementById('tourbtn').onclick=tourStart;
 (()=>{const b=document.getElementById('fbbtn');
   b.title=FEEDBACK_URL?'Pranešk apie netikslumus / pasiūlyk patobulinimą':'Atsiliepimų forma bus netrukus';
   if(FEEDBACK_URL) b.setAttribute('aria-label','Pranešk apie netikslumus arba pasiūlyk patobulinimą (atsidarys naujame lange)'); else b.setAttribute('aria-disabled','true');
-  b.onclick=()=>{ if(FEEDBACK_URL) window.open(FEEDBACK_URL,'_blank','noopener'); };})();
+  b.onclick=openFeedback;})();
+function openFeedback(){ if(FEEDBACK_URL) window.open(FEEDBACK_URL,'_blank','noopener'); }
 document.querySelectorAll('[data-a11y]').forEach(b=>b.onclick=()=>{const d=document.getElementById('a11ydlg'); if(d&&d.showModal) d.showModal();});
 (()=>{let seen=false;try{seen=localStorage.getItem('ap-tour')==='1'}catch(e){} if(!seen&&!isPhone()) setTimeout(tourStart,700);})();
 
-// ---- telefone: eilutė po antrašte „Kaip naudotis?“ ir „Įsidėti į telefono ekraną“ ----
+// ---- telefone: šoninis meniu (☰) – maršrutai, žemėlapis, instrukcija, įsidiegimas, klaidų pranešimas ----
 const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
 const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 let instEv=null;
-addEventListener('beforeinstallprompt',e=>{e.preventDefault(); instEv=e; updTip();});
-addEventListener('appinstalled',()=>{instEv=null; store.set('ap-inst',1); updTip();});
-const tip=document.createElement('div'); tip.id='tipbar';
-tip.innerHTML=`<button type="button" id="tiptour">Kaip naudotis?</button><button type="button" id="tipinst"><span aria-hidden="true">📲</span> Įsidėti į telefono ekraną</button><button type="button" id="tipx" aria-label="Paslėpti šią eilutę">✕</button>`;
-document.getElementById('apphead').after(tip);
-function updTip(){ let seen=false; try{seen=localStorage.getItem('ap-tour')==='1'}catch(e){}
-  const showT=!seen, showI=!standalone()&&!store.get('ap-inst');
-  tip.querySelector('#tiptour').hidden=!showT; tip.querySelector('#tipinst').hidden=!showI;
-  tip.hidden=!!store.get('ap-tipx')||!(showT||showI); }
-tip.querySelector('#tiptour').onclick=tourStart;
-tip.querySelector('#tipx').onclick=()=>{store.set('ap-tipx',1); updTip();};
-tip.querySelector('#tipinst').onclick=()=>{
-  if(instEv){ instEv.prompt(); instEv.userChoice.then(c=>{ if(c.outcome==='accepted') store.set('ap-inst',1); instEv=null; updTip(); }).catch(()=>{}); return; }
+addEventListener('beforeinstallprompt',e=>{e.preventDefault(); instEv=e;});
+addEventListener('appinstalled',()=>{instEv=null; store.set('ap-inst',1);});
+function doInstall(){
+  if(instEv){ instEv.prompt(); instEv.userChoice.then(c=>{ if(c.outcome==='accepted') store.set('ap-inst',1); instEv=null; }).catch(()=>{}); return; }
   const d=document.getElementById('instdlg');
-  d.querySelector('.inst-ios').hidden=!isIOS; d.querySelector('.inst-and').hidden=isIOS; if(d.showModal) d.showModal(); };
+  d.querySelector('.inst-ios').hidden=!isIOS; d.querySelector('.inst-and').hidden=isIOS; if(d.showModal) d.showModal(); }
 document.querySelector('.instclose').onclick=()=>document.getElementById('instdlg').close();
-updTip();
+const menu=document.getElementById('menudlg'), menuBtn=document.getElementById('menubtn');
+if(!store.get('ap-menu')) menuBtn.classList.add('new');   // geltonas taškelis, kol meniu dar neatidarytas
+menuBtn.onclick=()=>{ menu.querySelector('[data-m="inst"]').hidden=standalone()||!!store.get('ap-inst');
+  store.set('ap-menu',1); menuBtn.classList.remove('new'); menuBtn.setAttribute('aria-expanded','true'); menu.showModal(); };
+menu.addEventListener('close',()=>menuBtn.setAttribute('aria-expanded','false'));
+menu.addEventListener('click',e=>{ if(e.target===menu) menu.close(); });
+menu.querySelector('.mclose').onclick=()=>menu.close();
+const MENU={
+  routes:()=>{ state={route:null,day:today,trip:null,stop:null,dir:null,variant:null}; routesOpen=true; render(false);
+    const rb=document.querySelector('.routesbox'); if(rb) rb.scrollIntoView({behavior:SMOOTH,block:'start'}); },
+  map:()=>{ if(!mapBig) setMapBig(true); document.getElementById('map').scrollIntoView({behavior:SMOOTH,block:'start'}); },
+  tour:tourStart, inst:doInstall, fb:openFeedback,
+  a11y:()=>{const d=document.getElementById('a11ydlg'); if(d&&d.showModal) d.showModal();}};
+menu.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{ menu.close(); setTimeout(MENU[b.dataset.m],50); });
+if(!FEEDBACK_URL) menu.querySelector('[data-m="fb"]').hidden=true;
 
 // ---- paleidimas: stotelės iš nuorodos arba paskutinė paieška ----
 (()=>{ let f='',t=''; try{const q=new URLSearchParams(location.search); f=q.get('is')||''; t=q.get('i')||'';}catch(e){}
