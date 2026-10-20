@@ -256,7 +256,7 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
 .planner .phead .ph{font-size:1.05rem;line-height:1.3}.pnames{display:block;font-size:1.15rem}
 .obest{display:inline-block;margin-bottom:.25rem;padding:.1rem .5rem;border-radius:999px;background:#FFF4CC;color:#14213D;font-size:.78rem;font-weight:700}
 /* ---- telefonas: mažas žemėlapis su „Padidinti“, šoninis meniu, išskleidžiami maršrutai, suskleistas tilto pranešimas ---- */
-.mapexp,.menubtn,.sumph,.recent{display:none}
+.mapexp,.mapgeo,.menubtn,.sumph,.recent{display:none}
 #homelink{color:inherit;text-decoration:none}@media (hover:hover){#homelink:hover{text-decoration:underline}}
 .missing summary{list-style:none;cursor:default}.missing summary::-webkit-details-marker{display:none}
 .pbtns{display:flex;gap:6px}
@@ -289,6 +289,10 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
   .stoppop button{min-height:36px;padding:.15rem .7rem;border:2px solid var(--ink);border-radius:10px;background:var(--card);color:var(--ink);font:inherit;font-weight:700;font-size:.85rem;white-space:nowrap;cursor:pointer}
   .stoppop .spb button:first-child{background:var(--ink);color:#fff}
   body.popopen .mapexp{visibility:hidden}
+  .mapgeo{display:block;width:40px;height:40px;border:2px solid var(--ink);border-radius:10px;background:var(--card);font-size:1.15rem;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
+  .mapgeo.busy{animation:geopulse 1s ease-in-out infinite}@keyframes geopulse{50%{opacity:.45}}
+  @media (prefers-reduced-motion:reduce){.mapgeo.busy{animation:none;opacity:.6}}
+  .stoppop .spnote{font-size:.8rem;color:var(--muted)}
   .planner{border:0;border-radius:0;padding:0;margin-top:.2rem}   /* rezultatai be išorinio rėmelio */
   .plbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}   /* „Pasiūlymai kelionei“ – tik ekrano skaitytuvui */
   .planner .phead{align-items:center}.planner .pnames{font-size:1.05rem;line-height:1.25}

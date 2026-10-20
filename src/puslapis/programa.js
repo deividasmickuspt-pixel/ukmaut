@@ -233,8 +233,8 @@ function drawArrows(){
 map.on('zoomend',drawArrows);
 function clearHL(){if(hl){map.removeLayer(hl);hl=null;}setArrows([]);}
 // telefono planuoklio žemėlapyje paspausta stotelė niekur neperjungia: langelis „Iš čia / Į čia“
-function stopPopup(id){ const st=STOP[id], box=document.createElement('div'); box.className='stoppop';
-  box.innerHTML=`<span class="spn"><b>${esc(st.name)}</b>${HINT[id]?` <small>${esc(HINT[id])}</small>`:''}</span>
+function stopPopup(id,note){ const st=STOP[id], box=document.createElement('div'); box.className='stoppop';
+  box.innerHTML=`${note?`<span class="spnote">${note}</span>`:''}<span class="spn"><b>${esc(st.name)}</b>${HINT[id]?` <small>${esc(HINT[id])}</small>`:''}</span>
     <span class="spb"><button type="button" data-w="from" aria-label="Važiuosiu iš stotelės ${esc(st.name)}">Iš čia</button><button type="button" data-w="to" aria-label="Važiuosiu į stotelę ${esc(st.name)}">Į čia</button></span>`;
   const pop=L.popup({closeButton:false,autoPanPadding:[6,6],maxWidth:300,className:'stoppopw'}).setLatLng([st.lat,st.lon]).setContent(box).openOn(map);
   box.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{ map.closePopup(pop); const w=b.dataset.w;
@@ -481,6 +481,30 @@ const MapBtn=L.Control.extend({options:{position:'topright'},onAdd(){
   L.DomEvent.disableClickPropagation(b); b.onclick=()=>{ setMapBig(!mapBig); if(mapBig) document.getElementById('map').scrollIntoView({behavior:SMOOTH,block:'start'}); };
   return b; }});
 const mapExp=new MapBtn().addTo(map).getContainer();
+// ---- telefone: „📍 Mano vieta“ – vieta lieka tik telefone (niekur nesiunčiama), pasiūloma artimiausia stotelė ----
+let meLayer=null;
+const GeoBtn=L.Control.extend({options:{position:'topleft'},onAdd(){
+  const b=L.DomUtil.create('button','mapgeo'); b.type='button'; b.setAttribute('aria-label','Rodyti mano vietą ir artimiausią stotelę'); b.title='Mano vieta';
+  b.innerHTML='<span aria-hidden="true">📍</span>'; L.DomEvent.disableClickPropagation(b); b.onclick=locateMe; return b; }});
+const geoBtn=new GeoBtn().addTo(map).getContainer();
+function geoMsg(t){ L.popup({closeButton:false,className:'stoppopw'}).setLatLng(map.getCenter()).setContent(`<div class="stoppop"><span>${t}</span></div>`).openOn(map); announce(t); }
+function locateMe(){
+  if(!navigator.geolocation){ geoMsg('Ši naršyklė vietos nustatyti negali.'); return; }
+  geoBtn.classList.add('busy');
+  navigator.geolocation.getCurrentPosition(pos=>{ geoBtn.classList.remove('busy');
+    const me=[pos.coords.latitude,pos.coords.longitude], acc=pos.coords.accuracy||0;
+    if(meLayer) map.removeLayer(meLayer);
+    meLayer=L.layerGroup([...(acc&&acc<400?[L.circle(me,{radius:acc,color:'#1A73E8',weight:1,fillColor:'#1A73E8',fillOpacity:.12,interactive:false})]:[]),
+      L.circleMarker(me,{radius:8,color:'#fff',weight:3,fillColor:'#1A73E8',fillOpacity:1,interactive:false})]).addTo(map);
+    const K=Math.cos(me[0]*Math.PI/180); let best=null,bd=1e9;
+    D.stops.forEach(s=>{const d=Math.hypot((s.lat-me[0])*111320,(s.lon-me[1])*111320*K); if(d<bd){bd=d;best=s;}});
+    if(!best||bd>5000){ map.setView(me,13); geoMsg('Jūs esate toli nuo Ukmergės miesto autobusų stotelių.'); return; }
+    if(mapBig||!isPhone()) map.fitBounds(L.latLngBounds([me,[best.lat,best.lon]]),{padding:[60,60],maxZoom:17,animate:false});
+    else map.fitBounds(L.latLngBounds([me,[best.lat,best.lon]]),{paddingTopLeft:[40,90],paddingBottomRight:[40,20],maxZoom:17,animate:false});
+    stopPopup(best.id,`📍 Arčiausia stotelė – ~${Math.round(bd/10)*10} m`);
+  },err=>{ geoBtn.classList.remove('busy');
+    geoMsg(err.code===1?'Vietos naudoti neleista. Leiskite naršyklei naudoti vietą (telefono nustatymuose) ir bandykite dar kartą.':'Nepavyko nustatyti vietos. Patikrinkite, ar telefone įjungta vietos funkcija.');
+  },{enableHighAccuracy:true,timeout:12000,maximumAge:60000}); }
 function setMapBig(o){ mapBig=o; document.body.classList.toggle('mapbig',o); mapExp.setAttribute('aria-expanded',String(o));
   mapExp.innerHTML=o?'<span aria-hidden="true">⤡</span> Sumažinti':'<span aria-hidden="true">⤢</span> Padidinti';
   map.options.zoomSnap=isPhone()&&!o?0.25:1;   // mažame žemėlapyje tikslesnis priartinimas
