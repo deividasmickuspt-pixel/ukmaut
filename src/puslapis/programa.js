@@ -310,7 +310,7 @@ function routeStops(r){
   const part=i=>cnt.get(i)<0.3*med;
   return {main:[...order.filter(i=>!part(i)),...rest.filter(i=>!part(i))],other:[...order,...rest].filter(part)};
 }
-function selectRoute(r){ if(isPhone()&&page!=='routes') setPage('routes',tourI<0?'push':''); setTimeout(()=>announce(`Atidarytas ${r} maršrutas: ${D.meta[r].legend}.`),0);state={route:r,day:D.trips.some(t=>t.r===r&&inDay(t,today))?today:(['W','WE'].find(d=>D.trips.some(t=>t.r===r&&inDay(t,d)))),trip:null,stop:null,dir:null,variant:null};
+function selectRoute(r){ rbDay=null; if(isPhone()&&page!=='routes') setPage('routes',tourI<0?'push':''); setTimeout(()=>announce(`Atidarytas ${r} maršrutas: ${D.meta[r].legend}.`),0);state={route:r,day:D.trips.some(t=>t.r===r&&inDay(t,today))?today:(['W','WE'].find(d=>D.trips.some(t=>t.r===r&&inDay(t,d)))),trip:null,stop:null,dir:null,variant:null};
   if(!runsDay(r,viewDay)) viewDay=['W','WE'].find(d=>runsDay(r,d))||viewDay;   // iškart rodoma diena, kai maršrutas važiuoja
   if(onRoutesPg()&&tourI<0&&!(history.state&&history.state.r)) history.pushState({pg:'routes',r},'',location.href);   // telefono „Atgal“ uždaro skirtuką
   render(true); document.getElementById('panel').scrollTop=0;}
@@ -341,8 +341,45 @@ function routeView(fit){
 const runsDay=(r,d)=>D.trips.some(t=>t.r===r&&inDay(t,d));
 const dayTog=r=>`<div class="days vtog" role="group" aria-label="Diena maršrutams ir tvarkaraščiams">${['W','WE'].map(d=>{const off=r&&!runsDay(r,d);   // dieną, kai maršrutas nevažiuoja, mygtukas neaktyvus
   return `<button type="button" data-vday="${d}" class="${viewDay===d?'on':''}" aria-pressed="${viewDay===d}"${off?` disabled title="Šią dieną ${r} maršrutas nevažiuoja"`:''}>${DAYS[d]}</button>`;}).join('')}</div>`;
+// telefone: kryptis → visos stotelės (retesnių reisų stotelės – punktyru) → paspaudus stotelę jos laikai
+const mergeOrd=(a,b)=>{const out=[...a]; let pos=-1, buf=[];   // b įterpiama į a: naujos stotelės – prieš kitą bendrą stotelę (arba po paskutinės)
+  b.forEach(i=>{let k=out.indexOf(i,pos+1); if(k<0) k=out.indexOf(i); if(k<0){buf.push(i);return;} if(buf.length){ if(k<=pos) k=pos+1; out.splice(k,0,...buf); k+=buf.length; buf=[]; } pos=k;});
+  out.splice(pos+1,0,...buf); return out;};
+const tripRuns=t=>{ if(t.runs) return t.runs; const md=t.d==='W'?'D':'O', runs=[];   // reisas suskaidytas į atkarpas pagal kryptį
+  t.P.s.slice(0,-1).forEach((a,i)=>{const b=t.P.s[i+1], ab=x=>x.r===t.r&&x.ab[0]===a&&x.ab[1]===b, lys=D.layers.filter(x=>ab(x)&&x.m===md), ks=[...new Set((lys.length?lys:D.layers.filter(ab)).flatMap(x=>x.ds||[x.d]))], L=runs.at(-1);
+    if(L&&(!ks.length||ks.includes(L.d))) L.s.push(b); else if(L&&L.d===null){L.d=ks[0];L.s.push(b);} else runs.push({d:ks[0]||null,s:[a,b]});});
+  return t.runs=runs; };
+const dname=x=>x.replace(/ ir atgal į AS$/,'');
+let rbDay=null;   // telefono maršruto sąraše rodoma diena (tik kai poilsio dienų maršrutas kitoks)
+const rbRuns=(r,md,d)=>D.trips.filter(t=>t.r===r&&(t.d==='W'?'D':'O')===md).flatMap(t=>tripRuns(t).filter(x=>x.d===d).map(x=>({t,s:x.s.filter(i=>STOP[i])})));
+function rbOrder(runs){
+  const pc=new Map(); runs.forEach(x=>{const k=x.s.join(); const e=pc.get(k)||{s:x.s,n:0}; e.n++; pc.set(k,e);});
+  return [...pc.values()].sort((x,y)=>y.n*y.s.length-x.n*x.s.length).map(e=>e.s).reduce((o,sq)=>o?mergeOrd(o,sq):[...sq],null)||[];
+}
+function routeBodyPhone(r){
+  const hasW=runsDay(r,'W'), hasE=runsDay(r,'WE'), dflt=hasW&&(today==='W'||!hasE)?'D':'O';
+  const md=rbDay&&(rbDay==='D'?hasW:hasE)?rbDay:dflt, DD=(D.dirs[r]||{})[md]||{};
+  if(!state.dir||!DD[state.dir]) state.dir=DD.A?'A':Object.keys(DD)[0]||null;
+  const d=state.dir, runs=rbRuns(r,md,d), ord=rbOrder(runs);
+  // ar kitos dienos maršrutas kitoks (kitos stotelės ar tvarka)?
+  const om=md==='D'?'O':'D', OD=(D.dirs[r]||{})[om]||{};
+  const cntOf=rs=>{const c={}; rs.forEach(x=>new Set(x.s).forEach(i=>{c[i]=(c[i]||0)+1;})); return c;}, mainOf=(o,rs)=>{const c=cntOf(rs); return o.filter(i=>c[i]>=rs.length*.5).join();};
+  const differs=k=>{const rs=rbRuns(r,md,k), o=Object.keys(OD).find(q=>dname(OD[q].to)===dname(DD[k].to)), os=o?rbRuns(r,om,o):[]; return !os.length||mainOf(rbOrder(os),os)!==mainOf(rbOrder(rs),rs);};
+  const diff=!!rbDay||(md==='D'?hasE:hasW)&&Object.keys(DD).some(differs);   // lyginamos tik pagrindinės stotelės, visomis kryptimis
+  const wk=cntOf(runs),nW=runs.length;
+  const rare=i=>(wk[i]||0)<nW*.5, note=i=>rare(i)?'tik dalis reisų':'';
+  const dayLine=diff?`<p class="sub rbday">Rodomas <b>${md==='D'?'darbo dienų':'poilsio dienų'}</b> maršrutas. ${md==='D'?'Poilsio':'Darbo'} dienomis jis kitoks – <button type="button" class="srtt" data-rbday="${om}">rodyti ${md==='D'?'poilsio':'darbo'} dienų ›</button></p>`
+    :`<p class="sub" style="margin:.2rem 0 .4rem"><b>Važiuoja ${rdays(r)}.</b></p>`;
+  const dirBtns=Object.keys(DD).length>1?`<div class="days dirs" role="group" aria-label="Kryptis">${['A','B'].filter(k=>DD[k]).map(k=>`<button data-dir="${k}" class="${d===k?'on':''}" aria-pressed="${d===k}">→ ${esc(DD[k].to)}</button>`).join('')}</div>`
+    :DD[d]?`<p class="sub" style="margin-top:.3rem">Kryptis: <b>${esc(DD[d].to)}</b></p>`:'';
+  const item=(i,k)=>`<li class="${rare(i)?'var':''}"><button class="srow" data-openstop="${i}"><span class="dot"></span><span>${esc(nm(i))}${note(i)&&!(k&&rare(ord[k-1]))?`<small>${note(i)}</small>`:''}</span></button></li>`;   // užrašas – tik pirmoje punktyrinės dalies stotelėje
+  return `${dayLine}${dirBtns}
+  <p class="sub" style="margin-top:.6rem">Paspauskite stotelę – pamatysite jos laikus.${ord.some(rare)?' Punktyru – stotelės, pro kurias važiuoja ne visi reisai.':''}</p>
+  <ol class="strip" style="--rc:${C(r)}">${ord.map(item).join('')}</ol>`;
+}
 // maršruto turinys: diena, kryptis, stotelės, kiti reisai (kompiuteryje – atskiras vaizdas, telefone – skirtuke virš sąrašo)
 function routeBody(r){
+  if(onRoutesPg()) return routeBodyPhone(r);
   let rs=routeStops(r);
   const DR=DIRS(r);
   let VAR=new Set();
@@ -368,25 +405,8 @@ function routeBody(r){
 let tabShown=null;
 const routeTab=r=>{const nw=tabShown!==r; tabShown=r; return `<section class="rtab${nw?' rtab-in':''}" aria-label="${r} maršrutas"><div class="rthead" style="--rc:${C(r)}">${badge(r,1)}<h2>${esc(D.meta[r].legend)}</h2><button type="button" class="clr" data-rclose aria-label="Uždaryti maršrutą">✕</button></div>${routeBody(r)}</section>`;};
 function closeRoute(){ if(history.state&&history.state.r) history.back(); else { state={route:null,day:today,trip:null,stop:null,dir:null,variant:null}; render(true); fitAll(); document.getElementById('panel').scrollTop=0; } }
-// maršrutų puslapio paieška (stotelės ir maršrutai) – rezultatai perpiešiami tik savo bloke, kad laukelis neprarastų žymeklio
-let rq='';
-const fold=x=>x.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
 const rdays=r=>{const w=D.trips.some(t=>t.r===r&&t.d==='W'),we=D.trips.some(t=>t.r===r&&t.d==='WE'),sa=D.trips.some(t=>t.r===r&&t.d==='Sat');return [w?'darbo dienomis':'',we?'poilsio dienomis':(sa?'tik šeštadieniais':'')].filter(Boolean).join(', ');};
 const rcard=r=>`<button class="rcard" data-sel="${r}">${badge(r,1)}<span>${esc(D.meta[r].legend)}<small>${rdays(r)}</small></span><span class="chev" aria-hidden="true">›</span></button>`;
-function rqHtml(){
-  const q=fold(rq.trim()); if(!q) return `<h3 class="rqh">Maršrutai</h3>${R.map(rcard).join('')}`;
-  const rs=R.filter(r=>r===q||fold(r+' '+D.meta[r].legend).split(/[^a-z0-9]+/).some(w=>w.startsWith(q))||fold(D.meta[r].legend).includes(q));
-  const ss=D.stops.filter(st=>fold(st.name).includes(q)).sort((a,b)=>(fold(a.name).startsWith(q)?0:1)-(fold(b.name).startsWith(q)?0:1)||a.name.localeCompare(b.name,'lt'));
-  const stopRow=st=>`<button class="rcard scard" data-openstop="${st.id}"><span class="sdot" aria-hidden="true"></span><span>${esc(st.name)}<small>${esc(dirTxt(st.id))}</small></span><span class="xfer">${st.routes.map(x=>badge(x)).join('')}</span></button>`;
-  return (ss.length?`<h3 class="rqh">Stotelės</h3>${ss.map(stopRow).join('')}`:'')+(rs.length?`<h3 class="rqh">Maršrutai</h3>${rs.map(rcard).join('')}`:'')+(!ss.length&&!rs.length?`<div class="empty">Nieko nerasta pagal „${esc(rq.trim())}“.</div>`:'');
-}
-function rqBind(box){
-  box.querySelectorAll('[data-sel]').forEach(b=>b.onclick=()=>selectRoute(b.dataset.sel));
-  box.querySelectorAll('[data-openstop]').forEach(b=>b.onclick=()=>openStop(b.dataset.openstop));
-}
-function rqUpd(){ const box=document.getElementById('rqres'); box.innerHTML=rqHtml(); rqBind(box);
-  const n=box.querySelectorAll('.scard').length, m=box.querySelectorAll('[data-sel]').length;
-  if(rq.trim()) announce(n||m?`Rasta: stotelių ${n}, maršrutų ${m}.`:'Nieko nerasta.'); }
 // telefono maršrutų puslapyje poraštė – sąrašo gale (ne visada matoma)
 function addFoot(el){ if(onRoutesPg()) el.insertAdjacentHTML('beforeend',`<div class="pfoot">${document.getElementById('appfoot').innerHTML}</div>`); }
 // telefono maršruto skirtuke paspausta stotelė pažymima sąraše ir žemėlapyje; tvarkaraštis – atskiru mygtuku
@@ -404,7 +424,7 @@ function render(fit){
   const el=document.getElementById('panel'); const sc=el.scrollTop||0;
   const dayBtns=(cur,attr,avail)=>`<div class="days" role="group" aria-label="Diena">${['W','WE'].map(d=>`<button ${attr}="${d}" class="${d===cur?'on':''}"${avail&&!avail(d)?' disabled':''} aria-pressed="${d===cur}">${DAYS[d]}</button>`).join('')}</div>`;
   if(state.stop){
-    const id=state.stop, st=STOP[id], bl=[...(TTS[id]||[])].sort((x,y)=>(x.r===state.route?-1:0)-(y.r===state.route?-1:0));
+    const id=state.stop, st=STOP[id], bl0=[...(TTS[id]||[])], bl=(onRoutesPg()&&state.route&&bl0.some(b=>b.r===state.route)?bl0.filter(b=>b.r===state.route):bl0).sort((x,y)=>(x.r===state.route?-1:0)-(y.r===state.route?-1:0));
     clearHL(); fade(true);
     markers[id].setStyle({opacity:1,fillOpacity:1,radius:9,fillColor:'#F5B800',color:'#14213D'}).bringToFront();
     if(state.route){lineLayers.forEach(({x,pl})=>{if(x.r===state.route)pl.setStyle({opacity:.8});});setArrows(state.dir?lineLayers.filter(l=>l.x.r===state.route&&layerOn(l.x)&&(l.x.ds||[l.x.d]).includes(state.dir)).map(l=>({pts:D.segs[l.x.g],color:C(state.route)})):[]);}
@@ -414,7 +434,7 @@ function render(fit){
       :`<button class="back" data-stopback>‹ ${state.route?`${state.route} maršrutas`:'Atgal'}</button>
     <h1 class="sh">${esc(st.name)}</h1>${dirTxt(id)?`<p class="shint">${esc(dirTxt(id))}</p>`:''}${dayTog()}`)+`
     ${bl.length?bl.map(ttBlock).join(''):'<div class="empty">Šios stotelės tvarkaraščio plakate nėra.</div>'}
-    ${D.stops.filter(o=>o.name===st.name&&o.id!==id).map(o=>`<button class="back" data-openstop="${o.id}" style="margin-top:1rem">Kita gatvės pusė${dirTxt(o.id)?`: ${esc(dirTxt(o.id))}`:''} ›</button>`).join('')}
+    ${D.stops.filter(o=>o.name===st.name&&o.id!==id).map(o=>`<button class="back" data-openstop="${o.id}" style="margin-top:1rem">Kita gatvės pusė${dirTxt(o.id,state.route)?`: ${esc(dirTxt(o.id,state.route))}`:''} ›</button>`).join('')}
     <p class="note">Jei laikas nesutampa su plakatu stotelėje, teisingas plakatas.</p>${tab?'</section>':''}`;
     el.querySelectorAll('[data-openstop]').forEach(x=>x.onclick=()=>openStop(x.dataset.openstop));
     el.querySelectorAll('[data-stopback]').forEach(x=>x.onclick=()=>{state.stop=null;render(true);});
@@ -447,7 +467,7 @@ function render(fit){
     <div class="routesbox" ${plan.from&&plan.to&&!onRoutesPg()?"hidden":""}>
     ${isPhone()&&!onRoutesPg()?'':`<h2 class="ph" style="margin-top:${onRoutesPg()?'.2rem':'1.4rem'}">Maršrutai ir tvarkaraščiai</h2>`}
 
-    ${isPhone()&&!onRoutesPg()?'':onRoutesPg()&&state.route?routeTab(state.route):onRoutesPg()?`<div class="rqbox" role="search"><label for="rq" class="rql">Ieškoti stotelės ar maršruto</label><input id="rq" type="search" autocomplete="off" placeholder="pvz. Kauno arba 4" value="${esc(rq)}"></div><div id="rqres">${rqHtml()}</div>`:R.map(rcard).join('')}
+    ${isPhone()&&!onRoutesPg()?'':onRoutesPg()&&state.route?routeTab(state.route):R.map(rcard).join('')}
     <details class="missing"${isPhone()?'':' open'}><summary><b>Tilto remonto laikotarpis.</b><span class="sumph"> Darbo dienomis į Užupį – apylanka.</span></summary> Darbo dienomis (visą dieną, ir po 18 val.) autobusai į Užupį važiuoja apylanka per magistralę, o atgal – tiesiai per tiltą.<br>Savaitgaliais ir švenčių dienomis apylankos nėra – važiuojama per tiltą abiem kryptimis.</details>
     </div>
 
@@ -461,8 +481,8 @@ function render(fit){
   addFoot(el); syncLegend(); markSel();
   if(state.route) el.scrollTop=sc;
   el.querySelectorAll('[data-sel]').forEach(b=>b.onclick=()=>selectRoute(b.dataset.sel));
-  const rqi=el.querySelector('#rq'); if(rqi) rqi.oninput=()=>{rq=rqi.value; rqUpd();};
   el.querySelectorAll('[data-rclose]').forEach(b=>b.onclick=closeRoute);
+  el.querySelectorAll('[data-rbday]').forEach(b=>b.onclick=()=>{const r=state.route, cur=((D.dirs[r]||{})[rbDay||(runsDay(r,'W')&&(today==='W'||!runsDay(r,'WE'))?'D':'O')]||{})[state.dir]; rbDay=b.dataset.rbday; const nx=(D.dirs[r]||{})[rbDay]||{}; state.dir=cur&&Object.keys(nx).find(k=>dname(nx[k].to)===dname(cur.to))||null; render(false);});   // kryptis išlieka
   el.querySelectorAll('[data-vday]').forEach(b=>b.onclick=()=>{viewDay=b.dataset.vday;state.day=viewDay;render(false);});
   el.querySelectorAll('[data-dir]').forEach(b=>b.onclick=()=>{state.dir=state.dir===b.dataset.dir?null:b.dataset.dir;state.variant=null;render(false);});
   el.querySelectorAll('[data-var]').forEach(b=>b.onclick=()=>{state.variant=state.variant===b.dataset.var?null:b.dataset.var;render(false);});
