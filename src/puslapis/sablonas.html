@@ -196,6 +196,12 @@ li.end .dot{width:26px;height:26px;margin-left:4px}
 .pmode{display:flex;gap:4px}.pmode button{flex:0 0 auto;min-height:30px;padding:0 .7rem;border:2px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);font:inherit;font-size:.85rem;font-weight:700;cursor:pointer}
 .pmode button.on{border-color:var(--ink);background:var(--ink);color:#fff}
 .adays{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin:0 0 .4rem;padding:.3rem;border-radius:12px;background:var(--tint)}.adays .clr{font-size:1.3rem}
+.rvlist{list-style:none;margin:.4rem 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.rvb{display:grid;grid-template-columns:1fr auto;gap:2px .6rem;width:100%;padding:.55rem .7rem;border:2px solid var(--line);border-left:6px solid var(--rc);border-radius:12px;background:var(--card);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.rvb.on{border-color:var(--rc);box-shadow:0 0 0 3px var(--yellow)}.rvh b{display:block;font-size:.98rem}.rvh small{display:block;color:var(--muted);font-size:.82rem}
+.rvn{align-self:start;font-weight:700;font-size:.85rem;white-space:nowrap}.rvm{grid-column:1/-1;font-size:.8rem;color:var(--muted)}.rvt{grid-column:1/-1;font-size:.85rem;font-variant-numeric:tabular-nums;line-height:1.4}
+.rvmore{margin-top:.7rem}.rvmore summary{list-style:none;cursor:pointer;font-weight:700;min-height:40px;display:flex;align-items:center}
+.rvmore summary::before{content:'▸';margin-right:.45rem;transition:transform .15s}.rvmore[open] summary::before{transform:rotate(90deg)}.rvb{scroll-margin-top:120px;scroll-margin-bottom:12px}
 .allbtn{display:block;margin:.8rem auto 0;font-size:.95rem}
 .alist{list-style:none;margin:0;padding:0}.alist li{border-bottom:1px solid var(--line)}
 .arow{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"t b" "m m";gap:2px .6rem;align-items:center;width:100%;min-height:52px;padding:.45rem .2rem;border:0;background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
@@ -347,7 +353,7 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
   .plbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}   /* „Pasiūlymai kelionei“ – tik ekrano skaitytuvui */
   .planner .phead{align-items:center}.planner .pnames{font-size:1.05rem;line-height:1.25}
   body.pg-routes #planbar{display:none}
-  body.pg-routes>#left{display:none!important}
+  body.pg-routes #left #map{height:min(calc((100vw - 16px) * .62),36vh)!important}   /* maršrutų ir reisų puslapyje – žemėlapis viršuje */
   /* žemėlapio puslapis: antraštė, maršrutų mygtukai ir žemėlapis per visą likusį ekraną */
   html:has(body.pg-map){height:100%;overflow:hidden}
   body.pg-map{height:100vh;height:100dvh;overflow:hidden;display:flex!important;flex-direction:column}
@@ -465,6 +471,9 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
 <dialog id="menudlg" aria-labelledby="menu-h">
 <div class="mhead"><h2 id="menu-h">Meniu</h2><button type="button" class="mclose" aria-label="Uždaryti meniu">✕</button></div>
 <ul class="mlist">
+<li><button type="button" data-m="plan"><span class="mi" aria-hidden="true">🧭</span>Maršruto planuoklis</button></li>
+<li><button type="button" data-m="routes"><span class="mi" aria-hidden="true">🚌</span>Maršrutai ir reisai</button></li>
+<li class="sep" aria-hidden="true"></li>
 <li><button type="button" data-m="tour"><span class="mi" aria-hidden="true">❓</span>Kaip naudotis</button></li>
 <li><button type="button" data-m="fb"><span class="mi" aria-hidden="true">❗</span>Pranešti apie klaidą ar pasiūlyti</button></li>
 <li><button type="button" data-m="inst"><span class="mi" aria-hidden="true">📲</span>Įsidėti į telefono ekraną</button></li>

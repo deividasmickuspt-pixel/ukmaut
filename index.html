@@ -196,6 +196,12 @@ li.end .dot{width:26px;height:26px;margin-left:4px}
 .pmode{display:flex;gap:4px}.pmode button{flex:0 0 auto;min-height:30px;padding:0 .7rem;border:2px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);font:inherit;font-size:.85rem;font-weight:700;cursor:pointer}
 .pmode button.on{border-color:var(--ink);background:var(--ink);color:#fff}
 .adays{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin:0 0 .4rem;padding:.3rem;border-radius:12px;background:var(--tint)}.adays .clr{font-size:1.3rem}
+.rvlist{list-style:none;margin:.4rem 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.rvb{display:grid;grid-template-columns:1fr auto;gap:2px .6rem;width:100%;padding:.55rem .7rem;border:2px solid var(--line);border-left:6px solid var(--rc);border-radius:12px;background:var(--card);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.rvb.on{border-color:var(--rc);box-shadow:0 0 0 3px var(--yellow)}.rvh b{display:block;font-size:.98rem}.rvh small{display:block;color:var(--muted);font-size:.82rem}
+.rvn{align-self:start;font-weight:700;font-size:.85rem;white-space:nowrap}.rvm{grid-column:1/-1;font-size:.8rem;color:var(--muted)}.rvt{grid-column:1/-1;font-size:.85rem;font-variant-numeric:tabular-nums;line-height:1.4}
+.rvmore{margin-top:.7rem}.rvmore summary{list-style:none;cursor:pointer;font-weight:700;min-height:40px;display:flex;align-items:center}
+.rvmore summary::before{content:'▸';margin-right:.45rem;transition:transform .15s}.rvmore[open] summary::before{transform:rotate(90deg)}.rvb{scroll-margin-top:120px;scroll-margin-bottom:12px}
 .allbtn{display:block;margin:.8rem auto 0;font-size:.95rem}
 .alist{list-style:none;margin:0;padding:0}.alist li{border-bottom:1px solid var(--line)}
 .arow{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"t b" "m m";gap:2px .6rem;align-items:center;width:100%;min-height:52px;padding:.45rem .2rem;border:0;background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
@@ -347,7 +353,7 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
   .plbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}   /* „Pasiūlymai kelionei“ – tik ekrano skaitytuvui */
   .planner .phead{align-items:center}.planner .pnames{font-size:1.05rem;line-height:1.25}
   body.pg-routes #planbar{display:none}
-  body.pg-routes>#left{display:none!important}
+  body.pg-routes #left #map{height:min(calc((100vw - 16px) * .62),36vh)!important}   /* maršrutų ir reisų puslapyje – žemėlapis viršuje */
   /* žemėlapio puslapis: antraštė, maršrutų mygtukai ir žemėlapis per visą likusį ekraną */
   html:has(body.pg-map){height:100%;overflow:hidden}
   body.pg-map{height:100vh;height:100dvh;overflow:hidden;display:flex!important;flex-direction:column}
@@ -465,6 +471,9 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
 <dialog id="menudlg" aria-labelledby="menu-h">
 <div class="mhead"><h2 id="menu-h">Meniu</h2><button type="button" class="mclose" aria-label="Uždaryti meniu">✕</button></div>
 <ul class="mlist">
+<li><button type="button" data-m="plan"><span class="mi" aria-hidden="true">🧭</span>Maršruto planuoklis</button></li>
+<li><button type="button" data-m="routes"><span class="mi" aria-hidden="true">🚌</span>Maršrutai ir reisai</button></li>
+<li class="sep" aria-hidden="true"></li>
 <li><button type="button" data-m="tour"><span class="mi" aria-hidden="true">❓</span>Kaip naudotis</button></li>
 <li><button type="button" data-m="fb"><span class="mi" aria-hidden="true">❗</span>Pranešti apie klaidą ar pasiūlyti</button></li>
 <li><button type="button" data-m="inst"><span class="mi" aria-hidden="true">📲</span>Įsidėti į telefono ekraną</button></li>
@@ -545,7 +554,7 @@ const DIRS=r=>(D.dirs[r]||{})[MODE()]&&Object.keys(D.dirs[r][MODE()]).length?D.d
 let page='plan';
 const onRoutesPg=()=>isPhone()&&page==='routes';
 const onMapPg=()=>isPhone()&&page==='map';   // telefono žemėlapio puslapis (#zemelapis)
-const PGHASH={routes:'stoteles',map:'zemelapis'}, hashPg=()=>'plan';   // telefone liko tik planuoklis (maršrutų, stotelių ir žemėlapio puslapiai išjungti; senos #stoteles, #marsrutai, #zemelapis nuorodos atidaro planuoklį)
+const PGHASH={routes:'marsrutai',map:'zemelapis'}, hashPg=()=>location.hash==='#marsrutai'||location.hash==='#stoteles'?'routes':'plan';   // telefone liko tik planuoklis (maršrutų, stotelių ir žemėlapio puslapiai išjungti; senos #stoteles, #marsrutai, #zemelapis nuorodos atidaro planuoklį)
 function setPage(p,how){   // how: 'push' – naujas žingsnis naršyklės istorijoje (veikia telefono „Atgal“), kitaip – tik pakeičiamas adresas
   const was=page; page=p; document.body.classList.toggle('pg-routes',p==='routes'); document.body.classList.toggle('pg-map',p==='map');
   try{const u=new URL(location.href); u.hash=PGHASH[p]||''; const url=u.href.replace(/#$/,'');
@@ -745,18 +754,18 @@ function stopPopup(id,note){ const st=STOP[id], box=document.createElement('div'
     ${onMapPg()?`<button type="button" class="sptt" data-tt aria-label="Stotelės ${esc(st.name)} tvarkaraštis">Tvarkaraštis ›</button>`:''}<span class="spb"><button type="button" data-w="from" aria-label="Važiuosiu iš stotelės ${esc(st.name)}"><span class="spi spg" aria-hidden="true"></span>Iš čia</button><button type="button" data-w="to" aria-label="Važiuosiu į stotelę ${esc(st.name)}"><span class="spi spr" aria-hidden="true"></span>Į čia</button>${onMapPg()?'':`<button type="button" data-tt aria-label="Stotelės ${esc(st.name)} tvarkaraštis"><svg class="spc" aria-hidden="true" viewBox="0 0 16 16" width="15" height="15"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 4.3V8l2.6 1.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Tvarkaraštis</button>`}</span>`;   // 3 mygtukai vienoje eilutėje: ikonėlė + žodis   // žemėlapio puslapyje pagrindinis – tvarkaraštis
   const pop=L.popup({closeButton:false,autoPanPadding:[6,6],maxWidth:300,className:'stoppopw'}).setLatLng([st.lat,st.lon]).setContent(box).openOn(map);
   box.querySelectorAll('[data-tt]').forEach(b=>b.onclick=()=>{ map.closePopup(pop); openStop(id); });
-  box.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{ map.closePopup(pop); const w=b.dataset.w; if(onMapPg()){ setPage('plan','push'); state={route:null,day:today,trip:null,stop:null,dir:null,variant:null}; render(true); }   // iš žemėlapio – į planuoklį
+  box.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{ map.closePopup(pop); const w=b.dataset.w; if(onMapPg()||onRoutesPg()){ setPage('plan','push'); state={route:null,day:today,trip:null,stop:null,dir:null,variant:null}; render(true); }   // iš žemėlapio – į planuoklį
     if(w==='from') plan.from=st.name; else plan.to=st.name;
     if(plan.from===plan.to){ if(w==='from') plan.to=''; else plan.from=''; }
     renderBar();
     if(plan.from&&plan.to){ refreshTime(); updPlan(); }
     else announce(w==='from'?`Išvykimo stotelė: ${st.name}. Pasirinkite, kur važiuosite.`:`Atvykimo stotelė: ${st.name}. Pasirinkite, iš kur važiuosite.`); }); }
 // pasirinktos stotelės planuoklio žemėlapyje: išvykimo – žalia, atvykimo – raudona (kol kelionė dar nenupiešta)
-function markSel(){ if(!simpleMap()||plan.res.length) return;
+function markSel(){ if(!simpleMap()||onRoutesPg()||plan.res.length) return;
   D.stops.forEach(s=>{const m=markers[s.id], f=s.name===plan.from, t=s.name===plan.to;
     m.setStyle(f||t?{opacity:1,fillOpacity:1,radius:7,weight:2,color:'#fff',fillColor:f?'#0B7A3E':'#B42318'}:stopBase()); if(f||t) m.bringToFront();}); }
 // telefono planuoklio žemėlapis paprastas: be maršrutų linijų; telefone stotelės visur maži geltoni taškai
-const simpleMap=()=>isPhone()&&!onRoutesPg()&&!onMapPg();
+const simpleMap=()=>isPhone()&&!onMapPg();
 let wasSimple=null;
 const stopBase=()=>isPhone()?{opacity:1,fillOpacity:1,radius:5.5,weight:2,color:'#14213D',fillColor:'#F5B800'}:{opacity:1,fillOpacity:1,radius:6,weight:3,color:'#14213D',fillColor:'#fff'};
 function applyMode(){ if(wasSimple!==isPhone()){ wasSimple=isPhone(); D.stops.forEach(s=>markers[s.id].setStyle(stopBase())); }
@@ -814,7 +823,7 @@ function routeStops(r){
   const part=i=>cnt.get(i)<0.3*med;
   return {main:[...order.filter(i=>!part(i)),...rest.filter(i=>!part(i))],other:[...order,...rest].filter(part)};
 }
-function selectRoute(r){ rbDay=null; if(isPhone()&&page!=='routes') setPage('routes',tourI<0?'push':''); setTimeout(()=>announce(`Atidarytas ${r} maršrutas: ${D.meta[r].legend}.`),0);state={route:r,day:D.trips.some(t=>t.r===r&&inDay(t,today))?today:(['W','WE'].find(d=>D.trips.some(t=>t.r===r&&inDay(t,d)))),trip:null,stop:null,dir:null,variant:null};
+function selectRoute(r){ rbDay=null; state.rv=null; if(isPhone()&&page!=='routes') setPage('routes',tourI<0?'push':''); setTimeout(()=>announce(`Atidarytas ${r} maršrutas: ${D.meta[r].legend}.`),0);state={route:r,day:D.trips.some(t=>t.r===r&&inDay(t,today))?today:(['W','WE'].find(d=>D.trips.some(t=>t.r===r&&inDay(t,d)))),trip:null,stop:null,dir:null,variant:null};
   if(!runsDay(r,viewDay)) viewDay=['W','WE'].find(d=>runsDay(r,d))||viewDay;   // iškart rodoma diena, kai maršrutas važiuoja
   if(onRoutesPg()&&tourI<0&&!(history.state&&history.state.r)) history.pushState({pg:'routes',r},'',location.href);   // telefono „Atgal“ uždaro skirtuką
   render(true); document.getElementById('panel').scrollTop=0;}
@@ -867,6 +876,30 @@ function blkInDir(b,id,r,want,md){ let y=0,n=0;   // tikrinami tik pasirinktos d
   [['W',b.W],['WE',[...b.Sat,...b.WE]]].filter(([day])=>(day==='W')===(md==='D')).forEach(([day,arr])=>arr.forEach(([h,m])=>{const mm=(h*60+m)%1440;
     D.trips.forEach(t=>{ if(t.r!==r||!inDay(t,day)) return; t.P.s.forEach((s,i)=>{ if(s===id&&i<t.P.s.length-1&&t.t[i]%1440===mm){const k=legDirName(t,i); if(k===want) y++; else if(k) n++;} }); });}));
   return y>n; }
+// ---- telefono „Maršrutai ir reisai“: maršruto unikalūs reisai (stotelių sekos) pasirinktą dieną; paspaudus – linija žemėlapyje ----
+function rvList(r){ const md=rbMode(r), day=md==='D'?'W':'WE', by=new Map();
+  D.trips.filter(t=>t.r===r&&inDay(t,day)).forEach(t=>{ if(!by.has(t.p)) by.set(t.p,[]); by.get(t.p).push(t); });
+  const L=[...by.entries()].map(([p,ts])=>({p,ts:ts.sort((a,b)=>a.t[0]-b.t[0]),P:D.pats[p]})).sort((a,b)=>b.ts.length-a.ts.length||a.ts[0].t[0]-b.ts[0].t[0]);
+  const td=dayInfo(isoDate(new Date())).day===day;
+  L.forEach(v=>{ v.rep=(td&&v.ts.find(t=>t.t[0]>=nowMin))||v.ts[0]; const a=v.P.s[0], z=v.P.s.at(-1);
+    const ref=L.find(w=>w!==v&&nm(w.P.s[0])===nm(a)&&nm(w.P.s.at(-1))===nm(z));   // tie patys galai – parodome, kuo skiriasi
+    const ex=ref?v.P.s.filter(id=>!ref.P.s.some(x=>nm(x)===nm(id))).map(nm):[];
+    v.via=ex.length?'per '+[...new Set(ex)].slice(0,2).join(', '):ref&&ref.P.s.length>v.P.s.length?'trumpesnis':'';
+    v.dur=v.rep.t.at(-1)-v.rep.t[0]; });
+  return {L,md,day}; }
+const rvSel=r=>{ const {L}=rvList(r); return L.find(v=>v.p===state.rv)||null; };
+function routeVars(r){ const {L,md}=rvList(r), hasW=runsDay(r,'W');
+  const dayLine=`<div class="days vtog" role="group" aria-label="Diena">${[['D','W'],['O','WE']].map(([m,dy])=>{const off=!runsDay(r,dy);
+    return `<button type="button" data-rbday="${m}" class="${md===m?'on':''}" aria-pressed="${md===m}"${off?` disabled title="Šią dieną ${r} maršrutas nevažiuoja"`:''}>${DAYS[dy]}</button>`;}).join('')}</div>${!hasW&&!D.trips.some(t=>t.r===r&&t.d==='WE')?'<p class="sub" style="margin-top:.5rem"><b>Važiuoja tik šeštadieniais.</b></p>':''}`;
+  const card=v=>{ const on=v.p===state.rv, st=v.P.s.length;
+    return `<li><button type="button" class="rvb${on?' on':''}" data-rv="${v.p}" aria-pressed="${on}" style="--rc:${C(r)}"><span class="rvh"><b>${esc(nm(v.P.s[0]))} → ${esc(nm(v.P.s.at(-1)))}</b>${v.via?`<small>${esc(v.via)}</small>`:''}</span>
+      <span class="rvn">${v.ts.length} ${v.ts.length===1?'reisas':v.ts.length<10?'reisai':'reisų'}</span><span class="rvm">${st} ${stotW(st)} · ~${v.dur} min.</span>
+      <span class="rvt">${v.ts.map(t=>hm(t.t[0])).join(' · ')}</span></button></li>`; };
+  const main=L.filter(v=>v.ts.length>=3), rest=L.filter(v=>v.ts.length<3);
+  return `${dayLine}<h3 class="ph sth">Reisai</h3><p class="sub" style="margin-top:.1rem">Paspauskite reisą – jo kelias bus parodytas žemėlapyje. Laikai – išvykimas iš pirmos stotelės.</p>
+    ${L.length?`<ul class="rvlist">${(main.length?main:rest).map(card).join('')}</ul>${main.length&&rest.length?`<details class="rvmore"${rest.some(v=>v.p===state.rv)?' open':''}><summary>Kiti reisai (${rest.length}) – važiuoja 1–2 kartus per dieną</summary><ul class="rvlist">${rest.map(card).join('')}</ul></details>`:''}`
+      :'<div class="empty">Šią dieną šis maršrutas nevažiuoja.</div>'}`;
+}
 function routeBodyPhone(r){
   const hasW=runsDay(r,'W'), md=rbMode(r), DD=(D.dirs[r]||{})[md]||{};
   if(!state.dir||!DD[state.dir]) state.dir=DD.A?'A':Object.keys(DD)[0]||null;
@@ -885,7 +918,7 @@ function routeBodyPhone(r){
 }
 // maršruto turinys: diena, kryptis, stotelės, kiti reisai (kompiuteryje – atskiras vaizdas, telefone – skirtuke virš sąrašo)
 function routeBody(r){
-  if(onRoutesPg()) return routeBodyPhone(r);
+  if(onRoutesPg()) return routeVars(r);
   let rs=routeStops(r);
   const DR=DIRS(r);
   let VAR=new Set();
@@ -1039,7 +1072,8 @@ function render(fit){
     el.scrollTop=0; addFoot(el); syncLegend(); return;
   }
   if(!state.route||onRoutesPg()){   // telefono maršrutų puslapyje maršrutas atsiveria po savo kortele
-    if(state.route) routeView(fit);
+    if(onRoutesPg()){ const v=state.route&&rvSel(state.route); if(v) drawLegs([{t:v.rep,i:0,j:v.rep.P.s.length-1}],fit); else { clearHL(); fade(false); D.stops.forEach(s=>markers[s.id].setStyle(stopBase())); } }   // maršrutų puslapyje – tik pasirinkto reiso linija
+    else if(state.route) routeView(fit);
     else if(plan.res.length&&!onRoutesPg()) drawLegs(plan.res[plan.opt].legs,fit); else {clearHL();fade(false);lineLayers.forEach(({x,pl})=>pl.setStyle({opacity:.9}));D.stops.forEach(s=>markers[s.id].setStyle({color:'#14213D'}));}
     const opts=sel=>'<option value="">— pasirinkite stotelę —</option>'+NAMES.map(n=>`<option${n===sel?' selected':''}>${esc(n)}</option>`).join('');
     let res='';
@@ -1062,9 +1096,9 @@ function render(fit){
     ${plan.from&&plan.to&&!onRoutesPg()?`<section class="planner"><div class="phead"><h2 class="ph"><span class="plbl">Pasiūlymai kelionei </span><span class="pnames">${esc(plan.from)} → ${esc(plan.to)}</span></h2><span class="pbtns">${canShare()?'<button class="clr" data-share aria-label="Dalintis šios kelionės nuoroda" title="Dalintis nuoroda">🔗</button>':''}<button class="clr" data-clear aria-label="Išvalyti paiešką">✕</button></span></div>
       ${plan.res.nextDate?`<p class="walkhint">Šiandien po ${hm(plan.time)} reisų nebėra. Artimiausi – ${plan.res.nextDate} (${dayInfo(plan.res.nextDate).label}).</p>`:''}${plan.res.wide?`<p class="walkhint">🚶 Tiesioginių reisų šiuo metu nėra – siūlome variantus su ilgesniu ėjimu pėsčiomis. Visus dienos reisus rasite apačioje: „Visi šios dienos reisai“.</p>`:''}${plan.res.walkAB?`<p class="walkhint">🚶 ${plan.res.walkBetter?'Pėsčiomis bus greičiau':'Šios stotelės arti viena kitos'} – ~${plan.res.walkAB.m} m (≈${plan.res.walkAB.min} min).</p>`:''}<p class="sub">${plan.date} (${dayInfo(plan.date).label}), ${plan.mode==='arr'?'atvykti iki':'nuo'} ${hm(plan.time)}</p>${res}${plan.from!==plan.to?`<button type="button" class="srtt allbtn" data-allday>Visi šios dienos reisai ›</button>`:''}</section>`:''}
     <div class="routesbox" ${plan.from&&plan.to&&!onRoutesPg()?"hidden":""}>
-    ${isPhone()&&!onRoutesPg()?'':`<h2 class="ph" style="margin-top:${onRoutesPg()?'.2rem':'1.4rem'}">${onRoutesPg()&&!state.route?'Stotelių tvarkaraščiai':'Maršrutai ir tvarkaraščiai'}</h2>`}
+    ${isPhone()&&!onRoutesPg()?'':`<h2 class="ph" style="margin-top:${onRoutesPg()?'.2rem':'1.4rem'}">${onRoutesPg()?'Maršrutai ir reisai':'Maršrutai ir tvarkaraščiai'}</h2>`}
 
-    ${isPhone()&&!onRoutesPg()?'':onRoutesPg()&&state.route?routeTab(state.route):onRoutesPg()?stopList():R.map(rcard).join('')}
+    ${isPhone()&&!onRoutesPg()?'':onRoutesPg()&&state.route?routeTab(state.route):R.map(rcard).join('')}
     <details class="missing"${isPhone()?'':' open'}><summary><b>Tilto remonto laikotarpis.</b><span class="sumph"> Darbo dienomis į Užupį – apylanka.</span></summary> Darbo dienomis (visą dieną, ir po 18 val.) autobusai į Užupį važiuoja apylanka per magistralę, o atgal – tiesiai per tiltą.<br>Savaitgaliais ir švenčių dienomis apylankos nėra – važiuojama per tiltą abiem kryptimis.</details>
     </div>
 
@@ -1079,7 +1113,8 @@ function render(fit){
   if(state.route) el.scrollTop=sc;
   el.querySelectorAll('[data-sel]').forEach(b=>b.onclick=()=>selectRoute(b.dataset.sel));
   el.querySelectorAll('[data-rclose]').forEach(b=>b.onclick=closeRoute);
-  el.querySelectorAll('[data-rbday]').forEach(b=>b.onclick=()=>{const r=state.route, cur=((D.dirs[r]||{})[rbDay||(runsDay(r,'W')&&(today==='W'||!runsDay(r,'WE'))?'D':'O')]||{})[state.dir]; rbDay=b.dataset.rbday; viewDay=rbDay==='D'?'W':'WE'; const nx=(D.dirs[r]||{})[rbDay]||{}; state.dir=cur&&Object.keys(nx).find(k=>dname(nx[k].to)===dname(cur.to))||null; render(false);});   // kryptis išlieka
+  el.querySelectorAll('[data-rv]').forEach(b=>b.onclick=()=>{ const p=+b.dataset.rv; state.rv=state.rv===p?null:p; render(true); const f=document.querySelector(`[data-rv="${p}"]`); if(f){ f.focus({preventScroll:true}); f.scrollIntoView({block:'nearest'}); } });
+  el.querySelectorAll('[data-rbday]').forEach(b=>b.onclick=()=>{ state.rv=null;const r=state.route, cur=((D.dirs[r]||{})[rbDay||(runsDay(r,'W')&&(today==='W'||!runsDay(r,'WE'))?'D':'O')]||{})[state.dir]; rbDay=b.dataset.rbday; viewDay=rbDay==='D'?'W':'WE'; const nx=(D.dirs[r]||{})[rbDay]||{}; state.dir=cur&&Object.keys(nx).find(k=>dname(nx[k].to)===dname(cur.to))||null; render(false);});   // kryptis išlieka
   el.querySelectorAll('[data-vday]').forEach(b=>b.onclick=()=>{viewDay=b.dataset.vday;state.day=viewDay;render(false);});
   el.querySelectorAll('[data-dir]').forEach(b=>b.onclick=()=>{state.dir=state.dir===b.dataset.dir?null:b.dataset.dir;state.variant=null;render(false);});
   el.querySelectorAll('[data-var]').forEach(b=>b.onclick=()=>{state.variant=state.variant===b.dataset.var?null:b.dataset.var;render(false);});
@@ -1404,7 +1439,7 @@ addEventListener('popstate',()=>{ if(tourI>=0) return; { const ad=document.getEl
   page=p; document.body.classList.toggle('pg-routes',p==='routes'); document.body.classList.toggle('pg-map',p==='map'); scrollTo(0,0); map.invalidateSize();
   if(p==='plan') goHome(); else { const keep=hs.r&&p==='routes'?hs.r:(p==='map'?state.route:null);   // grįžus į atidarytą maršrutą – jis lieka
     state={route:keep,day:today,trip:null,stop:null,dir:keep?state.dir:null,variant:null}; render(true); if(!keep) fitAll(); } });
-if(location.hash&&isPhone()) setPage('plan','');   // išvalomas senas adreso galas (#stoteles ir pan.)
+if(hashPg()==='routes'&&isPhone()){ setPage('routes',''); render(true); fitAll(); } else if(location.hash&&isPhone()) setPage('plan','');   // senas #zemelapis ir pan. – planuoklis
 function fitAll(){ map.fitBounds(homeBounds(),{padding:isPhone()&&!mapBig?[4,4]:[20,20],animate:false}); }
 
 // ---- paleidimas: stotelės iš nuorodos arba paskutinė paieška ----
