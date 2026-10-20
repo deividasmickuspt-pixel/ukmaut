@@ -871,10 +871,18 @@ function pickStop(id){ selStop=selStop&&selStop.id===id&&selStop.r===state.route
   if(row){ const r=row.getBoundingClientRect(), p=pn.getBoundingClientRect(), top=p.top+(document.querySelector('.rthead,.rcard-open')||{offsetHeight:0}).offsetHeight+8;
     if(r.top<top||r.bottom>p.bottom) pn.scrollTop+=r.top-top-40; } }
 // telefono maršrutų puslapyje stotelės laikai – langas virš sąrašo (kaip instrukcija); sąrašas lieka po juo
+// to paties maršruto blokai sujungiami į vieną lentelę: pagrindinė kryptis – daugiausia reisų, kitų reisų kryptis – žvaigždute
+function mergeBlocks(bl){ const by=new Map(); bl.forEach(b=>{ if(!by.has(b.r)) by.set(b.r,[]); by.get(b.r).push(b); });
+  return [...by.values()].map(g=>{ if(g.length===1) return g[0];
+    const n=b=>b.W.length+b.Sat.length+b.WE.length, [m,...rest]=[...g].sort((a,b)=>n(b)-n(a)), notes={...m.notes}, idx={};
+    Object.entries(m.notes).forEach(([k,v])=>idx[v]=+k); let k=Math.max(0,...Object.keys(m.notes).map(Number));
+    const tag=(b,x)=>{ const t='kryptis '+b.dest+(x[2]&&b.notes[x[2]]?' – '+b.notes[x[2]]:''); if(!idx[t]){ idx[t]=++k; notes[k]=t; } return [x[0],x[1],idx[t]]; };
+    const col=c=>[...m[c],...rest.flatMap(b=>b[c].map(x=>tag(b,x)))].sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
+    return {...m,W:col('W'),Sat:col('Sat'),WE:col('WE'),notes}; }); }
 function syncStopDlg(){
   const dlg=document.getElementById('stopdlg'), c=document.getElementById('stopdlg-c');
   if(!(isPhone()&&state.stop)){ const was=dlg.dataset.id; if(dlg.open){ dlg.close(); setTimeout(()=>{const b=document.querySelector(`#panel [data-openstop="${was}"]`); if(b) b.focus({preventScroll:true});},0); } dlg.dataset.id=''; return; }   // fokusas grįžta į paspaustą stotelę
-  const id=state.stop, st=STOP[id], r=state.route, bl0=[...(TTS[id]||[])], bl1=r&&bl0.some(b=>b.r===r)?bl0.filter(b=>b.r===r):bl0, dw=r&&state.dir&&((D.dirs[r]||{})[rbMode(r)]||{})[state.dir], bl2=dw?bl1.filter(b=>b.r!==r||blkInDir(b,id,r,dname(dw.to),rbMode(r))):bl1, bl=bl2.length?bl2:bl1, dt=dirTxt(id,r), endHere=dw&&!bl2.length&&bl1.length;
+  const id=state.stop, st=STOP[id], r=state.route, bl0=[...(TTS[id]||[])], bl1=r&&bl0.some(b=>b.r===r)?bl0.filter(b=>b.r===r):bl0, dw=r&&state.dir&&((D.dirs[r]||{})[rbMode(r)]||{})[state.dir], bl2=dw?bl1.filter(b=>b.r!==r||blkInDir(b,id,r,dname(dw.to),rbMode(r))):bl1, bl=mergeBlocks(bl2.length?bl2:bl1).sort((a,b)=>a.r.localeCompare(b.r,undefined,{numeric:true})), dt=dirTxt(id,r), endHere=dw&&!bl2.length&&bl1.length;
   c.innerHTML=`    ${endHere?`<div class="tth"><span class="ttl"><b id="stopdlg-h">${esc(st.name)}</b></span><button type="button" class="clr" data-stopclose aria-label="Uždaryti tvarkaraštį">✕</button></div><p class="sub">Kryptimi „${esc(dw.to)}“ autobusas čia baigia reisą. ${bl.length>1?'Lentelėse':'Lentelėje'} – išvykimai iš šios stotelės.</p>`:''}${bl.length?bl.map((b,k)=>ttBlock(b,k+(endHere?1:0),bl,1)).join(''):`<div class="tth"><span class="ttl"><b id="stopdlg-h">${esc(st.name)}</b>${esc(dt)}</span><button type="button" class="clr" data-stopclose aria-label="Uždaryti tvarkaraštį">✕</button></div><div class="empty">Šios stotelės tvarkaraščio plakate nėra.</div>`}
     ${D.stops.filter(o=>o.name===st.name&&o.id!==id).map(o=>`<button class="back" data-openstop="${o.id}" style="margin-top:1rem">Kita gatvės pusė${dirTxt(o.id,r)?`: ${esc(dirTxt(o.id,r))}`:''} ›</button>`).join('')}
     <p class="note">Jei laikas nesutampa su plakatu stotelėje, teisingas plakatas.</p>`;
