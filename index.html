@@ -257,6 +257,7 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
 .obest{display:inline-block;margin-bottom:.25rem;padding:.1rem .5rem;border-radius:999px;background:#FFF4CC;color:#14213D;font-size:.78rem;font-weight:700}
 /* ---- telefonas: mažas žemėlapis su „Padidinti“, šoninis meniu, išskleidžiami maršrutai, suskleistas tilto pranešimas ---- */
 .mapexp,.menubtn,.rtogh,.sumph{display:none}
+#homelink{color:inherit;text-decoration:none}@media (hover:hover){#homelink:hover{text-decoration:underline}}
 .missing summary{list-style:none;cursor:default}.missing summary::-webkit-details-marker{display:none}
 .pbtns{display:flex;gap:6px}
 #instdlg{max-width:30rem;width:calc(100% - 2rem);border:0;border-radius:14px;padding:1.2rem 1.4rem;color:var(--ink);box-shadow:0 10px 40px rgba(0,0,0,.35);font-size:.95rem;line-height:1.45}
@@ -290,7 +291,7 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
   .missing[open] summary::after{content:''}.missing[open] .sumph{display:none}
   /* kompaktiška antraštė: pavadinimas vienoje eilutėje, vietoj ? ir ! – meniu ☰ */
   #apphead{padding:6px 8px 6px 10px!important;gap:8px}
-  #apphead h1{font-size:clamp(.9rem,4.6vw,1.1rem)!important;white-space:nowrap;line-height:1.15}
+  #apphead h1{font-size:clamp(1rem,5.9vw,1.45rem)!important;white-space:nowrap;line-height:1.15}
   #apphead .beta{font-size:.5rem!important;padding:.05rem .4rem;margin-top:.15rem;letter-spacing:.03em}
   .ah-btns{display:none!important}
   .menubtn{display:block;position:relative;width:40px!important;height:36px!important;border-radius:8px;font-size:1.25rem;line-height:1}
@@ -309,7 +310,7 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
 </head>
 <body>
 <a class="skip" href="#planbar">Pereiti prie kelionės paieškos</a><a class="skip" href="#panel">Pereiti prie maršrutų ir tvarkaraščių</a>
-<header id="apphead"><div class="ah-title"><h1>Ukmergės miesto autobusai</h1><span class="beta" title="Puslapis dar tikrinamas – galimi netikslumai">bandomoji versija</span></div>
+<header id="apphead"><div class="ah-title"><h1><a href="/" id="homelink" title="Į pradžią">Ukmergės miesto autobusai</a></h1><span class="beta" title="Puslapis dar tikrinamas – galimi netikslumai">bandomoji versija</span></div>
 <div class="ah-btns"><button type="button" id="tourbtn" class="hbtn" title="Kaip naudotis?" aria-label="Kaip naudotis? Atidaryti instrukciją">?</button><button type="button" id="fbbtn" class="hbtn" aria-label="Pranešk apie netikslumus arba pasiūlyk patobulinimą">!</button></div><button type="button" id="menubtn" class="hbtn menubtn" aria-label="Meniu" aria-haspopup="dialog" aria-controls="menudlg" aria-expanded="false">☰</button></header>
 <div id="left"><div id="planbar" role="search" aria-label="Kelionės planuoklis"></div><div id="map" role="region" aria-label="Maršrutų žemėlapis. Žemėlapis papildomas – visa informacija pateikta ir tekstu: maršrutų sąrašuose, tvarkaraščiuose ir planuoklio rezultatuose."></div></div>
 <main id="panel" tabindex="-1" aria-label="Maršrutai, tvarkaraščiai ir kelionės rezultatai"></main>
@@ -817,8 +818,6 @@ const MapBtn=L.Control.extend({options:{position:'topright'},onAdd(){
 const mapExp=new MapBtn().addTo(map).getContainer();
 function setMapBig(o){ mapBig=o; document.body.classList.toggle('mapbig',o); mapExp.setAttribute('aria-expanded',String(o));
   mapExp.innerHTML=o?'<span aria-hidden="true">⤡</span> Sumažinti':'<span aria-hidden="true">⤢</span> Padidinti';
-  const touch=!isPhone()||o;   // mažame žemėlapyje pirštas slenka puslapį, o ne žemėlapį
-  ['dragging','touchZoom','doubleClickZoom'].forEach(k=>touch?map[k].enable():map[k].disable());
   map.options.zoomSnap=isPhone()&&!o?0.25:1;   // mažame žemėlapyje tikslesnis priartinimas
   map.invalidateSize();
   if(state.stop){const st=STOP[state.stop]; map.setView([st.lat,st.lon],o?16:15);} else if(state.route||plan.res.length) render(true); else map.fitBounds(allBounds,{padding:isPhone()&&!o?[4,4]:[20,20]}); }
@@ -826,7 +825,6 @@ setMapBig(false);
 let wasPhone=isPhone();
 addEventListener('resize',()=>{ if(isPhone()!==wasPhone){ wasPhone=isPhone(); setMapBig(false); render(false); } });
 map.on('click',()=>{
-  if(isPhone()&&!mapBig){ setMapBig(true); return; }   // paspaudus mažą žemėlapį – jis padidinamas
   if(state.stop){state.stop=null;render(false);}
   else if(state.route){state={route:null,day:today,trip:null,stop:null};render(false);}
 });
@@ -958,6 +956,12 @@ const MENU={
   a11y:()=>{const d=document.getElementById('a11ydlg'); if(d&&d.showModal) d.showModal();}};
 menu.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{ menu.close(); setTimeout(MENU[b.dataset.m],50); });
 if(!FEEDBACK_URL) menu.querySelector('[data-m="fb"]').hidden=true;
+
+// ---- pavadinimas = mygtukas į pradžią: be atidaryto maršruto ar stotelės, žemėlapis sumažintas, puslapio viršus ----
+document.getElementById('homelink').onclick=e=>{ e.preventDefault(); if(tourI>=0) return;
+  state={route:null,day:today,trip:null,stop:null,dir:null,variant:null}; routesOpen=false;
+  if(mapBig) setMapBig(false); render(true); if(!plan.res.length) map.fitBounds(allBounds,{padding:isPhone()?[4,4]:[20,20]});
+  scrollTo({top:0,behavior:SMOOTH}); const pn=document.getElementById('panel'); if(pn) pn.scrollTop=0; };
 
 // ---- paleidimas: stotelės iš nuorodos arba paskutinė paieška ----
 (()=>{ let f='',t=''; try{const q=new URLSearchParams(location.search); f=q.get('is')||''; t=q.get('i')||'';}catch(e){}

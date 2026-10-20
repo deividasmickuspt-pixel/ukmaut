@@ -450,8 +450,6 @@ const MapBtn=L.Control.extend({options:{position:'topright'},onAdd(){
 const mapExp=new MapBtn().addTo(map).getContainer();
 function setMapBig(o){ mapBig=o; document.body.classList.toggle('mapbig',o); mapExp.setAttribute('aria-expanded',String(o));
   mapExp.innerHTML=o?'<span aria-hidden="true">⤡</span> Sumažinti':'<span aria-hidden="true">⤢</span> Padidinti';
-  const touch=!isPhone()||o;   // mažame žemėlapyje pirštas slenka puslapį, o ne žemėlapį
-  ['dragging','touchZoom','doubleClickZoom'].forEach(k=>touch?map[k].enable():map[k].disable());
   map.options.zoomSnap=isPhone()&&!o?0.25:1;   // mažame žemėlapyje tikslesnis priartinimas
   map.invalidateSize();
   if(state.stop){const st=STOP[state.stop]; map.setView([st.lat,st.lon],o?16:15);} else if(state.route||plan.res.length) render(true); else map.fitBounds(allBounds,{padding:isPhone()&&!o?[4,4]:[20,20]}); }
@@ -459,7 +457,6 @@ setMapBig(false);
 let wasPhone=isPhone();
 addEventListener('resize',()=>{ if(isPhone()!==wasPhone){ wasPhone=isPhone(); setMapBig(false); render(false); } });
 map.on('click',()=>{
-  if(isPhone()&&!mapBig){ setMapBig(true); return; }   // paspaudus mažą žemėlapį – jis padidinamas
   if(state.stop){state.stop=null;render(false);}
   else if(state.route){state={route:null,day:today,trip:null,stop:null};render(false);}
 });
@@ -591,6 +588,12 @@ const MENU={
   a11y:()=>{const d=document.getElementById('a11ydlg'); if(d&&d.showModal) d.showModal();}};
 menu.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{ menu.close(); setTimeout(MENU[b.dataset.m],50); });
 if(!FEEDBACK_URL) menu.querySelector('[data-m="fb"]').hidden=true;
+
+// ---- pavadinimas = mygtukas į pradžią: be atidaryto maršruto ar stotelės, žemėlapis sumažintas, puslapio viršus ----
+document.getElementById('homelink').onclick=e=>{ e.preventDefault(); if(tourI>=0) return;
+  state={route:null,day:today,trip:null,stop:null,dir:null,variant:null}; routesOpen=false;
+  if(mapBig) setMapBig(false); render(true); if(!plan.res.length) map.fitBounds(allBounds,{padding:isPhone()?[4,4]:[20,20]});
+  scrollTo({top:0,behavior:SMOOTH}); const pn=document.getElementById('panel'); if(pn) pn.scrollTop=0; };
 
 // ---- paleidimas: stotelės iš nuorodos arba paskutinė paieška ----
 (()=>{ let f='',t=''; try{const q=new URLSearchParams(location.search); f=q.get('is')||''; t=q.get('i')||'';}catch(e){}
