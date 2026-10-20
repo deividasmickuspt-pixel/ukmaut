@@ -464,7 +464,7 @@ function setMapBig(o){ mapBig=o; document.body.classList.toggle('mapbig',o); map
   mapExp.innerHTML=o?'<span aria-hidden="true">⤡</span> Sumažinti':'<span aria-hidden="true">⤢</span> Padidinti';
   map.options.zoomSnap=isPhone()&&!o?0.25:1;   // mažame žemėlapyje tikslesnis priartinimas
   map.invalidateSize();
-  if(state.stop){const st=STOP[state.stop]; map.setView([st.lat,st.lon],o?16:15);} else if(state.route||plan.res.length) render(true); else map.fitBounds(allBounds,{padding:isPhone()&&!o?[4,4]:[20,20]}); }
+  if(state.stop){const st=STOP[state.stop]; map.setView([st.lat,st.lon],o?16:15);} else if(state.route||plan.res.length) render(true); else map.fitBounds(allBounds,{padding:isPhone()&&!o?[4,4]:[20,20],animate:false}); }   // be animacijos – kitaip ji vėliau perrašo kelionės priartinimą
 setMapBig(false);
 let wasPhone=isPhone();
 addEventListener('resize',()=>{ if(isPhone()!==wasPhone){ wasPhone=isPhone(); setMapBig(false); render(false); } });
@@ -614,7 +614,7 @@ addEventListener('popstate',()=>{ if(tourI>=0) return; const p=location.hash==='
   page=p; document.body.classList.toggle('pg-routes',p==='routes'); scrollTo(0,0); map.invalidateSize();
   if(p==='plan') goHome(); else { state={route:null,day:today,trip:null,stop:null,dir:null,variant:null}; render(true); fitAll(); } });
 if(location.hash==='#marsrutai'&&isPhone()){ setPage('routes',''); render(true); fitAll(); }
-function fitAll(){ map.fitBounds(allBounds,{padding:isPhone()&&!mapBig?[4,4]:[20,20]}); }
+function fitAll(){ map.fitBounds(allBounds,{padding:isPhone()&&!mapBig?[4,4]:[20,20],animate:false}); }
 
 // ---- paleidimas: stotelės iš nuorodos arba paskutinė paieška ----
 (()=>{ let f='',t=''; try{const q=new URLSearchParams(location.search); f=q.get('is')||''; t=q.get('i')||'';}catch(e){}
