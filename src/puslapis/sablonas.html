@@ -58,6 +58,13 @@ li.end .dot{width:26px;height:26px;margin-left:4px}
 .opts{list-style:none;margin:1rem 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
 .opt{display:flex;flex-direction:column;gap:.3rem;width:100%;padding:.7rem .8rem;border:2px solid var(--line);border-radius:14px;background:var(--card);text-align:left}
 .opt.chosen{border-color:var(--ink);box-shadow:0 0 0 4px var(--yellow)}
+.ocard{border:2px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden}.ocard.chosen{border-color:var(--ink);box-shadow:0 0 0 4px var(--yellow)}
+.ocard .opt{border:0;border-radius:0;box-shadow:none;cursor:pointer}
+.osum{display:flex;align-items:center;flex-wrap:wrap;gap:4px}.osum .b{font-size:.75rem;min-width:1.8em;height:1.8em}.osum .ometa{margin-left:.3rem}.ocont,.oxf{color:var(--muted);font-weight:700}
+.oexp{align-self:flex-end;font-size:.85rem;font-weight:700;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.steps{list-style:none;margin:0;padding:.2rem .8rem .8rem;border-top:1px solid var(--line)}
+.steps li{display:flex;gap:.6rem;align-items:flex-start;padding:.45rem 0;border-bottom:1px dashed var(--line);font-size:.95rem;line-height:1.35}.steps li:last-child{border-bottom:0}
+.steps .si{flex:none;width:1.6em;text-align:center;font-size:1.05rem}.steps .sh{font-size:1.02rem}.steps small{display:block;color:var(--muted);font-size:.82rem}.steps .b{font-size:.72rem;min-width:1.7em;height:1.7em;vertical-align:middle}
 .oh{display:flex;justify-content:space-between;align-items:center;gap:.6rem}
 .obus{display:flex;align-items:center;gap:.3rem}.arr{color:var(--muted);font-size:1.2rem}
 .omin{font-size:1.35rem;font-weight:700}

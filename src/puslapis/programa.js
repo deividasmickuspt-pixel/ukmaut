@@ -560,16 +560,14 @@ function render(fit){
       else if(!plan.res.length&&plan.mode==='arr') res=`<div class="empty">Reisų, kuriais atvyktumėte iki ${hm(plan.time)}, nerasta. Pabandykite vėlesnį laiką.</div>`;
       else if(!plan.res.length&&plan.res.noMore&&plan.mode==='dep'&&(plan.res.all||(plan.res.all=allDay(plan.from,plan.to,plan.date))).length) res=`<p class="walkhint">Po ${hm(plan.time)} šią dieną reisų nebėra. Štai visi tos dienos reisai:</p>${allRows(plan.res.all,plan.time,'data-inpick')}`;
       else if(!plan.res.length) res=`<div class="empty">Reisų tarp šių stotelių artimiausiomis dienomis nerasta (tiesiogiai, su vienu persėdimu ar trumpu ėjimu).</div>`;
-      else res=`<ul class="opts">${plan.res.map((o,n)=>`<li><button class="opt${n===plan.opt?' chosen':''}" data-opt="${n}">
+      else res=`<ul class="opts">${plan.res.map((o,n)=>{ const ex=plan.exp===n, wm=walkM(o), xf=o.legs.filter((l,k)=>k&&(l.walk||!l.cont)).length;
+        return `<li class="ocard${n===plan.opt?' chosen':''}"><button class="opt" data-opt="${n}" aria-expanded="${ex}" aria-controls="ost-${n}">
         ${o.best?'<span class="obest">⭐ Rekomenduojama</span>':''}
         <span class="oh"><span class="otime">${hm(o.dep)} – ${hm(o.arr)}</span><span class="omin">${o.arr-o.dep} min.</span></span>
-        ${plan.mode==='arr'?`<span class="oarr">atvyksite ${plan.time-o.arr?`${plan.time-o.arr} min. anksčiau`:'laiku'}</span>`:''}<span class="ometa">${o.legs.length>1&&(o.legs[1].walk||(o.legs[1].t.r!==o.legs[0].t.r&&!o.legs[1].cont))?'1 persėdimas'+(o.legs[1].walk||o.walkEnd||(o.walkStart&&!o.walkStart.near)?' su ėjimu':''):(o.walkEnd||(o.walkStart&&!o.walkStart.near)?'be persėdimų, su ėjimu':'be persėdimų')}</span>
-        ${o.walkStart?(o.walkStart.near?`<span class="ox ow">Autobusas išvyksta iš stotelės „${esc(nm(o.walkStart.to))}“ (kryptis ${esc(legTo(o.legs[0]))}, ~${o.walkStart.m} m nuo „${esc(nm(o.walkStart.from))}“)</span>`:`<span class="ox ow">🚶 Nueikite ~${o.walkStart.m} m (≈${o.walkStart.min} min) iki stotelės „${esc(nm(o.walkStart.to))}“ (kryptis ${esc(legTo(o.legs[0]))})</span>`):''}
-        ${o.legs.map((l,k)=>`${k?(l.walk?`<span class="ox ow">🚶 Nueikite ~${l.walk.m} m (≈${l.walk.min} min) iki stotelės „${esc(nm(l.walk.id))}“ (kryptis ${esc(legTo(l))})${l.t.t[l.i]-o.legs[k-1].t.t[o.legs[k-1].j]-l.walk.min>0?`, laukti ${l.t.t[l.i]-o.legs[k-1].t.t[o.legs[k-1].j]-l.walk.min} min.`:''}</span>`:l.cont&&l.t.r!==o.legs[0].t.r?`<span class="ox">Likite autobuse: stotelėje „${esc(nm(l.t.P.s[l.i]))}“ jis tęsia kaip Nr. ${l.t.r}</span>`:l.t.r===o.legs[0].t.r?`<span class="ox">Likite autobuse: stotelėje „${esc(nm(l.t.P.s[l.i]))}“ jis tęsia kitą ratą</span>`:(()=>{const prev=o.legs[k-1],pid=prev.t.P.s[prev.j],nid=l.t.P.s[l.i];
-          return pid===nid?`<span class="ox">🔁 Persėskite toje pačioje stotelėje „${esc(nm(nid))}“</span>`
-            :`<span class="ox">🔁 Persėskite: pereikite į stotelę „${esc(nm(nid))}“${nm(pid)===nm(nid)?' kitoje gatvės pusėje':''} (kryptis ${esc(legTo(l))}), laukti ${l.t.t[l.i]-prev.t.t[prev.j]} min.</span>`;})()):''}<span class="oleg">${badge(l.t.r)} <b>${hm(l.t.t[l.i])}</b> ${esc(nm(l.t.P.s[l.i]))} <span class="okr">kryptis ${esc(legTo(l))}</span> → <b>${hm(l.t.t[l.j])}</b> ${esc(nm(l.t.P.s[l.j]))}${(()=>{const x=[satOnly(l.t)?'<b>tik šeštadieniais</b>':'',...legNotes(l).map(esc)].filter(Boolean); return x.length?`<small>${x.join(' · ')}</small>`:'';})()}</span>`).join('')}
-        ${o.walkEnd?`<span class="ox ow">🚶 Išlipkite ir nueikite ~${o.walkEnd.m} m (≈${o.walkEnd.min} min) iki stotelės „${esc(nm(o.walkEnd.to))}“ – būsite ~${hm(o.arr)}</span>`:''}
-        ${n===plan.opt?'<span class="onmap">Rodoma žemėlapyje</span>':''}</button></li>`).join('')}</ul>`;
+        ${plan.mode==='arr'?`<span class="oarr">atvyksite ${plan.time-o.arr?`${plan.time-o.arr} min. anksčiau`:'laiku'}</span>`:''}
+        <span class="osum">${o.legs.map((l,k)=>`${k?(l.cont?'<span class="ocont" aria-hidden="true">→</span>':'<span class="oxf" aria-hidden="true">›</span>'):''}${badge(l.t.r)}`).join('')}<span class="ometa">${xf?xf===1?'1 persėdimas':xf+' persėdimai':'be persėdimų'}${wm?` · 🚶 ~${wm} m`:''}</span></span>
+        <span class="oexp" aria-hidden="true">${ex?'Slėpti ▴':'Kaip važiuoti ▾'}</span></button>
+        <ol class="steps" id="ost-${n}"${ex?'':' hidden'}>${tripSteps(o)}</ol></li>`; }).join('')}</ul>`;
     }
     el.innerHTML=`
     ${plan.from&&plan.to&&!onRoutesPg()?`<section class="planner"><div class="phead"><h2 class="ph"><span class="plbl">Pasiūlymai kelionei </span><span class="pnames">${esc(plan.from)} → ${esc(plan.to)}</span></h2><span class="pbtns">${canShare()?'<button class="clr" data-share aria-label="Dalintis šios kelionės nuoroda" title="Dalintis nuoroda">🔗</button>':''}<button class="clr" data-clear aria-label="Išvalyti paiešką">✕</button></span></div>
@@ -601,7 +599,7 @@ function render(fit){
   el.querySelectorAll('[data-rday]').forEach(b=>b.onclick=()=>{state.day=b.dataset.rday;state.trip=null;render(false);});
   el.querySelectorAll('[data-allday]').forEach(b=>b.onclick=openAllDay);
   el.querySelectorAll('[data-inpick]').forEach(b=>b.onclick=()=>{ plan.time=+b.dataset.inpick; plan.userTime=true; plan.autoArr=0; renderBar(); updPlan(); showMapOnPhone(); });
-  el.querySelectorAll('[data-opt]').forEach(b=>b.onclick=()=>{plan.opt=+b.dataset.opt;render(true);showMapOnPhone();});
+  el.querySelectorAll('[data-opt]').forEach(b=>b.onclick=()=>{const n=+b.dataset.opt; if(plan.opt===n&&plan.exp===n) plan.exp=null; else {plan.opt=n; plan.exp=n;} render(true); const f=document.querySelector(`[data-opt="${n}"]`); if(f) f.focus({preventScroll:true}); showMapOnPhone();});   // paspaudus – rodoma žemėlapyje ir išskleidžiama
   el.querySelectorAll('[data-openstop]').forEach(b=>{b.onclick=()=>{ if(b.dataset.selstop){ pickStop(b.dataset.selstop); return; } unhoverStop();openStop(b.dataset.openstop);};
     if(!b.dataset.selstop){ b.onmouseenter=b.onfocus=()=>hoverStop(b.dataset.openstop); b.onmouseleave=b.onblur=unhoverStop; }});
   el.querySelectorAll('[data-ttstop]').forEach(b=>b.onclick=()=>{unhoverStop();openStop(b.dataset.ttstop);});
@@ -642,8 +640,25 @@ function openAllDay(dd){ const dlg=document.getElementById('alldlg'), c=document
   dlg.scrollTop=0; const nx=c.querySelector('.arow:not(.past)'); if(typeof dd!=='string'){ (nx||c.querySelector('[data-allclose]')).focus(); if(nx&&isToday) nx.scrollIntoView({block:'center'}); }
 }
 function closeAllDay(){ const dlg=document.getElementById('alldlg'); if(!dlg.open) return; dlg.close(); if(history.state&&history.state.all) history.back(); }
+// ---- kelionė žingsnis po žingsnio (išskleidus variantą) ----
+const stotW=n=>n%10===1&&n%100!==11?'stotelė':n%10>=2&&(n%100<10||n%100>20)?'stotelės':'stotelių';
+const nb=r=>`<span class="b" style="background:${C(r)}" aria-hidden="true">${r}</span><span class="vh">Nr. ${r}</span>`;   // numeris žingsniuose: matomas ženkliukas, skaitytuvui „Nr. 2“
+function tripSteps(o){ const S=[], st=(ic,h,t,sm)=>S.push(`<li><span class="si" aria-hidden="true">${ic}</span><span class="sx">${h?`<b class="sh">${h}</b> `:''}${t}${sm?`<small>${sm}</small>`:''}</span></li>`);
+  if(o.walkStart) o.walkStart.near?st('🚏','',`Autobusas išvyksta iš stotelės <b>„${esc(nm(o.walkStart.to))}“</b> (~${o.walkStart.m} m nuo „${esc(nm(o.walkStart.from))}“)`)
+    :st('🚶','',`Nueikite ~${o.walkStart.m} m (≈${o.walkStart.min} min.) iki stotelės <b>„${esc(nm(o.walkStart.to))}“</b>`);
+  o.legs.forEach((l,k)=>{ const prev=o.legs[k-1], nx=o.legs[k+1], a=l.t.P.s[l.i], z=l.t.P.s[l.j];
+    if(k){ const wait=l.t.t[l.i]-prev.t.t[prev.j]-(l.walk?l.walk.min:0);
+      if(l.walk) st('🚶','',`Nueikite ~${l.walk.m} m (≈${l.walk.min} min.) iki stotelės <b>„${esc(nm(l.walk.id))}“</b>${wait>0?`, laukite ${wait} min.`:''}`);
+      else if(l.cont) st('🔄','',l.t.r===prev.t.r?`Likite autobuse – stotelėje „${esc(nm(a))}“ jis tęsia kitą ratą`:`Likite autobuse – stotelėje „${esc(nm(a))}“ jis tęsia kaip ${nb(l.t.r)}`);
+      else { const pid=prev.t.P.s[prev.j]; st('🔁','',pid===a?`Persėskite toje pačioje stotelėje${wait>0?`, laukite ${wait} min.`:''}`:`Pereikite į stotelę <b>„${esc(nm(a))}“</b>${nm(pid)===nm(a)?' kitoje gatvės pusėje':''}${wait>0?`, laukite ${wait} min.`:''}`); } }
+    if(!k||l.walk||!l.cont){ const x=[satOnly(l.t)?'<b>tik šeštadieniais</b>':'',...legNotes(l).map(esc)].filter(Boolean);
+      st('🚏',hm(l.t.t[l.i]),`Įlipkite į ${nb(l.t.r)} autobusą stotelėje <b>„${esc(nm(a))}“</b>`,`kryptis ${esc(legTo(l))}${x.length?' · '+x.join(' · '):''}`); }
+    const ns=l.j-l.i; st('🚌','',`Važiuokite ${l.t.t[l.j]-l.t.t[l.i]} min. (${ns} ${stotW(ns)})`);
+    if(!(nx&&!nx.walk&&nx.cont)) st('🛑',hm(l.t.t[l.j]),`Išlipkite stotelėje <b>„${esc(nm(z))}“</b>`); });
+  if(o.walkEnd) st('🚶','',`Nueikite ~${o.walkEnd.m} m (≈${o.walkEnd.min} min.) iki stotelės <b>„${esc(nm(o.walkEnd.to))}“</b> – būsite ~${hm(o.arr)}`);
+  return S.join(''); }
 function updPlan(){ setTimeout(()=>{ if(!(plan.from&&plan.to)) return; const r=plan.res;
-    announce(r.length?`Rasta kelionės variantų: ${r.length}. Greičiausias: ${hm(r[0].dep)}–${hm(r[0].arr)}${r[0].legs.length>1?', su persėdimu':''}.`:`Kelionių iš ${plan.from} į ${plan.to} nerasta.`);},0);plan.res=(plan.from&&plan.to&&plan.from!==plan.to)?findTrips(plan.from,plan.to,plan.date,plan.time):[];plan.opt=0;
+    announce(r.length?`Rasta kelionės variantų: ${r.length}. Greičiausias: ${hm(r[0].dep)}–${hm(r[0].arr)}${r[0].legs.length>1?', su persėdimu':''}.`:`Kelionių iš ${plan.from} į ${plan.to} nerasta.`);},0);plan.res=(plan.from&&plan.to&&plan.from!==plan.to)?findTrips(plan.from,plan.to,plan.date,plan.time):[];plan.opt=0;plan.exp=null;
   if(plan.from&&plan.to){state={route:null,day:today,trip:null,stop:null}; if(plan.from!==plan.to&&tourI<0) remember(); else renderBar();}
   render(true);}
 // ---- Lithuanian public holidays (count as rest days) ----
