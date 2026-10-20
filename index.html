@@ -189,6 +189,7 @@ li.end .dot{width:26px;height:26px;margin-left:4px}
 .pmode{display:flex;gap:4px}.pmode button{flex:0 0 auto;min-height:30px;padding:0 .7rem;border:2px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);font:inherit;font-size:.85rem;font-weight:700;cursor:pointer}
 .pmode button.on{border-color:var(--ink);background:var(--ink);color:#fff}
 .walkhint.rarehint{font-weight:400!important}.rarehint b{font-weight:700}.rarehint .rarebtn{display:inline;margin:0;padding:0;min-height:0;font-size:inherit;font-weight:700}
+.adays{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin:0 0 .4rem;padding:.3rem;border-radius:12px;background:var(--tint)}.adays .clr{font-size:1.3rem}
 .allbtn{display:block;margin:.8rem auto 0;font-size:.95rem}
 .alist{list-style:none;margin:0;padding:0}.alist li{border-bottom:1px solid var(--line)}
 .arow{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"t b" "m m";gap:2px .6rem;align-items:center;width:100%;min-height:52px;padding:.45rem .2rem;border:0;background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
@@ -1114,24 +1115,28 @@ function rareInfo(A,B,date,T,res){
   if(!later.length){ const d=new Date(date+'T12:00'); for(let k=1;k<=3&&!next;k++){ d.setDate(d.getDate()+1); const iso=isoDate(d), n=direct(dayInfo(iso).day).map(o=>o.dep); if(n.length) next={date:iso,dep:Math.min(...n),k}; } }
   return {times,later,next,day}; }
 // ---- „Visi šios dienos reisai“: visi variantai iš A į B nuo ryto iki vakaro (langas virš planuoklio) ----
-function allDay(A,B,date,wide){ const day=dayInfo(date).day, out=[], seen=new Set();
-  for(let T=0;T<1500;T+=30) computePlan(A,B,day,T,{window:60,...(wide?{walkMax:800}:{})}).forEach(o=>{   // diena tikrinama valandos langais, kad liktų ir retesni variantai
+function allDay(A,B,date){ const day=dayInfo(date).day, out=[], seen=new Set();
+  for(const o0 of [{},{walkMax:800}]) for(let T=0;T<1500;T+=30) computePlan(A,B,day,T,{window:60,...o0}).forEach(o=>{   // diena tikrinama valandos langais; ir variantai su ilgesniu ėjimu
     const k=o.dep+'|'+o.arr+'|'+o.legs.map(l=>l.walk?'w':l.t.r).join(); if(!seen.has(k)){seen.add(k); out.push(o);} });
   // paliekami tik prasmingi: vėliau išvykstantis ir ne vėliau atvykstantis išstumia ankstesnį
-  if(!out.length&&!wide) return allDay(A,B,date,1);   // tiesioginių nėra – su ilgesniu ėjimu
   return out.filter(o=>!out.some(p=>p!==o&&p.dep>=o.dep&&p.arr<=o.arr&&(p.dep>o.dep||p.arr<o.arr))).sort((a,b)=>a.dep-b.dep||a.arr-b.arr)
     .filter((o,i,a)=>!i||o.dep!==a[i-1].dep||o.arr!==a[i-1].arr); }
-function openAllDay(){ const dlg=document.getElementById('alldlg'), c=document.getElementById('alldlg-c'), L=allDay(plan.from,plan.to,plan.date), di=dayInfo(plan.date);
-  c.innerHTML=`<div class="pt-top"><span><b id="alldlg-h">${esc(plan.from)} → ${esc(plan.to)}</b><small>${plan.date} (${di.label}) – visi reisai</small></span><button type="button" class="clr" data-allclose aria-label="Uždaryti">✕</button></div>
-    ${L.length?`<ul class="alist">${L.map((o,k)=>{ const now=plan.date===isoDate(new Date())&&o.dep<nowMin; return `<li><button type="button" class="arow${now?' past':''}" data-allpick="${o.dep}">
+const walkM=o=>(o.walkEnd?o.walkEnd.m:0)+o.legs.reduce((S,l)=>S+(l.walk?l.walk.m:0),0)+(o.walkStart&&!o.walkStart.near?o.walkStart.m:0);
+let adDate=null;
+function openAllDay(dd){ const dlg=document.getElementById('alldlg'), c=document.getElementById('alldlg-c'); adDate=typeof dd==='string'?dd:plan.date; const L=allDay(plan.from,plan.to,adDate), di=dayInfo(adDate), isToday=adDate===isoDate(new Date());
+  const shift=k=>{const d=new Date(adDate+'T12:00'); d.setDate(d.getDate()+k); return isoDate(d);};
+  c.innerHTML=`<div class="pt-top"><span><b id="alldlg-h">${esc(plan.from)} → ${esc(plan.to)}</b><small>visi dienos reisai</small></span><button type="button" class="clr" data-allclose aria-label="Uždaryti">✕</button></div>
+    <div class="adays"><button type="button" class="clr" data-addate="${shift(-1)}" aria-label="Ankstesnė diena">‹</button><span role="status"><b>${isToday?'Šiandien':adDate}</b> · ${di.label}</span><button type="button" class="clr" data-addate="${shift(1)}" aria-label="Kita diena">›</button></div>
+    ${L.length?`<ul class="alist">${L.map((o,k)=>{ const now=isToday&&o.dep<nowMin, wm=walkM(o); return `<li><button type="button" class="arow${now?' past':''}" data-allpick="${o.dep}">
       <span class="at"><b>${hm(o.dep)}</b> – ${hm(o.arr)}</span><span class="ab">${o.legs.filter(l=>!l.walk).map(l=>badge(l.t.r)).filter((x,i,a)=>a.indexOf(x)===i).join('')}</span>
-      <span class="am">${o.arr-o.dep} min.${o.legs.length>1&&o.legs.some((l,k)=>k&&!l.cont)?' · persėdimas':''}${o.walkEnd||o.legs.some(l=>l.walk)||(o.walkStart&&!o.walkStart.near)?' · su ėjimu':''}${now?' · jau išvyko':''}</span></button></li>`;}).join('')}</ul>`
+      <span class="am">${o.arr-o.dep} min.${o.legs.length>1&&o.legs.some((l,k)=>k&&!l.cont)?' · persėdimas':''}${wm?` · 🚶 ~${wm} m pėsčiomis`:''}${now?' · jau išvyko':''}</span></button></li>`;}).join('')}</ul>`
       :'<div class="empty">Šią dieną reisų nerasta.</div>'}
     <p class="note">Paspauskite reisą – jis bus parodytas planuoklyje ir žemėlapyje.</p>`;
   c.querySelector('[data-allclose]').onclick=()=>closeAllDay();
-  c.querySelectorAll('[data-allpick]').forEach(b=>b.onclick=()=>{ const t=+b.dataset.allpick; closeAllDay(); plan.mode='dep'; plan.time=t; plan.userTime=true; plan.autoArr=0; renderBar(); updPlan(); showMapOnPhone(); });
+  c.querySelectorAll('[data-addate]').forEach(b=>b.onclick=()=>{ const lb=b.getAttribute('aria-label'); openAllDay(b.dataset.addate); c.querySelector(`[aria-label="${lb}"]`).focus(); });   // fokusas lieka ant to paties mygtuko
+  c.querySelectorAll('[data-allpick]').forEach(b=>b.onclick=()=>{ const t=+b.dataset.allpick; closeAllDay(); plan.mode='dep'; plan.date=adDate; plan.day=dayInfo(adDate).day; plan.time=t; plan.userTime=true; plan.autoArr=0; renderBar(); updPlan(); showMapOnPhone(); });
   if(!dlg.open){ dlg.showModal(); if(tourI<0) history.pushState({all:1},'',location.href); }
-  dlg.scrollTop=0; const nx=c.querySelector('.arow:not(.past)'); (nx||c.querySelector('[data-allclose]')).focus(); if(nx) nx.scrollIntoView({block:'center'});
+  dlg.scrollTop=0; const nx=c.querySelector('.arow:not(.past)'); if(typeof dd!=='string'){ (nx||c.querySelector('[data-allclose]')).focus(); if(nx&&isToday) nx.scrollIntoView({block:'center'}); }
 }
 function closeAllDay(){ const dlg=document.getElementById('alldlg'); if(!dlg.open) return; dlg.close(); if(history.state&&history.state.all) history.back(); }
 function updPlan(){ setTimeout(()=>{ if(!(plan.from&&plan.to)) return; const r=plan.res;
