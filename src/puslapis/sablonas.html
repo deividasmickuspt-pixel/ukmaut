@@ -297,6 +297,7 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
   .plbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}   /* „Pasiūlymai kelionei“ – tik ekrano skaitytuvui */
   .planner .phead{align-items:center}.planner .pnames{font-size:1.05rem;line-height:1.25}
   body.pg-routes #planbar{display:none}
+  .fa11y{display:none!important}   /* telefone prieinamumo deklaracija – meniu */
   .recent{display:flex;flex:1 1 100%;gap:6px;overflow-x:auto;padding-bottom:2px}   /* paskutinės paieškos – viena slenkama eilutė */
   .recent button{flex:0 0 auto;min-height:40px;padding:.2rem .75rem;border:2px solid var(--line);border-radius:999px;background:var(--tint);color:var(--ink);font:inherit;font-size:.88rem;white-space:nowrap;cursor:pointer}
   #planbar .ptitle{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -329,7 +330,7 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
 <div class="ah-btns"><button type="button" id="tourbtn" class="hbtn" title="Kaip naudotis?" aria-label="Kaip naudotis? Atidaryti instrukciją">?</button><button type="button" id="fbbtn" class="hbtn" aria-label="Pranešk apie netikslumus arba pasiūlyk patobulinimą">!</button></div><button type="button" id="menubtn" class="hbtn menubtn" aria-label="Meniu" aria-haspopup="dialog" aria-controls="menudlg" aria-expanded="false">☰</button></header>
 <div id="left"><div id="planbar" role="search" aria-label="Kelionės planuoklis"></div><div id="map" role="region" aria-label="Maršrutų žemėlapis. Žemėlapis papildomas – visa informacija pateikta ir tekstu: maršrutų sąrašuose, tvarkaraščiuose ir planuoklio rezultatuose."></div></div>
 <main id="panel" tabindex="-1" aria-label="Maršrutai, tvarkaraščiai ir kelionės rezultatai"></main>
-<footer id="appfoot"><span>Projekto autorius: <b>Deividas Mickus</b></span><span class="sep" aria-hidden="true">·</span><span>Žemėlapis: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> bendraautoriai (ODbL), Esri · <a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a></span><span class="sep" aria-hidden="true">·</span><button type="button" class="a11ylink" data-a11y>Prieinamumo deklaracija</button></footer>
+<footer id="appfoot"><span>Žemėlapis: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (ODbL), Esri · <a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a></span><span class="sep" aria-hidden="true">·</span><span>Projekto autorius: <b>Deividas Mickus</b></span><span class="sep fa11y" aria-hidden="true">·</span><button type="button" class="a11ylink fa11y" data-a11y>Prieinamumo deklaracija</button></footer>
 <dialog id="a11ydlg" aria-labelledby="a11y-h">
 <button type="button" class="a11yclose" aria-label="Uždaryti prieinamumo deklaraciją">✕</button>
 <h2 id="a11y-h">Prieinamumo deklaracija</h2>
