@@ -286,14 +286,15 @@ function openStop(id){ const had=!!state.stop; state.stop=id; if(isPhone()&&page
   if(onRoutesPg()&&tourI<0){ const hs={pg:'routes',r:state.route,s:id}; if(had&&history.state&&history.state.s) history.replaceState(hs,'',location.href); else history.pushState(hs,'',location.href); }   // telefono „Atgal“ uždaro tvarkaraštį
   render(false);announce(`Stotelės ${sname(id)} tvarkaraštis.`);}
 const DCOL=[['W','Darbo dienomis'],['WE','Poilsio dienomis']];
-function ttBlock(b){
+function ttBlock(b,k,all,dlg){   // dlg – telefono lange: pirmame bloke stotelės pavadinimas ir ✕
   const cols={W:b.W,WE:[...b.Sat.map(x=>[...x,'s']),...b.WE].sort((x,y)=>x[0]-y[0]||x[1]-y[1])};
   const use=DCOL.filter(([d])=>cols[d].length), miss=DCOL.filter(([d])=>!cols[d].length);
   const hours=[...new Set(use.flatMap(([d])=>cols[d].map(x=>x[0])))].sort((a,c)=>a-c);
   const curH=Math.floor(nowMin/60);
   const cell=(d,h)=>cols[d].filter(x=>x[0]===h).map(x=>`<span class="${x[3]==='s'?'sat':''}">${String(x[1]).padStart(2,'0')}${x[2]?`<sup>${'*'.repeat(x[2])}</sup>`:''}${x[3]==='s'?'<sup>š</sup>':''}</span>`).join(' ');
   const notes=Object.entries(b.notes);
-  return `<section class="ttb"><div class="tth">${badge(b.r,1)}<span>kryptis<b>${esc(b.dest)}</b></span></div>
+  const top=dlg&&!k, st=top&&STOP[state.stop];
+  return `<section class="ttb"><div class="tth">${badge(b.r,1)}${top?`<span class="ttl"><b id="stopdlg-h">${esc(st.name)}</b>kryptis ${esc(b.dest)}</span><button type="button" class="clr" data-stopclose aria-label="Uždaryti tvarkaraštį">✕</button>`:`<span class="ttl">kryptis<b>${esc(b.dest)}</b></span>`}</div>
   ${use.length?`<table class="tt"><thead><tr><th>Val.</th>${use.map(([d,l])=>`<th class="${d===viewDay?'today':''}">${l}</th>`).join('')}</tr></thead>
   <tbody>${hours.map(h=>`<tr class="${h===curH?'now':''}"><th>${String(h%24).padStart(2,'0')}</th>${use.map(([d])=>`<td class="${d===viewDay?'today':''}">${cell(d,h)}</td>`).join('')}</tr>`).join('')}</tbody></table>`:''}
   ${b.Sat.length?`<p class="ttm"><sup>š</sup> – tik šeštadieniais</p>`:''}
@@ -417,8 +418,7 @@ function syncStopDlg(){
   const dlg=document.getElementById('stopdlg'), c=document.getElementById('stopdlg-c');
   if(!(onRoutesPg()&&state.stop)){ const was=dlg.dataset.id; if(dlg.open){ dlg.close(); setTimeout(()=>{const b=document.querySelector(`#panel [data-openstop="${was}"]`); if(b) b.focus({preventScroll:true});},0); } dlg.dataset.id=''; return; }   // fokusas grįžta į paspaustą stotelę
   const id=state.stop, st=STOP[id], r=state.route, bl0=[...(TTS[id]||[])], bl=r&&bl0.some(b=>b.r===r)?bl0.filter(b=>b.r===r):bl0, dt=dirTxt(id,r);
-  c.innerHTML=`<div class="rthead" style="--rc:${r?C(r):'var(--ink)'}">${r?badge(r,1):''}<h2 id="stopdlg-h">${esc(st.name)}${dt?` <small>${esc(dt)}</small>`:''}</h2><button type="button" class="clr" data-stopclose aria-label="Uždaryti tvarkaraštį">✕</button></div>
-    ${bl.length?bl.map(ttBlock).join(''):'<div class="empty">Šios stotelės tvarkaraščio plakate nėra.</div>'}
+  c.innerHTML=`    ${bl.length?bl.map((b,k)=>ttBlock(b,k,bl,1)).join(''):`<div class="tth"><span class="ttl"><b id="stopdlg-h">${esc(st.name)}</b>${esc(dt)}</span><button type="button" class="clr" data-stopclose aria-label="Uždaryti tvarkaraštį">✕</button></div><div class="empty">Šios stotelės tvarkaraščio plakate nėra.</div>`}
     ${D.stops.filter(o=>o.name===st.name&&o.id!==id).map(o=>`<button class="back" data-openstop="${o.id}" style="margin-top:1rem">Kita gatvės pusė${dirTxt(o.id,r)?`: ${esc(dirTxt(o.id,r))}`:''} ›</button>`).join('')}
     <p class="note">Jei laikas nesutampa su plakatu stotelėje, teisingas plakatas.</p>`;
   c.querySelectorAll('[data-openstop]').forEach(x=>x.onclick=()=>openStop(x.dataset.openstop));
