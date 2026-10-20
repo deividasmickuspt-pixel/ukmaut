@@ -572,8 +572,7 @@ function render(fit){
     }
     el.innerHTML=`
     ${plan.from&&plan.to&&!onRoutesPg()?`<section class="planner"><div class="phead"><h2 class="ph"><span class="plbl">Pasiūlymai kelionei </span><span class="pnames">${esc(plan.from)} → ${esc(plan.to)}</span></h2><span class="pbtns">${canShare()?'<button class="clr" data-share aria-label="Dalintis šios kelionės nuoroda" title="Dalintis nuoroda">🔗</button>':''}<button class="clr" data-clear aria-label="Išvalyti paiešką">✕</button></span></div>
-      ${(r=>r?`<p class="walkhint rarehint">ℹ️ <b>Iki stotelės „${esc(plan.to)}“ autobusai važiuoja retai</b> – ${r.day==='W'?'darbo dienomis':'poilsio dienomis'}${r.times.length?` tik ${r.times.map(hm).join(', ')} (iš stotelės „${esc(plan.from)}“)`:' iš čia tiesiogiai nevažiuoja'}. ${r.arr?(r.ok?`Kad atvyktumėte iki ${hm(plan.time)} be ėjimo pėsčiomis, reikėtų važiuoti ${hm(r.ok.dep)} (būsite ${hm(r.ok.arr)}). <button type="button" class="srtt rarebtn" data-rareok="${r.ok.dep}">Rodyti ${hm(r.ok.dep)} reisą ›</button>`:`Iki ${hm(plan.time)} tiesiogiai nenuvažiuosite, todėl siūlome nuvažiuoti iki artimiausios stotelės ir nueiti pėsčiomis.`):r.later.length?`Kitas – ${hm(r.later[0])}.`:'Šią dieną jų nebėra, todėl siūlome nuvažiuoti iki artimiausios stotelės ir nueiti pėsčiomis.'}${r.next?` <button type="button" class="srtt rarebtn" data-rarenext="${r.next.date}|${r.next.dep}">Artimiausias iki pat stotelės – ${r.next.k===1?'rytoj':r.next.date} ${hm(r.next.dep)} ›</button>`:''}</p>`:'')(plan.res.rare)}
-      ${plan.res.nextDate?`<p class="walkhint">Šiandien po ${hm(plan.time)} reisų nebėra. Artimiausi – ${plan.res.nextDate} (${dayInfo(plan.res.nextDate).label}).</p>`:''}${plan.res.wide&&!plan.res.rare?`<p class="walkhint">🚶 Tiesioginių reisų iš šios vietos nėra – siūlome nueiti iki netoliese esančios stotelės, kur autobusai važiuoja dažniau.</p>`:''}${plan.res.walkAB?`<p class="walkhint">🚶 ${plan.res.walkBetter?'Pėsčiomis bus greičiau':'Šios stotelės arti viena kitos'} – ~${plan.res.walkAB.m} m (≈${plan.res.walkAB.min} min).</p>`:''}<p class="sub">${plan.date} (${dayInfo(plan.date).label}), ${plan.mode==='arr'?'atvykti iki':'nuo'} ${hm(plan.time)}</p>${res}${plan.from!==plan.to?`<button type="button" class="srtt allbtn" data-allday>Visi šios dienos reisai ›</button>`:''}</section>`:''}
+      ${plan.res.nextDate?`<p class="walkhint">Šiandien po ${hm(plan.time)} reisų nebėra. Artimiausi – ${plan.res.nextDate} (${dayInfo(plan.res.nextDate).label}).</p>`:''}${plan.res.wide?`<p class="walkhint">🚶 Tiesioginių reisų šiuo metu nėra – siūlome variantus su ilgesniu ėjimu pėsčiomis. Visus dienos reisus rasite apačioje: „Visi šios dienos reisai“.</p>`:''}${plan.res.walkAB?`<p class="walkhint">🚶 ${plan.res.walkBetter?'Pėsčiomis bus greičiau':'Šios stotelės arti viena kitos'} – ~${plan.res.walkAB.m} m (≈${plan.res.walkAB.min} min).</p>`:''}<p class="sub">${plan.date} (${dayInfo(plan.date).label}), ${plan.mode==='arr'?'atvykti iki':'nuo'} ${hm(plan.time)}</p>${res}${plan.from!==plan.to?`<button type="button" class="srtt allbtn" data-allday>Visi šios dienos reisai ›</button>`:''}</section>`:''}
     <div class="routesbox" ${plan.from&&plan.to&&!onRoutesPg()?"hidden":""}>
     ${isPhone()&&!onRoutesPg()?'':`<h2 class="ph" style="margin-top:${onRoutesPg()?'.2rem':'1.4rem'}">${onRoutesPg()&&!state.route?'Stotelių tvarkaraščiai':'Maršrutai ir tvarkaraščiai'}</h2>`}
 
@@ -598,8 +597,6 @@ function render(fit){
   el.querySelectorAll('[data-var]').forEach(b=>b.onclick=()=>{state.variant=state.variant===b.dataset.var?null:b.dataset.var;render(false);});
   el.querySelectorAll('[data-clear]').forEach(b=>b.onclick=()=>{plan.from='';plan.to='';plan.res=[];setUrl();renderBar();render(true);fitAll();});   // žemėlapis grįžta į pradinį vaizdą   // (paskutinės paieškos lieka)
   el.querySelectorAll('[data-share]').forEach(b=>b.onclick=shareTrip);
-  el.querySelectorAll('[data-rareok]').forEach(b=>b.onclick=()=>{ plan.mode='dep'; plan.time=+b.dataset.rareok; plan.userTime=true; plan.autoArr=0; renderBar(); updPlan(); });
-  el.querySelectorAll('[data-rarenext]').forEach(b=>b.onclick=()=>{ const [d,t]=b.dataset.rarenext.split('|'); plan.date=d; plan.day=dayInfo(d).day; plan.time=+t; plan.userTime=true; renderBar(); updPlan(); });
   el.querySelectorAll('[data-rday]').forEach(b=>b.onclick=()=>{state.day=b.dataset.rday;state.trip=null;render(false);});
   el.querySelectorAll('[data-allday]').forEach(b=>b.onclick=openAllDay);
   el.querySelectorAll('[data-opt]').forEach(b=>b.onclick=()=>{plan.opt=+b.dataset.opt;render(true);showMapOnPhone();});
@@ -620,17 +617,6 @@ function findTrips(A,B,date,T){
     let n=computePlan(A,B,dayInfo(iso).day,0,{window:1440}); if(!n.length){n=computePlan(A,B,dayInfo(iso).day,0,{walkMax:800,window:1440}); if(n.length) n.wide=1;}
     if(n.length){n.nextDate=iso; return n;} }
   return r;}
-// retai aptarnaujama stotelė (pvz. Narbuto): kai visi variantai baigiasi ėjimu pėsčiomis, pasakome, kada autobusai į ją važiuoja iki pat stotelės
-function rareInfo(A,B,date,T,res){
-  if(!res.length||!res.every(o=>o.walkEnd)) return null;
-  const day=dayInfo(date).day; if(D.trips.filter(t=>inDay(t,day)&&t.P.s.some((id,i)=>i>0&&nm(id)===B)).length>8) return null;
-  const direct=d=>computePlan(A,B,d,0,{window:1440}).filter(o=>!o.walkEnd);
-  const all=direct(day), times=[...new Set(all.map(o=>o.dep))].sort((a,b)=>a-b);
-  if(plan.mode==='arr'){ const ok=all.filter(o=>o.arr<=T).sort((a,b)=>b.dep-a.dep)[0];   // atvykti iki T: vėliausias tiesioginis, spėjantis laiku
-    return {times,day,arr:1,ok:ok?{date,dep:ok.dep,arr:ok.arr}:null}; }
-  const later=times.filter(x=>x>=T); let next=null;
-  if(!later.length){ const d=new Date(date+'T12:00'); for(let k=1;k<=3&&!next;k++){ d.setDate(d.getDate()+1); const iso=isoDate(d), n=direct(dayInfo(iso).day).map(o=>o.dep); if(n.length) next={date:iso,dep:Math.min(...n),k}; } }
-  return {times,later,next,day}; }
 // ---- „Visi šios dienos reisai“: visi variantai iš A į B nuo ryto iki vakaro (langas virš planuoklio) ----
 function allDay(A,B,date){ const day=dayInfo(date).day, out=[], seen=new Set();
   for(const o0 of [{},{walkMax:800}]) for(let T=0;T<1500;T+=30) computePlan(A,B,day,T,{window:60,...o0}).forEach(o=>{   // diena tikrinama valandos langais; ir variantai su ilgesniu ėjimu
@@ -657,7 +643,7 @@ function openAllDay(dd){ const dlg=document.getElementById('alldlg'), c=document
 }
 function closeAllDay(){ const dlg=document.getElementById('alldlg'); if(!dlg.open) return; dlg.close(); if(history.state&&history.state.all) history.back(); }
 function updPlan(){ setTimeout(()=>{ if(!(plan.from&&plan.to)) return; const r=plan.res;
-    announce(r.length?`Rasta kelionės variantų: ${r.length}. Greičiausias: ${hm(r[0].dep)}–${hm(r[0].arr)}${r[0].legs.length>1?', su persėdimu':''}.`:`Kelionių iš ${plan.from} į ${plan.to} nerasta.`);},0);plan.res=(plan.from&&plan.to&&plan.from!==plan.to)?findTrips(plan.from,plan.to,plan.date,plan.time):[];plan.opt=0; if(plan.res.length) plan.res.rare=rareInfo(plan.from,plan.to,plan.res.nextDate||plan.date,plan.res.nextDate?0:plan.time,plan.res);
+    announce(r.length?`Rasta kelionės variantų: ${r.length}. Greičiausias: ${hm(r[0].dep)}–${hm(r[0].arr)}${r[0].legs.length>1?', su persėdimu':''}.`:`Kelionių iš ${plan.from} į ${plan.to} nerasta.`);},0);plan.res=(plan.from&&plan.to&&plan.from!==plan.to)?findTrips(plan.from,plan.to,plan.date,plan.time):[];plan.opt=0;
   if(plan.from&&plan.to){state={route:null,day:today,trip:null,stop:null}; if(plan.from!==plan.to&&tourI<0) remember(); else renderBar();}
   render(true);}
 // ---- Lithuanian public holidays (count as rest days) ----
