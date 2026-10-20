@@ -247,11 +247,11 @@ function stopPopup(id,note){ const st=STOP[id], box=document.createElement('div'
 function markSel(){ if(!simpleMap()||plan.res.length) return;
   D.stops.forEach(s=>{const m=markers[s.id], f=s.name===plan.from, t=s.name===plan.to;
     m.setStyle(f||t?{opacity:1,fillOpacity:1,radius:7,weight:2,color:'#fff',fillColor:f?'#0B7A3E':'#B42318'}:stopBase()); if(f||t) m.bringToFront();}); }
-// telefono planuoklio žemėlapis paprastas: be maršrutų linijų, maži geltoni stotelių taškai
+// telefono planuoklio žemėlapis paprastas: be maršrutų linijų; telefone stotelės visur maži geltoni taškai
 const simpleMap=()=>isPhone()&&!onRoutesPg();
 let wasSimple=null;
-const stopBase=()=>simpleMap()?{opacity:1,fillOpacity:1,radius:4,weight:1.5,color:'#14213D',fillColor:'#F5B800'}:{opacity:1,fillOpacity:1,radius:6,weight:3,color:'#14213D',fillColor:'#fff'};
-function applyMode(){ if(wasSimple!==simpleMap()){ wasSimple=simpleMap(); D.stops.forEach(s=>markers[s.id].setStyle(stopBase())); }
+const stopBase=()=>isPhone()?{opacity:1,fillOpacity:1,radius:4,weight:1.5,color:'#14213D',fillColor:'#F5B800'}:{opacity:1,fillOpacity:1,radius:6,weight:3,color:'#14213D',fillColor:'#fff'};
+function applyMode(){ if(wasSimple!==isPhone()){ wasSimple=isPhone(); D.stops.forEach(s=>markers[s.id].setStyle(stopBase())); }
   lineLayers.forEach(l=>{const on=layerOn(l.x)&&!simpleMap(); if(on&&!map.hasLayer(l.pl)) l.pl.addTo(map); else if(!on&&map.hasLayer(l.pl)) l.pl.remove();});
   const el=document.getElementById('modeinfo'); if(el) el.innerHTML=MODE()==='D'?'<b>Darbo dienų schema</b><span class="mi2"><br>į Užupį – apylanka per magistralę, visą dieną</span>':'<b>Poilsio dienų schema</b><span class="mi2"><br>be apylankos, tiltu abiem kryptimis</span>';}
 function fade(on){lineLayers.forEach(({x,pl})=>pl.setStyle(on?{opacity:.12}:{opacity:.9}));
@@ -319,7 +319,12 @@ function routeView(fit){
   const dirStops=new Set(D.layers.filter(inDir).flatMap(x=>x.ab));
   const routeStopsOnMap=new Set(D.layers.filter(x=>x.r===r&&x.m===MODE()&&x.main).flatMap(x=>x.ab));
   const servesToday=id=>(TTS[id]||[]).some(b=>b.r===r&&(viewDay==='W'?b.W.length:(b.WE.length||b.Sat.length)));
-  D.stops.forEach(s=>{const on=(servesToday(s.id)||routeStopsOnMap.has(s.id))&&(!state.dir||dirStops.has(s.id));markers[s.id].setStyle(on?{opacity:1,fillOpacity:1,radius:6,color:C(r),fillColor:'#fff'}:{opacity:.2,fillOpacity:.2,radius:4,color:'#14213D'});});
+  const ph=isPhone(), pts=[];
+  D.stops.forEach(s=>{const on=(servesToday(s.id)||routeStopsOnMap.has(s.id))&&(!state.dir||dirStops.has(s.id)); if(on) pts.push([s.lat,s.lon]);
+    markers[s.id].setStyle(on?(ph?{opacity:1,fillOpacity:1,radius:4.5,weight:2,color:C(r),fillColor:'#F5B800'}:{opacity:1,fillOpacity:1,radius:6,color:C(r),fillColor:'#fff'})
+      :(ph?{opacity:.25,fillOpacity:.25,radius:3,weight:1.5,color:'#14213D',fillColor:'#F5B800'}:{opacity:.2,fillOpacity:.2,radius:4,color:'#14213D'}));});
+  // telefone atidarius maršrutą žemėlapis priartinamas tik prie jo
+  if(fit&&ph&&pts.length) map.fitBounds(pts,mapBig?{padding:[40,40],maxZoom:16,animate:false}:{paddingTopLeft:[18,50],paddingBottomRight:[18,14],maxZoom:16,animate:false});
 }
 const dayTog=()=>`<div class="days vtog" role="group" aria-label="Diena maršrutams ir tvarkaraščiams">${['W','WE'].map(d=>`<button type="button" data-vday="${d}" class="${viewDay===d?'on':''}" aria-pressed="${viewDay===d}">${DAYS[d]}</button>`).join('')}</div>`;
 function render(fit){
