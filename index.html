@@ -282,6 +282,14 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
   .mapexp{display:block;min-height:36px;padding:.2rem .7rem;border:2px solid var(--ink);border-radius:10px;background:var(--card);color:var(--ink);font:700 .85rem "Atkinson Hyperlegible",system-ui,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
   body:not(.mapbig) .onmap{display:none}
   body:not(.mapbig) .leaflet-tooltip{display:none}
+  .stoppopw .leaflet-popup-content{margin:8px 10px;font:inherit;font-size:.88rem;color:var(--ink)}
+  .stoppop{display:flex;flex-direction:column;gap:6px}
+  .stoppop .spn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}.stoppop small{color:var(--muted)}
+  .stoppop .spb{display:flex;gap:6px}
+  .stoppop button{min-height:36px;padding:.15rem .7rem;border:2px solid var(--ink);border-radius:10px;background:var(--card);color:var(--ink);font:inherit;font-weight:700;font-size:.85rem;white-space:nowrap;cursor:pointer}
+  .stoppop .spb button:first-child{background:var(--ink);color:#fff}
+  .stoppop .sptt{border-color:var(--line);font-weight:400}
+  body.popopen .mapexp{visibility:hidden}
   .planner{border:0;border-radius:0;padding:0;margin-top:.2rem}   /* rezultatai be išorinio rėmelio */
   .plbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}   /* „Pasiūlymai kelionei“ – tik ekrano skaitytuvui */
   .planner .phead{align-items:center}.planner .pnames{font-size:1.05rem;line-height:1.25}
@@ -568,7 +576,7 @@ function nextAt(id){
 D.stops.forEach(s=>{
   const m=L.circleMarker([s.lat,s.lon],{radius:6,color:'#14213D',weight:3,fillColor:'#fff',fillOpacity:1,dashArray:s.approx?'3 3':null}).addTo(map);
   m.bindTooltip(esc(sname(s.id)),{direction:'top',offset:[0,-8],className:'tip'});
-  m.on('click',e=>{L.DomEvent.stopPropagation(e);openStop(s.id);});
+  m.on('click',e=>{L.DomEvent.stopPropagation(e); if(simpleMap()) stopPopup(s.id); else openStop(s.id);});
   markers[s.id]=m;
 });
 const allBounds=L.latLngBounds(D.stops.map(s=>[s.lat,s.lon]));
@@ -599,6 +607,18 @@ function drawArrows(){
 }
 map.on('zoomend',drawArrows);
 function clearHL(){if(hl){map.removeLayer(hl);hl=null;}setArrows([]);}
+// telefono planuoklio žemėlapyje paspausta stotelė niekur neperjungia: langelis „Važiuosiu iš čia / čia“ ir tvarkaraštis
+function stopPopup(id){ const st=STOP[id], box=document.createElement('div'); box.className='stoppop';
+  box.innerHTML=`<span class="spn"><b>${esc(st.name)}</b>${HINT[id]?` <small>${esc(HINT[id])}</small>`:''}</span>
+    <span class="spb"><button type="button" data-w="from" aria-label="Važiuosiu iš stotelės ${esc(st.name)}">Iš čia</button><button type="button" data-w="to" aria-label="Važiuosiu į stotelę ${esc(st.name)}">Į čia</button><button type="button" class="sptt" data-w="tt">Tvarkaraštis ›</button></span>`;
+  const pop=L.popup({closeButton:false,autoPanPadding:[6,6],maxWidth:300,className:'stoppopw'}).setLatLng([st.lat,st.lon]).setContent(box).openOn(map);
+  box.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{ map.closePopup(pop); const w=b.dataset.w;
+    if(w==='tt'){ openStop(id); return; }
+    if(w==='from') plan.from=st.name; else plan.to=st.name;
+    if(plan.from===plan.to){ if(w==='from') plan.to=''; else plan.from=''; }
+    renderBar();
+    if(plan.from&&plan.to){ refreshTime(); updPlan(); }
+    else announce(w==='from'?`Išvykimo stotelė: ${st.name}. Pasirinkite, kur važiuosite.`:`Atvykimo stotelė: ${st.name}. Pasirinkite, iš kur važiuosite.`); }); }
 // telefono planuoklio žemėlapis paprastas: be maršrutų linijų, maži geltoni stotelių taškai
 const simpleMap=()=>isPhone()&&!onRoutesPg();
 let wasSimple=null;
@@ -612,20 +632,20 @@ function drawLegs(legs,fit){
   clearHL(); fade(true); hl=L.layerGroup().addTo(map); const all=[];
   legs.forEach(l=>{const p=l.t.P,seg=p.line.slice(p.idx[l.i],p.idx[l.j]+1);all.push(...seg);
     L.polyline(seg,{color:C(l.t.r),weight:6,opacity:1,lineCap:'round'}).addTo(hl);
-    for(let k=l.i;k<=l.j;k++){const s=STOP[p.s[k]];L.circleMarker([s.lat,s.lon],{radius:k===l.i||k===l.j?8:5,color:C(l.t.r),weight:3,fillColor:'#fff',fillOpacity:1}).addTo(hl).bindTooltip(`${esc(s.name)} <b>${hm(l.t.t[k])}</b>`,{direction:'top',className:'tip'});}});
+    for(let k=l.i;k<=l.j;k++){const s=STOP[p.s[k]];L.circleMarker([s.lat,s.lon],{radius:k===l.i||k===l.j?8:5,color:C(l.t.r),weight:3,fillColor:'#fff',fillOpacity:1}).on('click',e=>{L.DomEvent.stopPropagation(e); if(simpleMap()) stopPopup(s.id); else openStop(s.id);}).addTo(hl).bindTooltip(`${esc(s.name)} <b>${hm(l.t.t[k])}</b>`,{direction:'top',className:'tip'});}});
   setArrows(legs.map(l=>({pts:l.t.P.line.slice(l.t.P.idx[l.i],l.t.P.idx[l.j]+1),color:C(l.t.r)})));
   legs.forEach((l,k)=>{ if(!k||!l.walk) return; const p=STOP[legs[k-1].t.P.s[legs[k-1].j]], q=STOP[l.walk.id];
-    if(p&&q) L.polyline([[p.lat,p.lon],[q.lat,q.lon]],{color:'#3b4252',weight:4,dashArray:'2 8',lineCap:'round',interactive:false}).addTo(hl);});
+    if(p&&q){ L.polyline([[p.lat,p.lon],[q.lat,q.lon]],{color:'#3b4252',weight:4,dashArray:'2 8',lineCap:'round',interactive:false}).addTo(hl); all.push([p.lat,p.lon],[q.lat,q.lon]); }});
   const o0=plan.res[plan.opt]; if(o0&&o0.walkStart){const p=STOP[o0.walkStart.from],q=STOP[o0.walkStart.to];
-    if(p&&q) L.polyline([[p.lat,p.lon],[q.lat,q.lon]],{color:'#3b4252',weight:4,dashArray:'2 8',lineCap:'round',interactive:false}).addTo(hl);}
+    if(p&&q){ L.polyline([[p.lat,p.lon],[q.lat,q.lon]],{color:'#3b4252',weight:4,dashArray:'2 8',lineCap:'round',interactive:false}).addTo(hl); all.push([p.lat,p.lon],[q.lat,q.lon]); }}
   const oo=plan.res[plan.opt]; if(oo&&oo.walkEnd){const l=legs[legs.length-1],p=STOP[l.t.P.s[l.j]],q=STOP[oo.walkEnd.to];
-    if(p&&q) L.polyline([[p.lat,p.lon],[q.lat,q.lon]],{color:'#3b4252',weight:4,dashArray:'2 8',lineCap:'round',interactive:false}).addTo(hl);}
-  const pin=(id,cls,txt)=>{const s=STOP[id];L.marker([s.lat,s.lon],{zIndexOffset:1000,icon:L.divIcon({className:'',html:`<div class="pin ${cls}"></div>`,iconSize:[28,28],iconAnchor:[14,14]})}).addTo(hl).bindTooltip(txt,{permanent:true,direction:'top',offset:[0,-14],className:'tip'});};
+    if(p&&q){ L.polyline([[p.lat,p.lon],[q.lat,q.lon]],{color:'#3b4252',weight:4,dashArray:'2 8',lineCap:'round',interactive:false}).addTo(hl); all.push([p.lat,p.lon],[q.lat,q.lon]); }}
+  const pin=(id,cls,txt)=>{const s=STOP[id];L.marker([s.lat,s.lon],{zIndexOffset:1000,icon:L.divIcon({className:'',html:`<div class="pin ${cls}"></div>`,iconSize:[28,28],iconAnchor:[14,14]})}).on('click',e=>{L.DomEvent.stopPropagation(e); if(simpleMap()) stopPopup(id); else openStop(id);}).addTo(hl).bindTooltip(txt,{permanent:true,direction:'top',offset:[0,-14],className:'tip'});};
   const a=legs[0],z=legs.at(-1);
   pin(a.t.P.s[a.i],'start',`<b>${hm(a.t.t[a.i])}</b> ${badge(a.t.r)} ${esc(nm(a.t.P.s[a.i]))}`);
   if(legs.length>1&&legs[1].t.r!==legs[0].t.r&&!legs[1].cont){const b=legs[1];pin(b.t.P.s[b.i],'xfer',`🔁 <b>${hm(b.t.t[b.i])}</b> ${badge(b.t.r)} ${esc(nm(b.t.P.s[b.i]))}`);}
   pin(z.t.P.s[z.j],'end',`<b>${hm(z.t.t[z.j])}</b> ${esc(nm(z.t.P.s[z.j]))}`);
-  if(fit) map.fitBounds(all,{padding:isPhone()&&!mapBig?[18,18]:[60,60],maxZoom:16});
+  if(fit) map.fitBounds(all,isPhone()&&!mapBig?{paddingTopLeft:[18,50],paddingBottomRight:[18,14],maxZoom:16}:{padding:[60,60],maxZoom:16});   // mažame žemėlapyje viršuje vieta mygtukui „Padidinti“
 }
 function openStop(id){state.stop=id; if(isPhone()&&page!=='routes') setPage('routes',tourI<0?'push':''); render(false);announce(`Stotelės ${sname(id)} tvarkaraštis.`);}
 const DCOL=[['W','Darbo dienomis'],['WE','Poilsio dienomis']];
@@ -838,6 +858,7 @@ function setMapBig(o){ mapBig=o; document.body.classList.toggle('mapbig',o); map
   map.invalidateSize();
   if(state.stop){const st=STOP[state.stop]; map.setView([st.lat,st.lon],o?16:15);} else if(state.route||plan.res.length) render(true); else map.fitBounds(allBounds,{padding:isPhone()&&!o?[4,4]:[20,20],animate:false}); }   // be animacijos – kitaip ji vėliau perrašo kelionės priartinimą
 setMapBig(false);
+map.on('popupopen',()=>document.body.classList.add('popopen')); map.on('popupclose',()=>document.body.classList.remove('popopen'));   // langelio neuždengia „Padidinti“
 let wasPhone=isPhone();
 addEventListener('resize',()=>{ if(isPhone()!==wasPhone){ wasPhone=isPhone(); setMapBig(false); render(false); } });
 map.on('click',()=>{

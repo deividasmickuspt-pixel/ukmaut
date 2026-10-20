@@ -282,6 +282,14 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
   .mapexp{display:block;min-height:36px;padding:.2rem .7rem;border:2px solid var(--ink);border-radius:10px;background:var(--card);color:var(--ink);font:700 .85rem "Atkinson Hyperlegible",system-ui,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
   body:not(.mapbig) .onmap{display:none}
   body:not(.mapbig) .leaflet-tooltip{display:none}
+  .stoppopw .leaflet-popup-content{margin:8px 10px;font:inherit;font-size:.88rem;color:var(--ink)}
+  .stoppop{display:flex;flex-direction:column;gap:6px}
+  .stoppop .spn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}.stoppop small{color:var(--muted)}
+  .stoppop .spb{display:flex;gap:6px}
+  .stoppop button{min-height:36px;padding:.15rem .7rem;border:2px solid var(--ink);border-radius:10px;background:var(--card);color:var(--ink);font:inherit;font-weight:700;font-size:.85rem;white-space:nowrap;cursor:pointer}
+  .stoppop .spb button:first-child{background:var(--ink);color:#fff}
+  .stoppop .sptt{border-color:var(--line);font-weight:400}
+  body.popopen .mapexp{visibility:hidden}
   .planner{border:0;border-radius:0;padding:0;margin-top:.2rem}   /* rezultatai be išorinio rėmelio */
   .plbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}   /* „Pasiūlymai kelionei“ – tik ekrano skaitytuvui */
   .planner .phead{align-items:center}.planner .pnames{font-size:1.05rem;line-height:1.25}
