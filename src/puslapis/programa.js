@@ -434,15 +434,38 @@ function mergeBlocks(bl){ const by=new Map(); bl.forEach(b=>{ if(!by.has(b.r)) b
     const tag=(b,x)=>{ const t='kryptis '+b.dest+(x[2]&&b.notes[x[2]]?' – '+b.notes[x[2]]:''); if(!idx[t]){ idx[t]=++k; notes[k]=t; } return [x[0],x[1],idx[t]]; };
     const col=c=>[...m[c],...rest.flatMap(b=>b[c].map(x=>tag(b,x)))].sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
     return {...m,W:col('W'),Sat:col('Sat'),WE:col('WE'),notes}; }); }
+// stotelės laikai kaip autobusų parko plakate: visi maršrutai greta, eilutės – valandos, langeliuose minutės; telefone – viena diena (savaitgalis geltonas)
+let dlgDay=null;
+function posterHtml(st,bl){
+  const td=dayInfo(isoDate(new Date())).day, colsOf=(b,d)=>d==='W'?b.W:[...b.Sat.map(x=>[...x,'s']),...b.WE].sort((x,y)=>x[0]-y[0]||x[1]-y[1]);
+  const has=d=>bl.some(b=>colsOf(b,d).length); let day=dlgDay||td; if(!has(day)&&has(day==='W'?'WE':'W')) day=day==='W'?'WE':'W';
+  const use=bl.filter(b=>colsOf(b,day).length), miss=bl.filter(b=>!colsOf(b,day).length);
+  const dayBtns=`<div class="days pdays" role="group" aria-label="Diena">${[['W','Darbo dienos'],['WE','Savaitgaliai ir šventės']].map(([d,l])=>`<button type="button" data-pday="${d}" class="${d===day?'on':''}${d==='WE'?' pwe':''}" aria-pressed="${d===day}"${has(d)?'':' disabled'}>${l}</button>`).join('')}</div>`;
+  if(!use.length) return dayBtns+'<div class="empty">Šios stotelės tvarkaraščio plakate nėra.</div>';
+  const hs=use.flatMap(b=>colsOf(b,day).map(x=>x[0])), h0=Math.min(...hs), h1=Math.max(...hs), curH=day===td?Math.floor(nowMin/60):-1;
+  const NL=k=>String.fromCharCode(96+(+k));   // pastabos – raidėmis a, b, c… (žvaigždučių daug būtų nesuskaičiuoti)
+  const cell=(b,h)=>colsOf(b,day).filter(x=>x[0]===h).map(x=>`<span>${String(x[1]).padStart(2,'0')}${x[2]||x[3]==='s'?`<sup>${[x[2]?NL(x[2]):'',x[3]==='s'?'š':''].filter(Boolean).join(',')}</sup>`:''}</span>`).join(' ');
+  const rows=[]; for(let h=h0;h<=h1;h++) rows.push(`<tr class="${h===curH?'now':''}"><th scope="row">${String(h%24).padStart(2,'0')}</th>${use.map(b=>`<td>${cell(b,h)}</td>`).join('')}</tr>`);
+  const notes=use.flatMap(b=>Object.entries(b.notes).filter(([k])=>colsOf(b,day).some(x=>x[2]==+k)).map(([k,v])=>`<li>${badge(b.r)} <b>${NL(k)}</b> – ${esc(v)}</li>`));
+  return `${dayBtns}<div class="ptw"><table class="pt${day==='WE'?' pt-we':''}"><caption class="vh">${esc(st.name)}, ${day==='W'?'darbo dienomis':'savaitgaliais ir švenčių dienomis'}</caption>
+    <thead><tr><th scope="col" class="pt-hc">Val.</th>${use.map(b=>`<th scope="col" class="pt-r" style="--rc:${C(b.r)}"><span class="pt-n">${b.r}<span class="vh"> maršrutas,</span></span><span class="pt-d"><span class="vh">kryptis ${esc(b.dest)}</span><span aria-hidden="true">${esc(b.dest.replace(/ \(.*\)$/,'').replace('Autobusų stotis','Aut. stotis').replace('Žaliasis vienkiemis','Žaliasis vnk.'))}</span></span></th>`).join('')}</tr></thead>
+    <tbody>${rows.join('')}</tbody></table></div>
+    ${use.some(b=>colsOf(b,day).some(x=>x[3]==='s'))?'<p class="ttm"><sup>š</sup> – tik šeštadieniais</p>':''}
+    ${notes.length?`<ul class="ttn ptn">${notes.join('')}</ul>`:''}
+    ${miss.length?`<p class="ttm">${day==='W'?'Darbo dienomis':'Savaitgaliais'} nevažiuoja: ${miss.map(b=>badge(b.r)).join(' ')}</p>`:''}`;
+}
 function syncStopDlg(){
   const dlg=document.getElementById('stopdlg'), c=document.getElementById('stopdlg-c');
   if(!(isPhone()&&state.stop)){ const was=dlg.dataset.id; if(dlg.open){ dlg.close(); setTimeout(()=>{const b=document.querySelector(`#panel [data-openstop="${was}"]`); if(b) b.focus({preventScroll:true});},0); } dlg.dataset.id=''; return; }   // fokusas grįžta į paspaustą stotelę
   const id=state.stop, st=STOP[id], r=state.route, bl0=[...(TTS[id]||[])], bl1=r&&bl0.some(b=>b.r===r)?bl0.filter(b=>b.r===r):bl0, dw=r&&state.dir&&((D.dirs[r]||{})[rbMode(r)]||{})[state.dir], bl2=dw?bl1.filter(b=>b.r!==r||blkInDir(b,id,r,dname(dw.to),rbMode(r))):bl1, bl=mergeBlocks(bl2.length?bl2:bl1).sort((a,b)=>a.r.localeCompare(b.r,undefined,{numeric:true})), dt=dirTxt(id,r), endHere=dw&&!bl2.length&&bl1.length;
-  c.innerHTML=`    ${endHere?`<div class="tth"><span class="ttl"><b id="stopdlg-h">${esc(st.name)}</b></span><button type="button" class="clr" data-stopclose aria-label="Uždaryti tvarkaraštį">✕</button></div><p class="sub">Kryptimi „${esc(dw.to)}“ autobusas čia baigia reisą. ${bl.length>1?'Lentelėse':'Lentelėje'} – išvykimai iš šios stotelės.</p>`:''}${bl.length?bl.map((b,k)=>ttBlock(b,k+(endHere?1:0),bl,1)).join(''):`<div class="tth"><span class="ttl"><b id="stopdlg-h">${esc(st.name)}</b>${esc(dt)}</span><button type="button" class="clr" data-stopclose aria-label="Uždaryti tvarkaraštį">✕</button></div><div class="empty">Šios stotelės tvarkaraščio plakate nėra.</div>`}
+  if(!dlg.open) dlgDay=null;
+  c.innerHTML=`<div class="pt-top"><span><b id="stopdlg-h">${esc(st.name)}</b>${dt?`<small>${esc(dt)}</small>`:''}</span><button type="button" class="clr" data-stopclose aria-label="Uždaryti tvarkaraštį">✕</button></div>
+    ${endHere?`<p class="sub">Kryptimi „${esc(dw.to)}“ autobusas čia baigia reisą. Lentelėje – išvykimai iš šios stotelės.</p>`:''}${posterHtml(st,bl)}
     ${D.stops.filter(o=>o.name===st.name&&o.id!==id).map(o=>`<button class="back" data-openstop="${o.id}" style="margin-top:1rem">Kita gatvės pusė${dirTxt(o.id,r)?`: ${esc(dirTxt(o.id,r))}`:''} ›</button>`).join('')}
     <p class="note">Jei laikas nesutampa su plakatu stotelėje, teisingas plakatas.</p>`;
   c.querySelectorAll('[data-openstop]').forEach(x=>x.onclick=()=>openStop(x.dataset.openstop));
   c.querySelectorAll('[data-stopclose]').forEach(x=>x.onclick=closeStop);
+  c.querySelectorAll('[data-pday]').forEach(x=>x.onclick=()=>{dlgDay=x.dataset.pday; syncStopDlg(); const f=c.querySelector(`[data-pday="${dlgDay}"]`); if(f) f.focus();});
   const nw=dlg.dataset.id!==id; if(nw){ dlg.scrollTop=0; dlg.dataset.id=id; }
   if(!dlg.open) dlg.showModal(); if(nw) c.querySelector('[data-stopclose]').focus();
 }
