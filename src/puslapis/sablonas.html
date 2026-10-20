@@ -331,7 +331,7 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
   #left #map{height:clamp(190px,34vh,300px)!important}   /* maršrutų puslapyje */
   body:not(.pg-routes):not(.pg-map) #left #map{height:min(calc((100vw - 16px) * .75),44vh)!important}   /* planuoklio puslapyje – ¾ pločio aukščio */
   body.mapbig #left #map{height:72vh!important}
-  .mapexp{display:block;min-height:36px;padding:.2rem .7rem;border:2px solid var(--ink);border-radius:10px;background:var(--card);color:var(--ink);font:700 .85rem "Atkinson Hyperlegible",system-ui,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
+  .mapexp{display:none;min-height:36px;padding:.2rem .7rem;border:2px solid var(--ink);border-radius:10px;background:var(--card);color:var(--ink);font:700 .85rem "Atkinson Hyperlegible",system-ui,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
   body:not(.mapbig) .onmap{display:none}
   body:not(.mapbig) .leaflet-tooltip{display:none}
   .stoppopw .leaflet-popup-content{margin:8px 10px;font:inherit;font-size:.88rem;color:var(--ink)}
@@ -394,8 +394,6 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
   .pfoot a{color:inherit}.pfoot .sep,.pfoot .fa11y{display:none}
   body.pg-routes.rtopen .routesbox>h2.ph{position:static}   /* atidarius maršrutą antraštė lieka (prilimpa maršruto juosta) */
   .rtpg{margin:0!important;padding:.8rem 0 .5rem}
-  body.pg-routes.rtopen:not(.mapbig) #left #map{height:clamp(150px,22vh,190px)!important}
-  body.pg-routes.rtopen>#panel{padding-top:8px}
   body.pg-routes>#panel{padding-bottom:0!important}
   body.pg-routes>#panel{flex:1 1 auto;min-height:0;height:auto!important;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding-top:0}
   body.pg-routes>#panel::-webkit-scrollbar{display:none}
