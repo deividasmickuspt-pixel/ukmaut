@@ -15,7 +15,7 @@ Darbo dienomis visą dieną į Užupį – apylanka per magistralę; poilsio die
 ## Autobusai ir numerių keitimas (`blk`)
 | Autobusas | Diena |
 |---|---|
-| 1-1, 1-2 | tik 1 |
+| 1-1, 1-2 | tik 1 (nuo 2026-10-20 visi 1 maršruto darbo dienų reisai `reisai.json` pažymėti `blk` 1-1 / 1-2 pagal Excel lapus) |
 | 2-1 | 4:15 AS→Biofabrikas (2); 4:36 Biofabrikas → Pašilė 5:20, 5:40 Pašilė → Deltuva; ratai 2; vakare 19:47 AS→Biofabrikas, 20:35 Biofabrikas → Pašilė 21:20, 21:40 Pašilė → Žiedo 21:59 (visi **2**); 23:15 Narbute → **4** iki Pašilės 0:06 → **5** iki Žiedo 0:21 (*spėjimas*) |
 | 2-2 | tik 2 |
 | 4-1 | tik 4; nuo 10-19 pradeda 4:45 pilna trasa (Pašilė 5:16), 5:25 atgal, 6:19 iš Pašilės |

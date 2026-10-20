@@ -5198,7 +5198,8 @@
 "pienine",
 "05:09"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Pieninė",
@@ -5243,7 +5244,8 @@
 "pienine",
 "06:04"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Pieninė",
@@ -5288,7 +5290,8 @@
 "pienine",
 "07:04"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Pieninė",
@@ -5333,7 +5336,8 @@
 "pienine",
 "08:04"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Pieninė",
@@ -5378,7 +5382,8 @@
 "pienine",
 "09:49"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Pieninė",
@@ -5423,7 +5428,8 @@
 "pienine",
 "11:49"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Pieninė",
@@ -5445,7 +5451,8 @@
 "autobusu-stotis",
 "08:45"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Pieninė",
@@ -5502,7 +5509,8 @@
 "pienine",
 "10:54"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Pieninė",
@@ -5524,7 +5532,8 @@
 "autobusu-stotis",
 "12:35"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -5573,7 +5582,8 @@
 "autobusu-stotis",
 "05:34"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -5622,7 +5632,8 @@
 "autobusu-stotis",
 "06:34"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -5671,7 +5682,8 @@
 "autobusu-stotis",
 "07:34"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -5720,7 +5732,8 @@
 "autobusu-stotis",
 "11:19"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -5786,7 +5799,8 @@
 "dukstyna-link-centro",
 "08:35"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -5852,7 +5866,8 @@
 "dukstyna-link-centro",
 "10:25"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -5918,7 +5933,8 @@
 "dukstyna-link-centro",
 "12:25"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Pieninė",
@@ -5963,7 +5979,8 @@
 "pienine",
 "05:34"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Pieninė",
@@ -6008,7 +6025,8 @@
 "pienine",
 "06:34"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Pieninė",
@@ -6053,7 +6071,8 @@
 "pienine",
 "07:34"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Pieninė",
@@ -6098,7 +6117,8 @@
 "pienine",
 "08:34"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Pieninė",
@@ -6143,7 +6163,8 @@
 "pienine",
 "10:19"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Pieninė",
@@ -6188,7 +6209,8 @@
 "pienine",
 "12:19"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Pieninė",
@@ -6210,7 +6232,8 @@
 "autobusu-stotis",
 "09:15"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Pieninė",
@@ -6267,7 +6290,8 @@
 "pienine",
 "11:24"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Pieninė",
@@ -6289,7 +6313,8 @@
 "autobusu-stotis",
 "13:05"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -6338,7 +6363,8 @@
 "autobusu-stotis",
 "06:04"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -6387,7 +6413,8 @@
 "autobusu-stotis",
 "07:04"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -6436,7 +6463,8 @@
 "autobusu-stotis",
 "08:04"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -6485,7 +6513,8 @@
 "autobusu-stotis",
 "11:49"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -6551,7 +6580,8 @@
 "dukstyna-link-centro",
 "09:05"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -6617,7 +6647,8 @@
 "dukstyna-link-centro",
 "10:55"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -6683,7 +6714,8 @@
 "dukstyna-link-centro",
 "12:55"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Pieninė",
@@ -6728,7 +6760,8 @@
 "pienine",
 "13:04"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Pieninė",
@@ -6773,7 +6806,8 @@
 "pienine",
 "14:04"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Pieninė",
@@ -6818,7 +6852,8 @@
 "pienine",
 "16:04"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Pieninė",
@@ -6863,7 +6898,8 @@
 "pienine",
 "17:34"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Pieninė",
@@ -6908,7 +6944,8 @@
 "pienine",
 "19:49"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Pieninė",
@@ -6965,7 +7002,8 @@
 "pienine",
 "15:04"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Pieninė",
@@ -7022,7 +7060,8 @@
 "pienine",
 "18:49"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -7071,7 +7110,8 @@
 "autobusu-stotis",
 "13:34"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -7120,7 +7160,8 @@
 "autobusu-stotis",
 "15:34"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -7169,7 +7210,8 @@
 "autobusu-stotis",
 "16:29"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -7218,7 +7260,8 @@
 "autobusu-stotis",
 "19:19"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -7267,7 +7310,8 @@
 "autobusu-stotis",
 "20:19"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -7333,7 +7377,8 @@
 "dukstyna-link-centro",
 "14:35"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -7399,7 +7444,8 @@
 "dukstyna-link-centro",
 "18:10"
 ]
-]
+],
+"blk": "1-1"
 },
 {
 "dest": "Pieninė",
@@ -7444,7 +7490,8 @@
 "pienine",
 "13:34"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Pieninė",
@@ -7489,7 +7536,8 @@
 "pienine",
 "14:34"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Pieninė",
@@ -7585,7 +7633,8 @@
 "pienine",
 "18:19"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Pieninė",
@@ -7630,7 +7679,8 @@
 "pienine",
 "19:19"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Pieninė",
@@ -7675,7 +7725,8 @@
 "pienine",
 "20:19"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Pieninė",
@@ -7732,7 +7783,8 @@
 "pienine",
 "15:34"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Pieninė",
@@ -7754,7 +7806,8 @@
 "autobusu-stotis",
 "17:15"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -7803,7 +7856,8 @@
 "autobusu-stotis",
 "14:04"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -7852,7 +7906,8 @@
 "autobusu-stotis",
 "16:04"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -7901,7 +7956,8 @@
 "autobusu-stotis",
 "18:49"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -7950,7 +8006,8 @@
 "autobusu-stotis",
 "19:49"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -7999,7 +8056,8 @@
 "autobusu-stotis",
 "20:49"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -8065,7 +8123,8 @@
 "dukstyna-link-centro",
 "15:05"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
@@ -8131,7 +8190,8 @@
 "dukstyna-link-centro",
 "17:10"
 ]
-]
+],
+"blk": "1-2"
 },
 {
 "dest": "Autobusų stotis (Dukstyna)",
