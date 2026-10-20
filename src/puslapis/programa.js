@@ -558,6 +558,7 @@ function render(fit){
       if(plan.from===plan.to) res='<div class="empty">Pasirinkote tą pačią stotelę.</div>';
       else if(!plan.res.length&&plan.res.walkAB) res=`<div class="empty">Greičiausia nueiti pėsčiomis – autobusu tektų važiuoti gerokai ilgiau.</div>`;
       else if(!plan.res.length&&plan.mode==='arr') res=`<div class="empty">Reisų, kuriais atvyktumėte iki ${hm(plan.time)}, nerasta. Pabandykite vėlesnį laiką.</div>`;
+      else if(!plan.res.length&&plan.res.noMore&&plan.mode==='dep'&&(plan.res.all||(plan.res.all=allDay(plan.from,plan.to,plan.date))).length) res=`<p class="walkhint">Po ${hm(plan.time)} šią dieną reisų nebėra. Štai visi tos dienos reisai:</p>${allRows(plan.res.all,plan.time,'data-inpick')}`;
       else if(!plan.res.length) res=`<div class="empty">Reisų tarp šių stotelių artimiausiomis dienomis nerasta (tiesiogiai, su vienu persėdimu ar trumpu ėjimu).</div>`;
       else res=`<ul class="opts">${plan.res.map((o,n)=>`<li><button class="opt${n===plan.opt?' chosen':''}" data-opt="${n}">
         ${o.best?'<span class="obest">⭐ Rekomenduojama</span>':''}
@@ -599,6 +600,7 @@ function render(fit){
   el.querySelectorAll('[data-share]').forEach(b=>b.onclick=shareTrip);
   el.querySelectorAll('[data-rday]').forEach(b=>b.onclick=()=>{state.day=b.dataset.rday;state.trip=null;render(false);});
   el.querySelectorAll('[data-allday]').forEach(b=>b.onclick=openAllDay);
+  el.querySelectorAll('[data-inpick]').forEach(b=>b.onclick=()=>{ plan.time=+b.dataset.inpick; plan.userTime=true; plan.autoArr=0; renderBar(); updPlan(); showMapOnPhone(); });
   el.querySelectorAll('[data-opt]').forEach(b=>b.onclick=()=>{plan.opt=+b.dataset.opt;render(true);showMapOnPhone();});
   el.querySelectorAll('[data-openstop]').forEach(b=>{b.onclick=()=>{ if(b.dataset.selstop){ pickStop(b.dataset.selstop); return; } unhoverStop();openStop(b.dataset.openstop);};
     if(!b.dataset.selstop){ b.onmouseenter=b.onfocus=()=>hoverStop(b.dataset.openstop); b.onmouseleave=b.onblur=unhoverStop; }});
@@ -612,11 +614,8 @@ function findTrips(A,B,date,T){
   let r=computePlan(A,B,dayInfo(date).day,T); if(r.length||r.walkAB) return r;
   // nothing nearby: allow a longer walk to a better served stop
   let w=computePlan(A,B,dayInfo(date).day,T,{walkMax:800}); if(w.length){w.wide=1; return w;}
-  // nothing more today: earliest options on the following days
-  const d=new Date(date+'T12:00'); for(let k=1;k<=3;k++){ d.setDate(d.getDate()+1); const iso=isoDate(d);
-    let n=computePlan(A,B,dayInfo(iso).day,0,{window:1440}); if(!n.length){n=computePlan(A,B,dayInfo(iso).day,0,{walkMax:800,window:1440}); if(n.length) n.wide=1;}
-    if(n.length){n.nextDate=iso; return n;} }
-  return r;}
+  // šią dieną reisų nebeliko: kitų dienų nesiūlome – rodomi visi tos dienos reisai (matosi, kas jau praėjo)
+  r.noMore=1; return r;}
 // ---- „Visi šios dienos reisai“: visi variantai iš A į B nuo ryto iki vakaro (langas virš planuoklio) ----
 function allDay(A,B,date){ const day=dayInfo(date).day, out=[], seen=new Set();
   for(const o0 of [{},{walkMax:800}]) for(let T=0;T<1500;T+=30) computePlan(A,B,day,T,{window:60,...o0}).forEach(o=>{   // diena tikrinama valandos langais; ir variantai su ilgesniu ėjimu
@@ -626,13 +625,14 @@ function allDay(A,B,date){ const day=dayInfo(date).day, out=[], seen=new Set();
     .filter((o,i,a)=>!i||o.dep!==a[i-1].dep||o.arr!==a[i-1].arr); }
 const walkM=o=>(o.walkEnd?o.walkEnd.m:0)+o.legs.reduce((S,l)=>S+(l.walk?l.walk.m:0),0)+(o.walkStart&&!o.walkStart.near?o.walkStart.m:0);
 let adDate=null;
+const allRows=(L,refT,attr)=>`<ul class="alist">${L.map(o=>{ const past=o.dep<refT, wm=walkM(o); return `<li><button type="button" class="arow${past?' past':''}" ${attr}="${o.dep}">
+      <span class="at"><b>${hm(o.dep)}</b> – ${hm(o.arr)}</span><span class="ab">${o.legs.filter(l=>!l.walk).map(l=>badge(l.t.r)).filter((x,i,a)=>a.indexOf(x)===i).join('')}</span>
+      <span class="am">${o.arr-o.dep} min.${o.legs.length>1&&o.legs.some((l,k)=>k&&!l.cont)?' · persėdimas':''}${wm?` · 🚶 ~${wm} m pėsčiomis`:''}${past?' · jau išvyko':''}</span></button></li>`;}).join('')}</ul>`;
 function openAllDay(dd){ const dlg=document.getElementById('alldlg'), c=document.getElementById('alldlg-c'); adDate=typeof dd==='string'?dd:plan.date; const L=allDay(plan.from,plan.to,adDate), di=dayInfo(adDate), isToday=adDate===isoDate(new Date());
   const shift=k=>{const d=new Date(adDate+'T12:00'); d.setDate(d.getDate()+k); return isoDate(d);};
   c.innerHTML=`<div class="pt-top"><span><b id="alldlg-h">${esc(plan.from)} → ${esc(plan.to)}</b><small>visi dienos reisai</small></span><button type="button" class="clr" data-allclose aria-label="Uždaryti">✕</button></div>
     <div class="adays"><button type="button" class="clr" data-addate="${shift(-1)}" aria-label="Ankstesnė diena">‹</button><span role="status"><b>${isToday?'Šiandien':adDate}</b> · ${di.label}</span><button type="button" class="clr" data-addate="${shift(1)}" aria-label="Kita diena">›</button></div>
-    ${L.length?`<ul class="alist">${L.map((o,k)=>{ const now=isToday&&o.dep<nowMin, wm=walkM(o); return `<li><button type="button" class="arow${now?' past':''}" data-allpick="${o.dep}">
-      <span class="at"><b>${hm(o.dep)}</b> – ${hm(o.arr)}</span><span class="ab">${o.legs.filter(l=>!l.walk).map(l=>badge(l.t.r)).filter((x,i,a)=>a.indexOf(x)===i).join('')}</span>
-      <span class="am">${o.arr-o.dep} min.${o.legs.length>1&&o.legs.some((l,k)=>k&&!l.cont)?' · persėdimas':''}${wm?` · 🚶 ~${wm} m pėsčiomis`:''}${now?' · jau išvyko':''}</span></button></li>`;}).join('')}</ul>`
+    ${L.length?allRows(L,isToday?nowMin:-1,'data-allpick')
       :'<div class="empty">Šią dieną reisų nerasta.</div>'}
     <p class="note">Paspauskite reisą – jis bus parodytas planuoklyje ir žemėlapyje.</p>`;
   c.querySelector('[data-allclose]').onclick=()=>closeAllDay();
