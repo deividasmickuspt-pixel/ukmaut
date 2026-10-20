@@ -323,7 +323,8 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
   .mbd button.on{background:var(--ink);color:#fff}
   .mbn{align-self:flex-start;margin:0 0 .4rem;padding:.15rem .5rem;border-radius:6px;background:var(--card);font-size:.8rem;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.2)}
   .rmap{display:block;margin:-.3rem 0 .7rem auto}
-  .sptt{display:block;margin:.5rem 0 0;min-height:32px}
+  .stoppop .sptt{min-height:42px;background:var(--ink);color:#fff;font-size:.95rem}
+  .sp-map .spb button,.sp-map .spb button:first-child{flex:1;min-height:32px;border-color:var(--line);background:var(--card);color:var(--ink);font-weight:400;font-size:.82rem}   /* mažiau ryškūs */
   .rcard-open{position:sticky;top:0;z-index:2;box-shadow:0 -10px 0 var(--card);margin-bottom:.8rem;border-color:var(--line)!important}   /* kaip sąraše */
   .sth{margin:1.1rem 0 0;font-size:1.05rem}
   .rbday .srtt{display:inline;margin:0;padding:0;min-height:0;font-size:inherit}   /* maršrutų puslapis – tik sąrašas, be žemėlapio */
@@ -680,9 +681,9 @@ function drawArrows(){
 map.on('zoomend',drawArrows);
 function clearHL(){if(hl){map.removeLayer(hl);hl=null;}setArrows([]);}
 // telefono planuoklio žemėlapyje paspausta stotelė niekur neperjungia: langelis „Iš čia / Į čia“
-function stopPopup(id,note){ const st=STOP[id], box=document.createElement('div'); box.className='stoppop';
+function stopPopup(id,note){ const st=STOP[id], box=document.createElement('div'); box.className='stoppop'+(onMapPg()?' sp-map':'');
   box.innerHTML=`${note?`<span class="spnote">${note}</span>`:''}<span class="spn"><b>${esc(st.name)}</b>${(onMapPg()?mapDirOf(id):dirTxt(id))?` <small>${esc(onMapPg()?mapDirOf(id):dirTxt(id))}</small>`:''}</span>
-    <span class="spb"><button type="button" data-w="from" aria-label="Važiuosiu iš stotelės ${esc(st.name)}">Iš čia</button><button type="button" data-w="to" aria-label="Važiuosiu į stotelę ${esc(st.name)}">Į čia</button></span>${onMapPg()?`<button type="button" class="srtt sptt" data-tt aria-label="Visas stotelės ${esc(st.name)} tvarkaraštis">Visas tvarkaraštis ›</button>`:''}`;
+    ${onMapPg()?`<button type="button" class="sptt" data-tt aria-label="Stotelės ${esc(st.name)} tvarkaraštis">Tvarkaraštis ›</button>`:''}<span class="spb"><button type="button" data-w="from" aria-label="Važiuosiu iš stotelės ${esc(st.name)}">Iš čia</button><button type="button" data-w="to" aria-label="Važiuosiu į stotelę ${esc(st.name)}">Į čia</button></span>`;   // žemėlapio puslapyje pagrindinis – tvarkaraštis
   const pop=L.popup({closeButton:false,autoPanPadding:[6,6],maxWidth:300,className:'stoppopw'}).setLatLng([st.lat,st.lon]).setContent(box).openOn(map);
   box.querySelectorAll('[data-tt]').forEach(b=>b.onclick=()=>{ map.closePopup(pop); openStop(id); });
   box.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{ map.closePopup(pop); const w=b.dataset.w; if(onMapPg()){ setPage('plan','push'); state={route:null,day:today,trip:null,stop:null,dir:null,variant:null}; render(true); }   // iš žemėlapio – į planuoklį
