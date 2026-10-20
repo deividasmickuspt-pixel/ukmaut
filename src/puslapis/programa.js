@@ -227,18 +227,21 @@ function drawArrows(){
 }
 map.on('zoomend',drawArrows);
 function clearHL(){if(hl){map.removeLayer(hl);hl=null;}setArrows([]);}
-// telefono planuoklio žemėlapyje paspausta stotelė niekur neperjungia: langelis „Važiuosiu iš čia / čia“ ir tvarkaraštis
+// telefono planuoklio žemėlapyje paspausta stotelė niekur neperjungia: langelis „Iš čia / Į čia“
 function stopPopup(id){ const st=STOP[id], box=document.createElement('div'); box.className='stoppop';
   box.innerHTML=`<span class="spn"><b>${esc(st.name)}</b>${HINT[id]?` <small>${esc(HINT[id])}</small>`:''}</span>
-    <span class="spb"><button type="button" data-w="from" aria-label="Važiuosiu iš stotelės ${esc(st.name)}">Iš čia</button><button type="button" data-w="to" aria-label="Važiuosiu į stotelę ${esc(st.name)}">Į čia</button><button type="button" class="sptt" data-w="tt">Tvarkaraštis ›</button></span>`;
+    <span class="spb"><button type="button" data-w="from" aria-label="Važiuosiu iš stotelės ${esc(st.name)}">Iš čia</button><button type="button" data-w="to" aria-label="Važiuosiu į stotelę ${esc(st.name)}">Į čia</button></span>`;
   const pop=L.popup({closeButton:false,autoPanPadding:[6,6],maxWidth:300,className:'stoppopw'}).setLatLng([st.lat,st.lon]).setContent(box).openOn(map);
   box.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{ map.closePopup(pop); const w=b.dataset.w;
-    if(w==='tt'){ openStop(id); return; }
     if(w==='from') plan.from=st.name; else plan.to=st.name;
     if(plan.from===plan.to){ if(w==='from') plan.to=''; else plan.from=''; }
     renderBar();
     if(plan.from&&plan.to){ refreshTime(); updPlan(); }
     else announce(w==='from'?`Išvykimo stotelė: ${st.name}. Pasirinkite, kur važiuosite.`:`Atvykimo stotelė: ${st.name}. Pasirinkite, iš kur važiuosite.`); }); }
+// pasirinktos stotelės planuoklio žemėlapyje: išvykimo – žalia, atvykimo – raudona (kol kelionė dar nenupiešta)
+function markSel(){ if(!simpleMap()||plan.res.length) return;
+  D.stops.forEach(s=>{const m=markers[s.id], f=s.name===plan.from, t=s.name===plan.to;
+    m.setStyle(f||t?{opacity:1,fillOpacity:1,radius:7,weight:2,color:'#fff',fillColor:f?'#0B7A3E':'#B42318'}:stopBase()); if(f||t) m.bringToFront();}); }
 // telefono planuoklio žemėlapis paprastas: be maršrutų linijų, maži geltoni stotelių taškai
 const simpleMap=()=>isPhone()&&!onRoutesPg();
 let wasSimple=null;
@@ -388,7 +391,7 @@ function render(fit){
     ${varHtml}
     <p class="note">Spalvoti ženkliukai rodo, kokie kiti maršrutai sustoja toje stotelėje.</p>`;
   }
-  syncLegend();
+  syncLegend(); markSel();
   if(state.route) el.scrollTop=sc;
   el.querySelectorAll('[data-sel]').forEach(b=>b.onclick=()=>selectRoute(b.dataset.sel));
   el.querySelectorAll('[data-vday]').forEach(b=>b.onclick=()=>{viewDay=b.dataset.vday;state.day=viewDay;render(false);});
@@ -454,10 +457,11 @@ function renderBar(){
   <button id="pgo" class="pgo" type="button">Ieškoti<span class="pgo-x"> kelionės</span></button>
   ${(()=>{const rs=recent.map((x,k)=>[x,k]).filter(([[f,t]])=>!(f===plan.from&&t===plan.to&&plan.res.length));   // dabar rodomos paieškos nekartojame
     return rs.length?`<div class="recent" role="group" aria-label="Paskutinės paieškos">${rs.map(([[f,t],k])=>`<button type="button" data-recent="${k}">${esc(f)} → ${esc(t)}</button>`).join('')}</div>`:'';})()}`;
-  bar.querySelector('#pf').onchange=e=>{plan.from=e.target.value;};
-  bar.querySelector('#pt').onchange=e=>{plan.to=e.target.value;};
+  bar.querySelector('#pf').onchange=e=>{plan.from=e.target.value;markSel();};
+  bar.querySelector('#pt').onchange=e=>{plan.to=e.target.value;markSel();};
   bar.querySelector('#pdate').onchange=e=>{if(e.target.value){plan.date=e.target.value;plan.day=dayInfo(plan.date).day;plan.userTime=true;}};
   bar.querySelector('#ptime').onchange=e=>{const [h,m]=e.target.value.split(':').map(Number);if(!isNaN(h)){plan.time=h*60+m;plan.userTime=true;}};
+  markSel();
   bar.querySelectorAll('[data-recent]').forEach(b=>b.onclick=()=>{const [f,t]=recent[+b.dataset.recent]; plan.from=f; plan.to=t; refreshTime(); renderBar(); updPlan();});
   bar.querySelector('#pswap').onclick=()=>{[plan.from,plan.to]=[plan.to,plan.from];renderBar();};
   bar.querySelector('#pgo').onclick=()=>{
