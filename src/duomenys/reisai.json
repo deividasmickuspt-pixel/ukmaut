@@ -11138,52 +11138,7 @@
 {
 "dest": "Pašilė",
 "blk": "4-2",
-"note": "važiuoja nuo Narbuto",
-"tail": {
-"at": "autobusu-stotis-vytauto-g-link-dukstynos",
-"dest": "Pašilė"
-},
 "stops": [
-[
-"narbuto",
-"14:45"
-],
-[
-"ziedo-link-autobusu-stoties",
-"14:46"
-],
-[
-"pramones-link-centro",
-"14:48"
-],
-[
-"senasis-pastas-link-centro",
-"14:50"
-],
-[
-"kauno-link-centro",
-"14:51"
-],
-[
-"kestucio-a-link-autobusu-stoties",
-"14:54"
-],
-[
-"basanaviciaus",
-"14:56"
-],
-[
-"kudirkos",
-"14:58"
-],
-[
-"anyksciu",
-"14:59"
-],
-[
-"ligonine",
-"15:01"
-],
 [
 "autobusu-stotis-vytauto-g-link-dukstynos",
 "15:02"
@@ -11277,52 +11232,7 @@
 {
 "dest": "Pašilė",
 "blk": "2-1",
-"note": "važiuoja nuo Narbuto",
-"tail": {
-"at": "autobusu-stotis-vytauto-g-link-dukstynos",
-"dest": "Pašilė"
-},
 "stops": [
-[
-"narbuto",
-"23:15"
-],
-[
-"ziedo-link-autobusu-stoties",
-"23:16"
-],
-[
-"pramones-link-centro",
-"23:18"
-],
-[
-"senasis-pastas-link-centro",
-"23:20"
-],
-[
-"kauno-link-centro",
-"23:21"
-],
-[
-"kestucio-a-link-autobusu-stoties",
-"23:24"
-],
-[
-"basanaviciaus",
-"23:26"
-],
-[
-"kudirkos",
-"23:28"
-],
-[
-"anyksciu",
-"23:29"
-],
-[
-"ligonine",
-"23:31"
-],
 [
 "autobusu-stotis-vytauto-g-link-dukstynos",
 "23:32"
@@ -11713,6 +11623,108 @@
 [
 "narbuto",
 "14:15"
+]
+]
+},
+{
+"dest": "Autobusų stotis",
+"blk": "4-2",
+"note": "važiuoja nuo Narbuto, iki autobusų stoties (toliau – Nr. 4 iki Pašilės)",
+"stops": [
+[
+"narbuto",
+"14:45"
+],
+[
+"ziedo-link-autobusu-stoties",
+"14:46"
+],
+[
+"pramones-link-centro",
+"14:48"
+],
+[
+"senasis-pastas-link-centro",
+"14:50"
+],
+[
+"kauno-link-centro",
+"14:51"
+],
+[
+"kestucio-a-link-autobusu-stoties",
+"14:54"
+],
+[
+"basanaviciaus",
+"14:56"
+],
+[
+"kudirkos",
+"14:58"
+],
+[
+"anyksciu",
+"14:59"
+],
+[
+"ligonine",
+"15:01"
+],
+[
+"autobusu-stotis-vytauto-g-link-dukstynos",
+"15:02"
+]
+]
+},
+{
+"dest": "Autobusų stotis",
+"blk": "2-1",
+"note": "važiuoja nuo Narbuto, iki autobusų stoties (toliau – Nr. 4 iki Pašilės)",
+"stops": [
+[
+"narbuto",
+"23:15"
+],
+[
+"ziedo-link-autobusu-stoties",
+"23:16"
+],
+[
+"pramones-link-centro",
+"23:18"
+],
+[
+"senasis-pastas-link-centro",
+"23:20"
+],
+[
+"kauno-link-centro",
+"23:21"
+],
+[
+"kestucio-a-link-autobusu-stoties",
+"23:24"
+],
+[
+"basanaviciaus",
+"23:26"
+],
+[
+"kudirkos",
+"23:28"
+],
+[
+"anyksciu",
+"23:29"
+],
+[
+"ligonine",
+"23:31"
+],
+[
+"autobusu-stotis-vytauto-g-link-dukstynos",
+"23:32"
 ]
 ]
 },

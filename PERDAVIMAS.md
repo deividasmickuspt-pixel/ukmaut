@@ -57,6 +57,8 @@ axe-core (WCAG 2.0/2.1/2.2 A+AA) – 0 pažeidimų. Žemėlapio elementai be fok
 - `puslapis/` – `sablonas.html` (išvaizda) ir `programa.js` (logika).
 - 2026-10-20 failai pervadinti pagal paskirtį; seni pagalbiniai ir `ovr_*.py` skriptai nebeįkelti (jų rezultatas – `duomenys/reisai.json`). Perstatytas puslapis patikrintas: visos 17 296 planuoklio paieškos sutampa su ankstesne versija.
 
+2026-10-20: Narbuto 14:45 (4-2) ir 23:15 (2-1) reisai padalinti Autobusų stotyje (Vytauto g.): iki jos – 5 maršrutas, toliau – 4 (tas pats autobusas; taip rodo ir naujas AP plakatas Kęstučio a. – 14:54 ir 23:24 prie 5). Reikia patvirtinti AS, kur tiksliai keičiasi numeris.
+
 ## Atviri klausimai AS
 2026-10-19 Excel'yje rasta ir pataisyta: 2-2 Dariaus ir Girėno 6:29→6:19, 2-1P 15:24→15:09, 4-1 4:45 reise Sodai/Dukstynos k. 4:45/4:47→4:47/4:48; 4-2 lape du 6:51/6:55 stulpeliai – galioja 6:55; 2-1 lape senas 4:40 rytinis – galioja 4:15; 2-1P 13:38 reise Smėlių 14:02 → Kęstučio a. 14:03 (1 min) – palikta kaip Excel'yje.
 2-1 naktiniai numeriai (23:15, 0:06); 14:45 nuo Narbuto („TIKRINTI“); ~~4:37 iš Kęstučio a.~~ (nuo 10-19 nebėra); „narbutas pietinis“; Biofabrikas link Deltuvos – atskira stotelė?; įvertintas atvykimas Narbuto 21:56.
