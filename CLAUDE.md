@@ -35,6 +35,8 @@ Visos komandos leidžiamos iš `src/` (skriptai naudoja kelius `duomenys/…`, `
 
 `src/tarpiniai/` – generuojami failai, į git neįtraukiami.
 
+Saugyklos šaknyje (ranka redaguojami, ne generuojami): `manifest.webmanifest`, `sw.js` (veikimas be interneto: puslapis pirmiausia iš tinklo, be ryšio – kopija; pakeitus saugomų failų sąrašą, padidinti `CACHE` versiją), `icons/`, `favicon.svg`, `vercel.json`.
+
 ## Tikrinimas po pakeitimų
 - `node --check src/puslapis/programa.js`
 - Atidaryti `index.html` naršyklėje: maršrutai, stotelės, planuoklis (pvz. Kauno → Pašilė darbo dieną 8:00; Autobusų stotis → Muziejus 9:45; Gėlių → Pramonės 14:01).

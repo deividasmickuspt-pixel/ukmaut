@@ -37,6 +37,9 @@ Darbo dienomis visą dieną į Užupį – apylanka per magistralę; poilsio die
 - Kompiuteryje: žemėlapis (apvalinti kampai) virš planuoklio, dešinėje skydelis; telefone: antraštė → planuoklis → žemėlapis → rezultatai/maršrutai.
 - Pradinis vaizdas rodo šiandienos schemą; dienos mygtukai tik maršruto ir stotelės vaizde. Rodant planuoklio rezultatus maršrutų sąrašas paslėptas.
 - Visada šviesus dizainas (tamsus režimas išjungtas: `color-scheme: light only`).
+- **Telefone** (≤820 px; ~90 % lankytojų): žemėlapis suskleistas po mygtuku „Rodyti žemėlapį“, rezultatai iškart po planuokliu, tilto pranešimas suskleistas, vietoj didelio „Sveiki!“ lango – eilutė „Kaip naudotis? · Įsidėti į telefono ekraną“. Kompiuterio vaizdas nepakeistas.
+- **Atsimenamos paieškos** (paskutinės 3, `localStorage` – tik tame telefone ir naršyklėje): telefone atidarius iškart rodomi artimiausi reisai, greiti mygtukai po planuokliu. **Nuoroda su stotelėmis** `?is=Kauno&i=Pašilė` (veikia bet kur), mygtukas 🔗 dalintis. Laikas – „dabar“, kol žmogus jo nepakeičia; grįžus į puslapį po >15 min. jis perkraunamas.
+- **PWA**: galima įsidėti į telefono ekraną (Android – naršyklės pasiūlymas, iPhone – instrukcija), veikia be interneto.
 - Instrukcija `TOUR` (9 žingsniai su gyvais pavyzdžiais; telefone kortelė apačioje, braukimas).
 
 ## Prieinamumas
