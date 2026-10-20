@@ -257,7 +257,7 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
 .planner .phead .ph{font-size:1.05rem;line-height:1.3}.pnames{display:block;font-size:1.15rem}
 .obest{display:inline-block;margin-bottom:.25rem;padding:.1rem .5rem;border-radius:999px;background:#FFF4CC;color:#14213D;font-size:.78rem;font-weight:700}
 /* ---- telefonas: mažas žemėlapis su „Padidinti“, šoninis meniu, išskleidžiami maršrutai, suskleistas tilto pranešimas ---- */
-.mapexp,.mapgeo,.menubtn,.sumph,.recent{display:none}
+.mapexp,.mapgeo,.menubtn,.sumph,.recent,#mapbar{display:none}
 #homelink{color:inherit;text-decoration:none}@media (hover:hover){#homelink:hover{text-decoration:underline}}
 .missing summary{list-style:none;cursor:default}.missing summary::-webkit-details-marker{display:none}
 .pbtns{display:flex;gap:6px}
@@ -281,7 +281,7 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
 .mfoot{padding:12px 16px;font-size:.8rem;color:var(--muted);border-top:1px solid var(--line)}
 @media (max-width:820px){
   #left #map{height:clamp(190px,34vh,300px)!important}   /* maršrutų puslapyje */
-  body:not(.pg-routes) #left #map{height:min(calc((100vw - 16px) * .75),44vh)!important}   /* planuoklio puslapyje – ¾ pločio aukščio */
+  body:not(.pg-routes):not(.pg-map) #left #map{height:min(calc((100vw - 16px) * .75),44vh)!important}   /* planuoklio puslapyje – ¾ pločio aukščio */
   body.mapbig #left #map{height:72vh!important}
   .mapexp{display:block;min-height:36px;padding:.2rem .7rem;border:2px solid var(--ink);border-radius:10px;background:var(--card);color:var(--ink);font:700 .85rem "Atkinson Hyperlegible",system-ui,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
   body:not(.mapbig) .onmap{display:none}
@@ -302,6 +302,20 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
   .planner .phead{align-items:center}.planner .pnames{font-size:1.05rem;line-height:1.25}
   body.pg-routes #planbar{display:none}
   body.pg-routes>#left{display:none!important}
+  /* žemėlapio puslapis: antraštė, maršrutų mygtukai ir žemėlapis per visą likusį ekraną */
+  html:has(body.pg-map){height:100%;overflow:hidden}
+  body.pg-map{height:100vh;height:100dvh;overflow:hidden;display:flex!important;flex-direction:column}
+  body.pg-map>#apphead{flex:none}
+  body.pg-map>#left{flex:1 1 auto;min-height:0;display:flex!important;flex-direction:column}
+  body.pg-map #planbar,body.pg-map>#panel,body.pg-map>#appfoot,body.pg-map .mapexp{display:none!important}
+  body.pg-map #mapbar{display:block;flex:none;padding:10px 12px 2px}
+  body.pg-map #left #map{flex:1 1 auto;height:auto!important;min-height:0;margin:6px 8px 8px}
+  .mbr{display:flex;gap:7px;flex-wrap:wrap}.mbb{min-width:44px;height:44px;font-size:1.1rem;cursor:pointer}
+  .mbb.on{box-shadow:0 0 0 3px var(--card),0 0 0 6px var(--ink)}.mbr:has(.on) .mbb:not(.on){opacity:.5}
+  .mbd{margin-top:10px}.mbd:empty{display:none}.mbd button{min-height:44px}
+  .mbn{margin:.45rem 0 .1rem;font-size:.85rem;color:var(--muted);line-height:1.3}
+  .rmap{display:block;margin:-.3rem 0 .7rem auto}
+  .sptt{display:block;margin:.5rem 0 0;min-height:32px}
   .rcard-open{position:sticky;top:0;z-index:2;box-shadow:0 -10px 0 var(--card);margin-bottom:.8rem;border-color:var(--line)!important}   /* kaip sąraše */
   .sth{margin:1.1rem 0 0;font-size:1.05rem}
   .rbday .srtt{display:inline;margin:0;padding:0;min-height:0;font-size:inherit}   /* maršrutų puslapis – tik sąrašas, be žemėlapio */
@@ -360,7 +374,7 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
 <a class="skip" href="#planbar">Pereiti prie kelionės paieškos</a><a class="skip" href="#panel">Pereiti prie maršrutų ir tvarkaraščių</a>
 <header id="apphead"><div class="ah-title"><h1><a href="/" id="homelink" title="Į pradžią">Ukmergės miesto autobusai</a></h1><span class="beta" title="Puslapis dar tikrinamas – galimi netikslumai">bandomoji versija</span></div>
 <div class="ah-btns"><button type="button" id="tourbtn" class="hbtn" title="Kaip naudotis?" aria-label="Kaip naudotis? Atidaryti instrukciją">?</button><button type="button" id="fbbtn" class="hbtn" aria-label="Pranešk apie netikslumus arba pasiūlyk patobulinimą">!</button></div><button type="button" id="menubtn" class="hbtn menubtn" aria-label="Meniu" aria-haspopup="dialog" aria-controls="menudlg" aria-expanded="false">☰</button></header>
-<div id="left"><div id="planbar" role="search" aria-label="Kelionės planuoklis"></div><div id="map" role="region" aria-label="Maršrutų žemėlapis. Žemėlapis papildomas – visa informacija pateikta ir tekstu: maršrutų sąrašuose, tvarkaraščiuose ir planuoklio rezultatuose."></div></div>
+<div id="left"><div id="mapbar"></div><div id="planbar" role="search" aria-label="Kelionės planuoklis"></div><div id="map" role="region" aria-label="Maršrutų žemėlapis. Žemėlapis papildomas – visa informacija pateikta ir tekstu: maršrutų sąrašuose, tvarkaraščiuose ir planuoklio rezultatuose."></div></div>
 <main id="panel" tabindex="-1" aria-label="Maršrutai, tvarkaraščiai ir kelionės rezultatai"></main>
 <footer id="appfoot"><span>Žemėlapis: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (ODbL), Esri, <a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a></span><span class="sep" aria-hidden="true">·</span><span>Projekto autorius: <b>Deividas Mickus</b></span><span class="sep fa11y" aria-hidden="true">·</span><button type="button" class="a11ylink fa11y" data-a11y>Prieinamumo deklaracija</button></footer>
 <dialog id="a11ydlg" aria-labelledby="a11y-h">
@@ -393,6 +407,7 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
 <ul class="mlist">
 <li><button type="button" data-m="plan"><span class="mi" aria-hidden="true">🧭</span>Maršruto planuoklis</button></li>
 <li><button type="button" data-m="routes"><span class="mi" aria-hidden="true">🚌</span>Maršrutai ir tvarkaraščiai</button></li>
+<li><button type="button" data-m="map"><span class="mi" aria-hidden="true">🗺️</span>Žemėlapis</button></li>
 <li class="sep" aria-hidden="true"></li>
 <li><button type="button" data-m="tour"><span class="mi" aria-hidden="true">❓</span>Kaip naudotis</button></li>
 <li><button type="button" data-m="fb"><span class="mi" aria-hidden="true">❗</span>Pranešti apie klaidą ar pasiūlyti</button></li>

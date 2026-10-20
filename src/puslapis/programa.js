@@ -46,9 +46,11 @@ const DIRS=r=>(D.dirs[r]||{})[MODE()]&&Object.keys(D.dirs[r][MODE()]).length?D.d
 // telefone du „puslapiai“: 'plan' – greitas kelionės patikrinimas, 'routes' – maršrutai, stotelės ir tvarkaraščiai (adrese #marsrutai)
 let page='plan';
 const onRoutesPg=()=>isPhone()&&page==='routes';
+const onMapPg=()=>isPhone()&&page==='map';   // telefono žemėlapio puslapis (#zemelapis)
+const PGHASH={routes:'marsrutai',map:'zemelapis'}, hashPg=()=>location.hash==='#marsrutai'?'routes':location.hash==='#zemelapis'?'map':'plan';
 function setPage(p,how){   // how: 'push' – naujas žingsnis naršyklės istorijoje (veikia telefono „Atgal“), kitaip – tik pakeičiamas adresas
-  const was=page; page=p; document.body.classList.toggle('pg-routes',p==='routes');
-  try{const u=new URL(location.href); u.hash=p==='routes'?'marsrutai':''; const url=u.href.replace(/#$/,'');
+  const was=page; page=p; document.body.classList.toggle('pg-routes',p==='routes'); document.body.classList.toggle('pg-map',p==='map');
+  try{const u=new URL(location.href); u.hash=PGHASH[p]||''; const url=u.href.replace(/#$/,'');
     if(how==='push'&&was!==p) history.pushState({pg:p},'',url); else history.replaceState(history.state,'',url);}catch(e){}
   if(was!==p){ scrollTo(0,0); map.invalidateSize(); } }
 let plan={from:'',to:'',day:today,time:nowMin,opt:0,res:[],userTime:false};   // userTime: laiką pasirinko pats žmogus (tada jo neatnaujiname)
@@ -201,7 +203,7 @@ function nextAt(id){
 D.stops.forEach(s=>{
   const m=L.circleMarker([s.lat,s.lon],{radius:6,color:'#14213D',weight:3,fillColor:'#fff',fillOpacity:1,dashArray:s.approx?'3 3':null}).addTo(map);
   m.bindTooltip(esc(sname(s.id)),{direction:'top',offset:[0,-8],className:'tip'});
-  m.on('click',e=>{L.DomEvent.stopPropagation(e); if(simpleMap()) stopPopup(s.id); else if(onRoutesPg()&&state.route&&!state.stop&&document.querySelector(`.rtab [data-selstop="${s.id}"]`)) pickStop(s.id); else openStop(s.id);});
+  m.on('click',e=>{L.DomEvent.stopPropagation(e); if(simpleMap()||onMapPg()) stopPopup(s.id); else if(onRoutesPg()&&state.route&&!state.stop&&document.querySelector(`.rtab [data-selstop="${s.id}"]`)) pickStop(s.id); else openStop(s.id);});
   markers[s.id]=m;
 });
 const allBounds=L.latLngBounds(D.stops.map(s=>[s.lat,s.lon]));
@@ -239,10 +241,11 @@ map.on('zoomend',drawArrows);
 function clearHL(){if(hl){map.removeLayer(hl);hl=null;}setArrows([]);}
 // telefono planuoklio žemėlapyje paspausta stotelė niekur neperjungia: langelis „Iš čia / Į čia“
 function stopPopup(id,note){ const st=STOP[id], box=document.createElement('div'); box.className='stoppop';
-  box.innerHTML=`${note?`<span class="spnote">${note}</span>`:''}<span class="spn"><b>${esc(st.name)}</b>${dirTxt(id)?` <small>${esc(dirTxt(id))}</small>`:''}</span>
-    <span class="spb"><button type="button" data-w="from" aria-label="Važiuosiu iš stotelės ${esc(st.name)}">Iš čia</button><button type="button" data-w="to" aria-label="Važiuosiu į stotelę ${esc(st.name)}">Į čia</button></span>`;
+  box.innerHTML=`${note?`<span class="spnote">${note}</span>`:''}<span class="spn"><b>${esc(st.name)}</b>${(onMapPg()?mapDirOf(id):dirTxt(id))?` <small>${esc(onMapPg()?mapDirOf(id):dirTxt(id))}</small>`:''}</span>
+    <span class="spb"><button type="button" data-w="from" aria-label="Važiuosiu iš stotelės ${esc(st.name)}">Iš čia</button><button type="button" data-w="to" aria-label="Važiuosiu į stotelę ${esc(st.name)}">Į čia</button></span>${onMapPg()?`<button type="button" class="srtt sptt" data-tt aria-label="Visas stotelės ${esc(st.name)} tvarkaraštis">Visas tvarkaraštis ›</button>`:''}`;
   const pop=L.popup({closeButton:false,autoPanPadding:[6,6],maxWidth:300,className:'stoppopw'}).setLatLng([st.lat,st.lon]).setContent(box).openOn(map);
-  box.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{ map.closePopup(pop); const w=b.dataset.w;
+  box.querySelectorAll('[data-tt]').forEach(b=>b.onclick=()=>{ map.closePopup(pop); openStop(id); });
+  box.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{ map.closePopup(pop); const w=b.dataset.w; if(onMapPg()){ setPage('plan','push'); state={route:null,day:today,trip:null,stop:null,dir:null,variant:null}; render(true); }   // iš žemėlapio – į planuoklį
     if(w==='from') plan.from=st.name; else plan.to=st.name;
     if(plan.from===plan.to){ if(w==='from') plan.to=''; else plan.from=''; }
     renderBar();
@@ -253,7 +256,7 @@ function markSel(){ if(!simpleMap()||plan.res.length) return;
   D.stops.forEach(s=>{const m=markers[s.id], f=s.name===plan.from, t=s.name===plan.to;
     m.setStyle(f||t?{opacity:1,fillOpacity:1,radius:7,weight:2,color:'#fff',fillColor:f?'#0B7A3E':'#B42318'}:stopBase()); if(f||t) m.bringToFront();}); }
 // telefono planuoklio žemėlapis paprastas: be maršrutų linijų; telefone stotelės visur maži geltoni taškai
-const simpleMap=()=>isPhone()&&!onRoutesPg();
+const simpleMap=()=>isPhone()&&!onRoutesPg()&&!onMapPg();
 let wasSimple=null;
 const stopBase=()=>isPhone()?{opacity:1,fillOpacity:1,radius:4,weight:1.5,color:'#14213D',fillColor:'#F5B800'}:{opacity:1,fillOpacity:1,radius:6,weight:3,color:'#14213D',fillColor:'#fff'};
 function applyMode(){ if(wasSimple!==isPhone()){ wasSimple=isPhone(); D.stops.forEach(s=>markers[s.id].setStyle(stopBase())); }
@@ -282,8 +285,8 @@ function drawLegs(legs,fit){
 }
 let stopShown=null;
 function closeStop(){ if(history.state&&history.state.s) history.back(); else { state.stop=null; render(false); } }
-function openStop(id){ const had=!!state.stop; state.stop=id; if(isPhone()&&page!=='routes') setPage('routes',tourI<0?'push':'');
-  if(onRoutesPg()&&tourI<0){ const hs={pg:'routes',r:state.route,s:id}; if(had&&history.state&&history.state.s) history.replaceState(hs,'',location.href); else history.pushState(hs,'',location.href); }   // telefono „Atgal“ uždaro tvarkaraštį
+function openStop(id){ const had=!!state.stop; state.stop=id; if(isPhone()&&page!=='routes'&&page!=='map') setPage('routes',tourI<0?'push':'');
+  if((onRoutesPg()||onMapPg())&&tourI<0){ const hs={pg:page,r:state.route,s:id}; if(had&&history.state&&history.state.s) history.replaceState(hs,'',location.href); else history.pushState(hs,'',location.href); }   // telefono „Atgal“ uždaro tvarkaraštį
   render(false);announce(`Stotelės ${sname(id)} tvarkaraštis.`);}
 const DCOL=[['W','Darbo dienomis'],['WE','Poilsio dienomis']];
 function ttBlock(b,k,all,dlg){   // dlg – telefono lange: pirmame bloke stotelės pavadinimas ir ✕
@@ -376,7 +379,7 @@ function routeBodyPhone(r){
   const dirBtns=Object.keys(DD).length>1?`<div class="days dirs" role="group" aria-label="Kryptis">${['A','B'].filter(k=>DD[k]).map(k=>`<button data-dir="${k}" class="${d===k?'on':''}" aria-pressed="${d===k}">→ ${esc(DD[k].to)}</button>`).join('')}</div>`
     :DD[d]?`<p class="sub" style="margin-top:.3rem">Kryptis: <b>${esc(DD[d].to)}</b></p>`:'';
   const item=(i,k)=>`<li class="${rare(i)?'var':''}"><button class="srow" data-openstop="${i}"><span class="dot"></span><span>${esc(nm(i))}${note(i)&&!(k&&rare(ord[k-1]))?`<small>${note(i)}</small>`:''}</span></button></li>`;   // užrašas – tik pirmoje punktyrinės dalies stotelėje
-  return `${dayLine}${dirBtns}
+  return `<button type="button" class="srtt rmap" data-showmap>Rodyti žemėlapyje ›</button>${dayLine}${dirBtns}
   <h3 class="ph sth">Stotelės</h3><p class="sub" style="margin-top:.1rem">Paspauskite stotelę – pamatysite jos laikus.${ord.some(rare)?' Punktyru – stotelės, pro kurias važiuoja ne visi reisai.':''}</p>
   <ol class="strip" style="--rc:${C(r)}">${ord.map(item).join('')}</ol>`;
 }
@@ -422,7 +425,7 @@ function pickStop(id){ selStop=selStop&&selStop.id===id&&selStop.r===state.route
 // telefono maršrutų puslapyje stotelės laikai – langas virš sąrašo (kaip instrukcija); sąrašas lieka po juo
 function syncStopDlg(){
   const dlg=document.getElementById('stopdlg'), c=document.getElementById('stopdlg-c');
-  if(!(onRoutesPg()&&state.stop)){ const was=dlg.dataset.id; if(dlg.open){ dlg.close(); setTimeout(()=>{const b=document.querySelector(`#panel [data-openstop="${was}"]`); if(b) b.focus({preventScroll:true});},0); } dlg.dataset.id=''; return; }   // fokusas grįžta į paspaustą stotelę
+  if(!((onRoutesPg()||onMapPg())&&state.stop)){ const was=dlg.dataset.id; if(dlg.open){ dlg.close(); setTimeout(()=>{const b=document.querySelector(`#panel [data-openstop="${was}"]`); if(b) b.focus({preventScroll:true});},0); } dlg.dataset.id=''; return; }   // fokusas grįžta į paspaustą stotelę
   const id=state.stop, st=STOP[id], r=state.route, bl0=[...(TTS[id]||[])], bl1=r&&bl0.some(b=>b.r===r)?bl0.filter(b=>b.r===r):bl0, dw=r&&state.dir&&((D.dirs[r]||{})[rbMode(r)]||{})[state.dir], bl2=dw?bl1.filter(b=>b.r!==r||blkInDir(b,id,r,dname(dw.to),rbMode(r))):bl1, bl=bl2.length?bl2:bl1, dt=dirTxt(id,r), endHere=dw&&!bl2.length&&bl1.length;
   c.innerHTML=`    ${endHere?`<div class="tth"><span class="ttl"><b id="stopdlg-h">${esc(st.name)}</b></span><button type="button" class="clr" data-stopclose aria-label="Uždaryti tvarkaraštį">✕</button></div><p class="sub">Kryptimi „${esc(dw.to)}“ autobusas čia baigia reisą. ${bl.length>1?'Lentelėse':'Lentelėje'} – išvykimai iš šios stotelės.</p>`:''}${bl.length?bl.map((b,k)=>ttBlock(b,k+(endHere?1:0),bl,1)).join(''):`<div class="tth"><span class="ttl"><b id="stopdlg-h">${esc(st.name)}</b>${esc(dt)}</span><button type="button" class="clr" data-stopclose aria-label="Uždaryti tvarkaraštį">✕</button></div><div class="empty">Šios stotelės tvarkaraščio plakate nėra.</div>`}
     ${D.stops.filter(o=>o.name===st.name&&o.id!==id).map(o=>`<button class="back" data-openstop="${o.id}" style="margin-top:1rem">Kita gatvės pusė${dirTxt(o.id,r)?`: ${esc(dirTxt(o.id,r))}`:''} ›</button>`).join('')}
@@ -432,7 +435,28 @@ function syncStopDlg(){
   const nw=dlg.dataset.id!==id; if(nw){ dlg.scrollTop=0; dlg.dataset.id=id; }
   if(!dlg.open) dlg.showModal(); if(nw) c.querySelector('[data-stopclose]').focus();
 }
+// ---- telefono žemėlapio puslapis: stotelės, viršuje maršrutų mygtukai; pasirinkus – maršruto linija (kryptis – rodyklės) ----
+let mapDirOf=id=>dirTxt(id);   // stotelės langeliui žemėlapio puslapyje – pasirinkta kryptis
+function mapPageView(fit){
+  clearHL(); unhoverStop(); const r=state.route, md=r?rbMode(r):null, DD=r?((D.dirs[r]||{})[md]||{}):{};
+  if(r&&state.dir&&!DD[state.dir]) state.dir=null;
+  const d=state.dir, on=x=>x.r===r&&x.m===md&&(!d||(x.ds||[x.d]).includes(d)), pts=[];
+  lineLayers.forEach(({x,pl})=>{ if(r&&on(x)){ pl.setStyle({opacity:x.main?.95:.85,weight:x.main?W[r]:3,dashArray:x.main?null:'8 7'}); if(!map.hasLayer(pl)) pl.addTo(map); pl.bringToFront(); pts.push(...D.segs[x.g]); } else if(map.hasLayer(pl)) pl.remove(); });
+  setArrows(d?lineLayers.filter(l=>on(l.x)&&l.x.main).map(l=>({pts:D.segs[l.x.g],color:C(r)})):[]);
+  const rs=new Set(D.layers.filter(on).flatMap(x=>x.ab)); mapDirOf=id=>d&&rs.has(id)&&DD[d]?'kryptis '+DD[d].to:dirTxt(id,r);
+  D.stops.forEach(st=>{const m=markers[st.id]; if(!r) m.setStyle(stopBase()); else if(rs.has(st.id)){ m.setStyle({opacity:1,fillOpacity:1,radius:5,weight:2.5,color:C(r),fillColor:'#fff'}); m.bringToFront(); } else m.setStyle({opacity:.35,fillOpacity:.35,radius:3,weight:1,color:'#14213D',fillColor:'#F5B800'});});
+  const bar=document.getElementById('mapbar');
+  bar.innerHTML=`<div class="mbr" role="group" aria-label="Maršrutas žemėlapyje">${R.map(x=>`<button type="button" class="b mbb${x===r?' on':''}" style="background:${C(x)}" data-mr="${x}" aria-pressed="${x===r}" aria-label="${x} maršrutas: ${esc(D.meta[x].legend)}">${x}</button>`).join('')}</div>
+    ${r?`<div class="days mbd" role="group" aria-label="Kryptis">${Object.keys(DD).length>1?['A','B'].filter(k=>DD[k]).map(k=>`<button type="button" data-md="${k}" class="${d===k?'on':''}" aria-pressed="${d===k}">→ ${esc(DD[k].to)}</button>`).join(''):''}</div>
+      <p class="mbn">${esc(D.meta[r].legend)}${md==='O'?' · poilsio dienomis':runsDay(r,'WE')?' · darbo dienomis':''}</p>`:'<p class="mbn">Pasirinkite maršrutą arba paspauskite stotelę.</p>'}
+    <a class="skip" href="#marsrutai" data-tolist>Tą pačią informaciją tekstu rasite skiltyje „Maršrutai ir tvarkaraščiai“</a>`;
+  bar.querySelectorAll('[data-mr]').forEach(b=>b.onclick=()=>{ const x=b.dataset.mr; if(state.route===x){state.route=null;state.dir=null;} else { if(state.route!==x) rbDay=null; state.route=x; state.dir=null; } map.closePopup(); render(true); });
+  bar.querySelectorAll('[data-md]').forEach(b=>b.onclick=()=>{ state.dir=state.dir===b.dataset.md?null:b.dataset.md; render(false); });
+  bar.querySelectorAll('[data-tolist]').forEach(a=>a.onclick=e=>{ e.preventDefault(); setPage('routes','push'); render(true); });
+  if(fit) map.fitBounds(pts.length?pts:allBounds,{padding:[24,24],maxZoom:16,animate:false});
+}
 function render(fit){
+  if(onMapPg()){ mapPageView(fit); syncStopDlg(); return; }
   if(!state.route&&!state.stop) viewDay=dayInfo(isoDate(new Date())).day;
   applyMode();
   // telefono maršrutų puslapis: atidarius maršrutą – mažesnis žemėlapis ir viena antraštė (daugiau vietos sąrašui)
@@ -499,6 +523,7 @@ function render(fit){
   if(state.route) el.scrollTop=sc;
   el.querySelectorAll('[data-sel]').forEach(b=>b.onclick=()=>selectRoute(b.dataset.sel));
   el.querySelectorAll('[data-rclose]').forEach(b=>b.onclick=closeRoute);
+  el.querySelectorAll('[data-showmap]').forEach(b=>b.onclick=()=>{ setPage('map','push'); render(true); });
   el.querySelectorAll('[data-rbday]').forEach(b=>b.onclick=()=>{const r=state.route, cur=((D.dirs[r]||{})[rbDay||(runsDay(r,'W')&&(today==='W'||!runsDay(r,'WE'))?'D':'O')]||{})[state.dir]; rbDay=b.dataset.rbday; viewDay=rbDay==='D'?'W':'WE'; const nx=(D.dirs[r]||{})[rbDay]||{}; state.dir=cur&&Object.keys(nx).find(k=>dname(nx[k].to)===dname(cur.to))||null; render(false);});   // kryptis išlieka
   el.querySelectorAll('[data-vday]').forEach(b=>b.onclick=()=>{viewDay=b.dataset.vday;state.day=viewDay;render(false);});
   el.querySelectorAll('[data-dir]').forEach(b=>b.onclick=()=>{state.dir=state.dir===b.dataset.dir?null:b.dataset.dir;state.variant=null;render(false);});
@@ -617,7 +642,7 @@ setMapBig(false);
 map.on('popupopen',()=>document.body.classList.add('popopen')); map.on('popupclose',()=>document.body.classList.remove('popopen'));   // langelio neuždengia „Padidinti“
 let wasPhone=isPhone();
 addEventListener('resize',()=>{ if(isPhone()!==wasPhone){ wasPhone=isPhone(); setMapBig(false); render(false); } });
-map.on('click',()=>{
+map.on('click',()=>{ if(onMapPg()) return;
   if(state.stop){state.stop=null;render(false);}
   else if(state.route){state={route:null,day:today,trip:null,stop:null};render(false);}
 });
@@ -749,25 +774,28 @@ const MENU={
   routes:()=>{ state={route:null,day:today,trip:null,stop:null,dir:null,variant:null};
     if(isPhone()) setPage('routes','push'); render(true); fitAll();
     if(!isPhone()){const pn=document.getElementById('panel'); if(pn) pn.scrollTop=0;} },
-  plan:()=>{ if(page==='routes') toPlan(); else goHome(); },
+  plan:()=>{ if(page!=='plan') toPlan(); else goHome(); },
+  map:()=>{ state={route:null,day:today,trip:null,stop:null,dir:null,variant:null}; setPage('map','push'); render(true); },
   tour:tourStart, inst:doInstall, fb:openFeedback,
   a11y:()=>{const d=document.getElementById('a11ydlg'); if(d&&d.showModal) d.showModal();}};
 menu.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{ menu.close(); setTimeout(MENU[b.dataset.m],50); });
 if(!FEEDBACK_URL) menu.querySelector('[data-m="fb"]').hidden=true;
 
 // ---- pavadinimas = mygtukas į pradžią: be atidaryto maršruto ar stotelės, žemėlapis sumažintas, puslapio viršus ----
-function toPlan(){ if(page==='routes'&&history.state&&history.state.pg==='routes') history.back(); else { setPage('plan',''); goHome(); } }
+function toPlan(){ setPage('plan','push'); goHome(); }
 function goHome(){ state={route:null,day:today,trip:null,stop:null,dir:null,variant:null};
   if(mapBig) setMapBig(false); render(true); if(!plan.res.length) fitAll();
   scrollTo({top:0,behavior:SMOOTH}); const pn=document.getElementById('panel'); if(pn) pn.scrollTop=0; }
-document.getElementById('homelink').onclick=e=>{ e.preventDefault(); if(tourI>=0) return; if(page==='routes') toPlan(); else goHome(); };
+document.getElementById('homelink').onclick=e=>{ e.preventDefault(); if(tourI>=0) return; if(page!=='plan') toPlan(); else goHome(); };
 // naršyklės / telefono „Atgal“ tarp planuoklio ir maršrutų
-addEventListener('popstate',()=>{ if(tourI>=0) return; const p=location.hash==='#marsrutai'?'routes':'plan';
-  if(p===page&&p==='routes'&&state.stop&&!(history.state&&history.state.s)){ state.stop=null; render(false); return; }
-  if(p===page&&p==='routes'&&state.route&&!(history.state&&history.state.r)){ state={route:null,day:today,trip:null,stop:null,dir:null,variant:null}; render(true); fitAll(); document.getElementById('panel').scrollTop=0; return; }
+addEventListener('popstate',()=>{ if(tourI>=0) return; const p=hashPg(), hs=history.state||{};
+  if(p===page&&p!=='plan'&&state.stop&&!hs.s){ state.stop=null; render(false); return; }   // uždaromas stotelės langas
+  if(p===page&&p==='routes'&&state.route&&!hs.r){ state={route:null,day:today,trip:null,stop:null,dir:null,variant:null}; render(true); fitAll(); document.getElementById('panel').scrollTop=0; return; }
   if(p===page) return;
-  page=p; document.body.classList.toggle('pg-routes',p==='routes'); scrollTo(0,0); map.invalidateSize();
-  if(p==='plan') goHome(); else { state={route:null,day:today,trip:null,stop:null,dir:null,variant:null}; render(true); fitAll(); } });
+  page=p; document.body.classList.toggle('pg-routes',p==='routes'); document.body.classList.toggle('pg-map',p==='map'); scrollTo(0,0); map.invalidateSize();
+  if(p==='plan') goHome(); else { const keep=hs.r&&p==='routes'?hs.r:(p==='map'?state.route:null);   // grįžus į atidarytą maršrutą – jis lieka
+    state={route:keep,day:today,trip:null,stop:null,dir:keep?state.dir:null,variant:null}; render(true); if(!keep) fitAll(); } });
+if(location.hash==='#zemelapis'&&isPhone()){ setPage('map',''); render(true); }
 if(location.hash==='#marsrutai'&&isPhone()){ setPage('routes',''); render(true); fitAll(); }
 function fitAll(){ map.fitBounds(homeBounds(),{padding:isPhone()&&!mapBig?[4,4]:[20,20],animate:false}); }
 
