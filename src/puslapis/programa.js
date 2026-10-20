@@ -301,7 +301,7 @@ function routeStops(r){
   const part=i=>cnt.get(i)<0.3*med;
   return {main:[...order.filter(i=>!part(i)),...rest.filter(i=>!part(i))],other:[...order,...rest].filter(part)};
 }
-function selectRoute(r){ if(isPhone()&&page!=='routes') setPage('routes',tourI<0?'push':''); setTimeout(()=>announce(`Atidarytas ${r} maršrutas: ${D.meta[r].legend}.`),0);state={route:r,day:D.trips.some(t=>t.r===r&&inDay(t,today))?today:(['W','WE'].find(d=>D.trips.some(t=>t.r===r&&inDay(t,d)))),trip:null,stop:null,dir:null,variant:null};render(true);}
+function selectRoute(r){ if(isPhone()&&page!=='routes') setPage('routes',tourI<0?'push':''); setTimeout(()=>announce(`Atidarytas ${r} maršrutas: ${D.meta[r].legend}.`),0);state={route:r,day:D.trips.some(t=>t.r===r&&inDay(t,today))?today:(['W','WE'].find(d=>D.trips.some(t=>t.r===r&&inDay(t,d)))),trip:null,stop:null,dir:null,variant:null};render(true); document.getElementById('panel').scrollTop=0;}
 function routeView(fit){
   clearHL(); const r=state.route;
   const inDir=x=>x.r===r&&layerOn(x)&&(!state.dir||(x.ds||[x.d]).includes(state.dir));
@@ -413,7 +413,7 @@ function render(fit){
   el.querySelectorAll('[data-openstop]').forEach(b=>{b.onclick=()=>{unhoverStop();openStop(b.dataset.openstop);};
     b.onmouseenter=b.onfocus=()=>hoverStop(b.dataset.openstop); b.onmouseleave=b.onblur=unhoverStop;});
   unhoverStop();
-    el.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>{state={route:null,day:today,trip:null,stop:null};render(true);fitAll();});
+    el.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>{state={route:null,day:today,trip:null,stop:null};render(true);fitAll();el.scrollTop=0;});
 }
 function findTrips(A,B,date,T){
   let r=computePlan(A,B,dayInfo(date).day,T); if(r.length||r.walkAB) return r;

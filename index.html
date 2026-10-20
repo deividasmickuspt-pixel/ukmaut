@@ -276,7 +276,7 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
 .mlist li.sep{border-top:1px solid var(--line);margin:6px 0}
 .mfoot{padding:12px 16px;font-size:.8rem;color:var(--muted);border-top:1px solid var(--line)}
 @media (max-width:820px){
-  #left #map{height:clamp(150px,24vh,220px)!important}
+  #left #map{height:clamp(190px,34vh,300px)!important}   /* maršrutų puslapyje */
   body:not(.pg-routes) #left #map{height:min(calc((100vw - 16px) * .75),44vh)!important}   /* planuoklio puslapyje – ¾ pločio aukščio */
   body.mapbig #left #map{height:72vh!important}
   .mapexp{display:block;min-height:36px;padding:.2rem .7rem;border:2px solid var(--ink);border-radius:10px;background:var(--card);color:var(--ink);font:700 .85rem "Atkinson Hyperlegible",system-ui,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
@@ -297,6 +297,13 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
   .plbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}   /* „Pasiūlymai kelionei“ – tik ekrano skaitytuvui */
   .planner .phead{align-items:center}.planner .pnames{font-size:1.05rem;line-height:1.25}
   body.pg-routes #planbar{display:none}
+  /* maršrutų puslapis: antraštė, žemėlapis ir poraštė vietoje, slenkamas tik sąrašas (be matomos slinkties juostos) */
+  html:has(body.pg-routes){height:100%;overflow:hidden}
+  body.pg-routes{height:100vh;height:100dvh;overflow:hidden;display:flex!important;flex-direction:column}
+  body.pg-routes>#apphead,body.pg-routes>#left,body.pg-routes>#appfoot{flex:none}
+  body.pg-routes>#panel{flex:1 1 auto;min-height:0;height:auto!important;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding-top:0}
+  body.pg-routes>#panel::-webkit-scrollbar{display:none}
+  body.pg-routes .routesbox>h2.ph{position:sticky;top:0;z-index:2;margin:0!important;padding:.8rem 0 .5rem;background:var(--card)}
   .fa11y{display:none!important}   /* telefone prieinamumo deklaracija – meniu */
   #appfoot{display:flex!important;flex-direction:column;align-items:flex-start;gap:4px}#appfoot .sep{display:none!important}   /* dvi eilutės be skiriamojo taškelio */
   .recent{display:flex;flex:1 1 100%;gap:6px;overflow-x:auto;padding-bottom:2px}   /* paskutinės paieškos – viena slenkama eilutė */
@@ -686,7 +693,7 @@ function routeStops(r){
   const part=i=>cnt.get(i)<0.3*med;
   return {main:[...order.filter(i=>!part(i)),...rest.filter(i=>!part(i))],other:[...order,...rest].filter(part)};
 }
-function selectRoute(r){ if(isPhone()&&page!=='routes') setPage('routes',tourI<0?'push':''); setTimeout(()=>announce(`Atidarytas ${r} maršrutas: ${D.meta[r].legend}.`),0);state={route:r,day:D.trips.some(t=>t.r===r&&inDay(t,today))?today:(['W','WE'].find(d=>D.trips.some(t=>t.r===r&&inDay(t,d)))),trip:null,stop:null,dir:null,variant:null};render(true);}
+function selectRoute(r){ if(isPhone()&&page!=='routes') setPage('routes',tourI<0?'push':''); setTimeout(()=>announce(`Atidarytas ${r} maršrutas: ${D.meta[r].legend}.`),0);state={route:r,day:D.trips.some(t=>t.r===r&&inDay(t,today))?today:(['W','WE'].find(d=>D.trips.some(t=>t.r===r&&inDay(t,d)))),trip:null,stop:null,dir:null,variant:null};render(true); document.getElementById('panel').scrollTop=0;}
 function routeView(fit){
   clearHL(); const r=state.route;
   const inDir=x=>x.r===r&&layerOn(x)&&(!state.dir||(x.ds||[x.d]).includes(state.dir));
@@ -798,7 +805,7 @@ function render(fit){
   el.querySelectorAll('[data-openstop]').forEach(b=>{b.onclick=()=>{unhoverStop();openStop(b.dataset.openstop);};
     b.onmouseenter=b.onfocus=()=>hoverStop(b.dataset.openstop); b.onmouseleave=b.onblur=unhoverStop;});
   unhoverStop();
-    el.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>{state={route:null,day:today,trip:null,stop:null};render(true);fitAll();});
+    el.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>{state={route:null,day:today,trip:null,stop:null};render(true);fitAll();el.scrollTop=0;});
 }
 function findTrips(A,B,date,T){
   let r=computePlan(A,B,dayInfo(date).day,T); if(r.length||r.walkAB) return r;
