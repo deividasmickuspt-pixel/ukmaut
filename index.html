@@ -749,7 +749,7 @@ function render(fit){
   el.querySelectorAll('[data-vday]').forEach(b=>b.onclick=()=>{viewDay=b.dataset.vday;state.day=viewDay;render(false);});
   el.querySelectorAll('[data-dir]').forEach(b=>b.onclick=()=>{state.dir=state.dir===b.dataset.dir?null:b.dataset.dir;state.variant=null;render(false);});
   el.querySelectorAll('[data-var]').forEach(b=>b.onclick=()=>{state.variant=state.variant===b.dataset.var?null:b.dataset.var;render(false);});
-  el.querySelectorAll('[data-clear]').forEach(b=>b.onclick=()=>{plan.from='';plan.to='';plan.res=[];setUrl();renderBar();render(true);});   // (paskutinės paieškos lieka)
+  el.querySelectorAll('[data-clear]').forEach(b=>b.onclick=()=>{plan.from='';plan.to='';plan.res=[];setUrl();renderBar();render(true);fitAll();});   // žemėlapis grįžta į pradinį vaizdą   // (paskutinės paieškos lieka)
   el.querySelectorAll('[data-share]').forEach(b=>b.onclick=shareTrip);
   el.querySelectorAll('[data-toplan]').forEach(b=>b.onclick=toPlan);
   el.querySelectorAll('[data-rday]').forEach(b=>b.onclick=()=>{state.day=b.dataset.rday;state.trip=null;render(false);});
@@ -757,7 +757,7 @@ function render(fit){
   el.querySelectorAll('[data-openstop]').forEach(b=>{b.onclick=()=>{unhoverStop();openStop(b.dataset.openstop);};
     b.onmouseenter=b.onfocus=()=>hoverStop(b.dataset.openstop); b.onmouseleave=b.onblur=unhoverStop;});
   unhoverStop();
-    el.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>{state={route:null,day:today,trip:null,stop:null};render(true);});
+    el.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>{state={route:null,day:today,trip:null,stop:null};render(true);fitAll();});
 }
 function findTrips(A,B,date,T){
   let r=computePlan(A,B,dayInfo(date).day,T); if(r.length||r.walkAB) return r;
