@@ -792,7 +792,7 @@ function render(fit){
     if(state.route){lineLayers.forEach(({x,pl})=>{if(x.r===state.route)pl.setStyle({opacity:.8});});setArrows(state.dir?lineLayers.filter(l=>l.x.r===state.route&&layerOn(l.x)&&(l.x.ds||[l.x.d]).includes(state.dir)).map(l=>({pts:D.segs[l.x.g],color:C(state.route)})):[]);}
     const tab=onRoutesPg(), nw=tab&&stopShown!==id; stopShown=tab?id:null;   // telefone tvarkaraštis – skirtuke virš maršruto
     if(tab&&!map.getBounds().pad(-.1).contains([st.lat,st.lon])) map.panTo([st.lat,st.lon],{animate:false});
-    el.innerHTML=(tab?`<section class="rtab${nw?' rtab-in':''}" aria-label="Stotelės ${esc(st.name)} tvarkaraštis"><div class="rthead" style="--rc:${state.route?C(state.route):'var(--ink)'}">${state.route?badge(state.route,1):''}<h2>${esc(st.name)}${HINT[id]?` <small>${esc(HINT[id])}</small>`:''}</h2><button type="button" class="clr" data-stopclose aria-label="Uždaryti tvarkaraštį">✕</button></div>${dayTog()}`
+    el.innerHTML=(tab?`<section class="rtab${nw?' rtab-in':''}" aria-label="Stotelės ${esc(st.name)} tvarkaraštis"><div class="rthead" style="--rc:${state.route?C(state.route):'var(--ink)'}">${state.route?badge(state.route,1):''}<h2>${esc(st.name)}${HINT[id]?` <small>${esc(HINT[id])}</small>`:''}</h2><button type="button" class="clr" data-stopclose aria-label="Uždaryti tvarkaraštį">✕</button></div>`   // be dienos mygtukų – lentelėje matomos abi dienos
       :`<button class="back" data-stopback>‹ ${state.route?`${state.route} maršrutas`:'Atgal'}</button>
     <h1 class="sh">${esc(st.name)}</h1>${HINT[id]?`<p class="shint">${esc(HINT[id])}</p>`:''}${dayTog()}`)+`
     ${bl.length?bl.map(ttBlock).join(''):'<div class="empty">Šios stotelės tvarkaraščio plakate nėra.</div>'}
