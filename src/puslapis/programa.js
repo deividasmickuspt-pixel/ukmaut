@@ -263,7 +263,7 @@ function stopPopup(id,note){ const st=STOP[id], box=document.createElement('div'
     if(plan.from&&plan.to){ refreshTime(); updPlan(); }
     else announce(w==='from'?`Išvykimo stotelė: ${st.name}. Pasirinkite, kur važiuosite.`:`Atvykimo stotelė: ${st.name}. Pasirinkite, iš kur važiuosite.`); }); }
 // pasirinktos stotelės planuoklio žemėlapyje: išvykimo – žalia, atvykimo – raudona (kol kelionė dar nenupiešta)
-function markSel(){ if(!simpleMap()||plan.res.length) return;
+function markSel(){ if(!simpleMap()||plan.res.length||plan.tv) return;
   D.stops.forEach(s=>{const m=markers[s.id], f=s.name===plan.from, t=s.name===plan.to;
     m.setStyle(f||t?{opacity:1,fillOpacity:1,radius:7,weight:2,color:'#fff',fillColor:f?'#0B7A3E':'#B42318'}:stopBase()); if(f||t) m.bringToFront();}); }
 // telefono planuoklio žemėlapis paprastas: be maršrutų linijų; telefone stotelės visur maži geltoni taškai
@@ -283,9 +283,9 @@ function drawLegs(legs,fit){
   setArrows(legs.map(l=>({pts:l.t.P.line.slice(l.t.P.idx[l.i],l.t.P.idx[l.j]+1),color:C(l.t.r)})));
   legs.forEach((l,k)=>{ if(!k||!l.walk) return; const p=STOP[legs[k-1].t.P.s[legs[k-1].j]], q=STOP[l.walk.id];
     if(p&&q){ L.polyline([[p.lat,p.lon],[q.lat,q.lon]],{color:'#3b4252',weight:4,dashArray:'2 8',lineCap:'round',interactive:false}).addTo(hl); all.push([p.lat,p.lon],[q.lat,q.lon]); }});
-  const o0=plan.res[plan.opt]; if(o0&&o0.walkStart){const p=STOP[o0.walkStart.from],q=STOP[o0.walkStart.to];
+  const o0=plan.tv?null:plan.res[plan.opt]; if(o0&&o0.walkStart){const p=STOP[o0.walkStart.from],q=STOP[o0.walkStart.to];
     if(p&&q){ L.polyline([[p.lat,p.lon],[q.lat,q.lon]],{color:'#3b4252',weight:4,dashArray:'2 8',lineCap:'round',interactive:false}).addTo(hl); all.push([p.lat,p.lon],[q.lat,q.lon]); }}
-  const oo=plan.res[plan.opt]; if(oo&&oo.walkEnd){const l=legs[legs.length-1],p=STOP[l.t.P.s[l.j]],q=STOP[oo.walkEnd.to];
+  const oo=plan.tv?null:plan.res[plan.opt]; if(oo&&oo.walkEnd){const l=legs[legs.length-1],p=STOP[l.t.P.s[l.j]],q=STOP[oo.walkEnd.to];
     if(p&&q){ L.polyline([[p.lat,p.lon],[q.lat,q.lon]],{color:'#3b4252',weight:4,dashArray:'2 8',lineCap:'round',interactive:false}).addTo(hl); all.push([p.lat,p.lon],[q.lat,q.lon]); }}
   const pin=(id,cls,txt)=>{const s=STOP[id];L.marker([s.lat,s.lon],{zIndexOffset:1000,icon:L.divIcon({className:'',html:`<div class="pin ${cls}"></div>`,iconSize:[28,28],iconAnchor:[14,14]})}).on('click',e=>{L.DomEvent.stopPropagation(e); if(simpleMap()) stopPopup(id); else openStop(id);}).addTo(hl).bindTooltip(txt,{permanent:true,direction:'top',offset:[0,-14],className:'tip'});};
   const a=legs[0],z=legs.at(-1);
@@ -452,7 +452,7 @@ function routeTTHtml(st,bl){
   const b=bl.find(x=>x.r===dlgRoute)||bl[0], td=dayInfo(isoDate(new Date())).day, NL=k=>String.fromCharCode(96+(+k));
   const cols={W:b.W,WE:[...b.Sat.map(x=>[...x,'s']),...b.WE].sort((x,y)=>x[0]-y[0]||x[1]-y[1])}, use=['W','WE'].filter(d=>cols[d].length);
   const hs=use.flatMap(d=>cols[d].map(x=>x[0])), h0=Math.min(...hs), h1=Math.max(...hs), curH=Math.floor(nowMin/60);
-  const cell=(d,h)=>cols[d].filter(x=>x[0]===h).map(x=>`<span>${String(x[1]).padStart(2,'0')}${x[2]||x[3]==='s'?`<sup>${[x[2]?NL(x[2]):'',x[3]==='s'?'š':''].filter(Boolean).join(',')}</sup>`:''}</span>`).join(' ');
+  const cell=(d,h)=>cols[d].filter(x=>x[0]===h).map(x=>`<button type="button" class="tmin" data-tv="${b.r}|${d}|${h*60+x[1]}" aria-label="${String(h%24).padStart(2,'0')}:${String(x[1]).padStart(2,'0')} – rodyti reisą žemėlapyje">${String(x[1]).padStart(2,'0')}${x[2]||x[3]==='s'?`<sup>${[x[2]?NL(x[2]):'',x[3]==='s'?'š':''].filter(Boolean).join(',')}</sup>`:''}</button>`).join(' ');   // paspaudus laiką – tas reisas žemėlapyje
   const rows=[]; for(let h=h0;h<=h1;h++) rows.push(`<tr class="${h===curH?'now':''}"><th scope="row">${String(h%24).padStart(2,'0')}</th>${use.map(d=>`<td class="${d==='WE'?'twe':''}">${cell(d,h)}</td>`).join('')}</tr>`);
   const tabs=`<div class="rtabs" role="tablist" aria-label="Maršrutai">${bl.map(x=>`<button type="button" role="tab" id="rt-${x.r}" aria-controls="rtp" aria-selected="${x===b}" tabindex="${x===b?0:-1}" class="rtb${x===b?' on':''}" style="--rc:${C(x.r)}" data-rt="${x.r}"><span class="vh">Maršrutas </span>${x.r}</button>`).join('')}</div>`;
   const notes=Object.entries(b.notes).filter(([k])=>[...cols.W,...cols.WE].some(x=>x[2]==+k));
@@ -461,6 +461,7 @@ function routeTTHtml(st,bl){
     <table class="pt pt1"><thead><tr><th scope="col" class="pt-hc">Val.</th>${use.map(d=>`<th scope="col" class="${d==='WE'?'twe':''}">${d==='W'?'Darbo dienomis':'Savaitgaliais ir švenčių dienomis'}${d===td?' <small>(šiandien)</small>':''}</th>`).join('')}</tr></thead>
     <tbody>${rows.join('')}</tbody></table>
     ${cols.WE.some(x=>x[3]==='s')?'<p class="ttm"><sup>š</sup> – tik šeštadieniais</p>':''}
+    <p class="ttm">Paspauskite laiką – reisas bus parodytas žemėlapyje.</p>
     ${notes.length?`<ul class="ttn ptn">${notes.map(([k,v])=>`<li><b>${NL(k)}</b> – ${esc(v)}</li>`).join('')}</ul>`:''}
     ${use.length<2?`<p class="ttm">Nevažiuoja ${use[0]==='W'?'savaitgaliais ir švenčių dienomis':'darbo dienomis'}.</p>`:''}</div>`;
 }
@@ -484,6 +485,19 @@ function posterHtml(st,bl){
     ${notes.length?`<ul class="ttn ptn">${notes.join('')}</ul>`:''}
     ${miss.length?`<p class="ttm">${day==='W'?'Darbo dienomis':'Savaitgaliais'} nevažiuoja: ${miss.map(b=>badge(b.r)).join(' ')}</p>`:''}`;
 }
+// ---- vienas reisas žemėlapyje (paspaudus laiką stotelės tvarkaraštyje): nuo šios stotelės iki galo, ir kai autobusas tęsia kitu numeriu ----
+function tvLegs(id,r,day,mm){ const t=D.trips.find(t=>t.r===r&&inDay(t,day)&&t.P.s.some((s,i)=>s===id&&i<t.P.s.length-1&&t.t[i]%1440===mm%1440)); if(!t) return null;
+  const legs=[{t,i:t.P.s.findIndex((s,i)=>s===id&&t.t[i]%1440===mm%1440),j:t.P.s.length-1}];
+  for(let k=0;k<3;k++){ const p=legs.at(-1).t, u=p.b&&D.trips.find(u=>u!==p&&u.b===p.b&&inDay(u,day)&&u.P.s[0]===p.P.s.at(-1)&&u.t[0]===p.t.at(-1)); if(!u) break; legs.push({t:u,i:0,j:u.P.s.length-1,cont:true}); }
+  return legs; }
+function tvHtml(){ const L=plan.tv.legs, a=L[0], z=L.at(-1), rows=[];
+  L.forEach((l,k)=>{ for(let x=(k?l.i+1:l.i);x<=l.j;x++){ const first=!k&&x===l.i; rows.push(`<li class="${first?'tv0':''}"><b>${hm(l.t.t[x])}</b> ${esc(nm(l.t.P.s[x]))}</li>`); }
+    if(L[k+1]) rows.push(`<li class="tvc">🔄 Stotelėje „${esc(nm(l.t.P.s[l.j]))}“ autobusas tęsia kaip ${badge(L[k+1].t.r)}</li>`); });
+  return `<section class="planner tvbox" aria-labelledby="tv-h"><div class="phead"><h2 class="ph" id="tv-h">Reisas ${L.map(l=>badge(l.t.r)).join(' → ')}</h2><button class="clr" data-tvclose aria-label="Uždaryti reisą">✕</button></div>
+    <p class="sub">${hm(a.t.t[a.i])} iš „${esc(nm(a.t.P.s[a.i]))}“ → ${hm(z.t.t[z.j])} „${esc(nm(z.t.P.s[z.j]))}“ · ${z.t.t[z.j]-a.t.t[a.i]} min.${legNotes(a).length?' · '+legNotes(a).map(esc).join(' · '):''}</p>
+    <ol class="tvlist">${rows.join('')}</ol></section>`; }
+function showTrip(r,day,mm){ const legs=tvLegs(state.stop,r,day,mm); if(!legs) return; plan.tv={legs}; closeStop();
+  setTimeout(()=>{ render(true); const m=document.getElementById('map'); if(m) m.scrollIntoView({behavior:SMOOTH,block:'start'}); announce(`Rodomas ${r} maršruto reisas ${hm(mm)}.`); },80); }
 function syncStopDlg(){
   const dlg=document.getElementById('stopdlg'), c=document.getElementById('stopdlg-c');
   if(!(isPhone()&&state.stop)){ const was=dlg.dataset.id; if(dlg.open){ dlg.close(); setTimeout(()=>{const b=document.querySelector(`#panel [data-openstop="${was}"]`); if(b) b.focus({preventScroll:true});},0); } dlg.dataset.id=''; return; }   // fokusas grįžta į paspaustą stotelę
@@ -495,6 +509,7 @@ function syncStopDlg(){
     <p class="note">Jei laikas nesutampa su plakatu stotelėje, teisingas plakatas.</p>`;
   c.querySelectorAll('[data-openstop]').forEach(x=>x.onclick=()=>openStop(x.dataset.openstop));
   c.querySelectorAll('[data-stopclose]').forEach(x=>x.onclick=closeStop);
+  c.querySelectorAll('[data-tv]').forEach(x=>x.onclick=()=>{ const [r,d,m]=x.dataset.tv.split('|'); showTrip(r,d,+m); });
   c.querySelectorAll('[data-rt]').forEach(x=>{ x.onclick=()=>{dlgRoute=x.dataset.rt; syncStopDlg(); c.querySelector(`[data-rt="${dlgRoute}"]`).focus();};
     x.onkeydown=e=>{ const t=[...c.querySelectorAll('[data-rt]')], i=t.indexOf(x), j=e.key==='ArrowRight'?i+1:e.key==='ArrowLeft'?i-1:-9; if(j===-9) return; e.preventDefault(); t[(j+t.length)%t.length].click(); }; });   // rodyklės – kitas maršrutas
   c.querySelectorAll('[data-pday]').forEach(x=>x.onclick=()=>{dlgDay=x.dataset.pday; syncStopDlg(); const f=c.querySelector(`[data-pday="${dlgDay}"]`); if(f) f.focus();});
@@ -551,6 +566,7 @@ function render(fit){
   }
   if(!state.route||onRoutesPg()){   // telefono maršrutų puslapyje maršrutas atsiveria po savo kortele
     if(state.route) routeView(fit);
+    else if(plan.tv&&!onRoutesPg()) drawLegs(plan.tv.legs,fit);
     else if(plan.res.length&&!onRoutesPg()) drawLegs(plan.res[plan.opt].legs,fit); else {clearHL();fade(false);lineLayers.forEach(({x,pl})=>pl.setStyle({opacity:.9}));D.stops.forEach(s=>markers[s.id].setStyle({color:'#14213D'}));}
     const opts=sel=>'<option value="">— pasirinkite stotelę —</option>'+NAMES.map(n=>`<option${n===sel?' selected':''}>${esc(n)}</option>`).join('');
     let res='';
@@ -569,7 +585,7 @@ function render(fit){
         <span class="oexp" aria-hidden="true">${ex?'Slėpti ▴':'Kaip važiuoti ▾'}</span></button>
         <ol class="steps" id="ost-${n}"${ex?'':' hidden'}>${tripSteps(o)}</ol></li>`; }).join('')}</ul>`;
     }
-    el.innerHTML=`
+    el.innerHTML=`${plan.tv&&!onRoutesPg()?tvHtml():''}
     ${plan.from&&plan.to&&!onRoutesPg()?`<section class="planner"><div class="phead"><h2 class="ph"><span class="plbl">Pasiūlymai kelionei </span><span class="pnames">${esc(plan.from)} → ${esc(plan.to)}</span></h2><span class="pbtns">${canShare()?'<button class="clr" data-share aria-label="Dalintis šios kelionės nuoroda" title="Dalintis nuoroda">🔗</button>':''}<button class="clr" data-clear aria-label="Išvalyti paiešką">✕</button></span></div>
       ${plan.res.nextDate?`<p class="walkhint">Šiandien po ${hm(plan.time)} reisų nebėra. Artimiausi – ${plan.res.nextDate} (${dayInfo(plan.res.nextDate).label}).</p>`:''}${plan.res.wide?`<p class="walkhint">🚶 Tiesioginių reisų šiuo metu nėra – siūlome variantus su ilgesniu ėjimu pėsčiomis. Visus dienos reisus rasite apačioje: „Visi šios dienos reisai“.</p>`:''}${plan.res.walkAB?`<p class="walkhint">🚶 ${plan.res.walkBetter?'Pėsčiomis bus greičiau':'Šios stotelės arti viena kitos'} – ~${plan.res.walkAB.m} m (≈${plan.res.walkAB.min} min).</p>`:''}<p class="sub">${plan.date} (${dayInfo(plan.date).label}), ${plan.mode==='arr'?'atvykti iki':'nuo'} ${hm(plan.time)}</p>${res}${plan.from!==plan.to?`<button type="button" class="srtt allbtn" data-allday>Visi šios dienos reisai ›</button>`:''}</section>`:''}
     <div class="routesbox" ${plan.from&&plan.to&&!onRoutesPg()?"hidden":""}>
@@ -598,6 +614,7 @@ function render(fit){
   el.querySelectorAll('[data-share]').forEach(b=>b.onclick=shareTrip);
   el.querySelectorAll('[data-rday]').forEach(b=>b.onclick=()=>{state.day=b.dataset.rday;state.trip=null;render(false);});
   el.querySelectorAll('[data-allday]').forEach(b=>b.onclick=openAllDay);
+  el.querySelectorAll('[data-tvclose]').forEach(b=>b.onclick=()=>{ plan.tv=null; render(true); if(!plan.res.length) fitAll(); });
   el.querySelectorAll('[data-inpick]').forEach(b=>b.onclick=()=>{ plan.time=+b.dataset.inpick; plan.userTime=true; plan.autoArr=0; renderBar(); updPlan(); showMapOnPhone(); });
   el.querySelectorAll('[data-opt]').forEach(b=>b.onclick=()=>{const n=+b.dataset.opt; if(plan.opt===n&&plan.exp===n) plan.exp=null; else {plan.opt=n; plan.exp=n;} render(true); const f=document.querySelector(`[data-opt="${n}"]`); if(f) f.focus({preventScroll:true}); showMapOnPhone();});   // paspaudus – rodoma žemėlapyje ir išskleidžiama
   el.querySelectorAll('[data-openstop]').forEach(b=>{b.onclick=()=>{ if(b.dataset.selstop){ pickStop(b.dataset.selstop); return; } unhoverStop();openStop(b.dataset.openstop);};
@@ -658,7 +675,7 @@ function tripSteps(o){ const S=[], st=(ic,h,t,sm)=>S.push(`<li><span class="si" 
   if(o.walkEnd) st('🚶','',`Nueikite ~${o.walkEnd.m} m (≈${o.walkEnd.min} min.) iki stotelės <b>„${esc(nm(o.walkEnd.to))}“</b> – būsite ~${hm(o.arr)}`);
   return S.join(''); }
 function updPlan(){ setTimeout(()=>{ if(!(plan.from&&plan.to)) return; const r=plan.res;
-    announce(r.length?`Rasta kelionės variantų: ${r.length}. Greičiausias: ${hm(r[0].dep)}–${hm(r[0].arr)}${r[0].legs.length>1?', su persėdimu':''}.`:`Kelionių iš ${plan.from} į ${plan.to} nerasta.`);},0);plan.res=(plan.from&&plan.to&&plan.from!==plan.to)?findTrips(plan.from,plan.to,plan.date,plan.time):[];plan.opt=0;plan.exp=null;
+    announce(r.length?`Rasta kelionės variantų: ${r.length}. Greičiausias: ${hm(r[0].dep)}–${hm(r[0].arr)}${r[0].legs.length>1?', su persėdimu':''}.`:`Kelionių iš ${plan.from} į ${plan.to} nerasta.`);},0);plan.res=(plan.from&&plan.to&&plan.from!==plan.to)?findTrips(plan.from,plan.to,plan.date,plan.time):[];plan.opt=0;plan.exp=null;plan.tv=null;
   if(plan.from&&plan.to){state={route:null,day:today,trip:null,stop:null}; if(plan.from!==plan.to&&tourI<0) remember(); else renderBar();}
   render(true);}
 // ---- Lithuanian public holidays (count as rest days) ----
