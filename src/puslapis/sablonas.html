@@ -308,12 +308,20 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
   body.pg-map>#apphead{flex:none}
   body.pg-map>#left{flex:1 1 auto;min-height:0;display:flex!important;flex-direction:column}
   body.pg-map #planbar,body.pg-map>#panel,body.pg-map>#appfoot,body.pg-map .mapexp{display:none!important}
-  body.pg-map #mapbar{display:block;flex:none;padding:10px 12px 2px}
-  body.pg-map #left #map{flex:1 1 auto;height:auto!important;min-height:0;margin:6px 8px 8px}
-  .mbr{display:flex;gap:7px;flex-wrap:wrap}.mbb{min-width:44px;height:44px;font-size:1.1rem;cursor:pointer}
-  .mbb.on{box-shadow:0 0 0 3px var(--card),0 0 0 6px var(--ink)}.mbr:has(.on) .mbb:not(.on){opacity:.5}
-  .mbd{margin-top:10px}.mbd:empty{display:none}.mbd button{min-height:44px}
-  .mbn{margin:.45rem 0 .1rem;font-size:.85rem;color:var(--muted);line-height:1.3}
+  body.pg-map>#left{position:relative}
+  body.pg-map #mapbar{display:flex;flex-direction:column-reverse;align-items:stretch;position:absolute;bottom:10px;left:8px;right:8px;z-index:1000;pointer-events:none}   /* ant žemėlapio, apačioje: kryptys virš numerių */
+  body.pg-map #mapbar button{pointer-events:auto}
+  body.pg-map #left #map{flex:1 1 auto;height:auto!important;min-height:0;margin:0;border-radius:0}
+  body.pg-map .leaflet-bottom{bottom:calc(var(--mbh,0px) + 10px)}
+  .mbsr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}   /* tik ekrano skaitytuvui ir klaviatūrai */
+  .mbsr:focus{position:static;width:auto;height:auto;clip:auto;white-space:normal;pointer-events:auto;margin-bottom:8px;padding:.5rem .8rem;border-radius:8px;background:#14213D;color:#fff;font-weight:700}
+  .mbattr{align-self:flex-end;margin:6px -4px -6px 0;padding:1px 6px;border-radius:4px;background:rgba(255,255,255,.85);font-size:.68rem;color:#3d4a63;pointer-events:auto}.mbattr a{color:inherit}   /* žemėlapio autoriai – privaloma */
+  .mbr{display:flex;gap:6px;flex-wrap:wrap}.mbb{min-width:36px;height:36px;font-size:.95rem;cursor:pointer;box-shadow:0 0 0 2px #fff,0 2px 6px rgba(0,0,0,.3)}
+  .mbb.on{box-shadow:0 0 0 2px #fff,0 0 0 4.5px var(--ink),0 2px 6px rgba(0,0,0,.3)}.mbr:has(.on) .mbb:not(.on){opacity:.55}
+  .mbd{display:flex;gap:6px;margin-bottom:8px}.mbd:empty{display:none}
+  .mbd button{flex:1;min-height:38px;padding:.2rem .5rem;border:2px solid var(--ink);border-radius:10px;background:var(--card);color:var(--ink);font:700 .85rem "Atkinson Hyperlegible",system-ui,sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+  .mbd button.on{background:var(--ink);color:#fff}
+  .mbn{align-self:flex-start;margin:0 0 .4rem;padding:.15rem .5rem;border-radius:6px;background:var(--card);font-size:.8rem;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.2)}
   .rmap{display:block;margin:-.3rem 0 .7rem auto}
   .sptt{display:block;margin:.5rem 0 0;min-height:32px}
   .rcard-open{position:sticky;top:0;z-index:2;box-shadow:0 -10px 0 var(--card);margin-bottom:.8rem;border-color:var(--line)!important}   /* kaip sąraše */
