@@ -306,7 +306,8 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
   body.pg-routes>#appfoot{display:none!important}
   .pfoot{display:flex;flex-direction:column;gap:4px;margin:1.2rem -18px 0;padding:10px 18px;background:#E3E9F5;border-top:1px solid var(--line);font-size:.8rem;color:var(--muted)}
   .pfoot a{color:inherit}.pfoot .sep,.pfoot .fa11y{display:none}
-  body.pg-routes.rtopen .routesbox>h2.ph{display:none}
+  body.pg-routes.rtopen .routesbox>h2.ph{position:static}   /* atidarius maršrutą antraštė lieka (prilimpa maršruto juosta) */
+  .rtpg{margin:0!important;padding:.8rem 0 .5rem}
   body.pg-routes.rtopen:not(.mapbig) #left #map{height:clamp(150px,22vh,190px)!important}
   body.pg-routes.rtopen>#panel{padding-top:8px}
   body.pg-routes>#panel{padding-bottom:0!important}
@@ -839,7 +840,7 @@ function render(fit){
     if(state.route){lineLayers.forEach(({x,pl})=>{if(x.r===state.route)pl.setStyle({opacity:.8});});setArrows(state.dir?lineLayers.filter(l=>l.x.r===state.route&&layerOn(l.x)&&(l.x.ds||[l.x.d]).includes(state.dir)).map(l=>({pts:D.segs[l.x.g],color:C(state.route)})):[]);}
     const tab=onRoutesPg(), nw=tab&&stopShown!==id; stopShown=tab?id:null;   // telefone tvarkaraštis – skirtuke virš maršruto
     if(tab&&!map.getBounds().pad(-.1).contains([st.lat,st.lon])) map.panTo([st.lat,st.lon],{animate:false});
-    el.innerHTML=(tab?`<section class="rtab${nw?' rtab-in':''}" aria-label="Stotelės ${esc(st.name)} tvarkaraštis"><div class="rthead" style="--rc:${state.route?C(state.route):'var(--ink)'}">${state.route?badge(state.route,1):''}<h2>${esc(st.name)}${dirTxt(id,state.route)?` <small>${esc(dirTxt(id,state.route))}</small>`:''}</h2><button type="button" class="clr" data-stopclose aria-label="Uždaryti tvarkaraštį">✕</button></div>`   // be dienos mygtukų – lentelėje matomos abi dienos
+    el.innerHTML=(tab?`<h2 class="ph rtpg">Maršrutai ir tvarkaraščiai</h2><section class="rtab${nw?' rtab-in':''}" aria-label="Stotelės ${esc(st.name)} tvarkaraštis"><div class="rthead" style="--rc:${state.route?C(state.route):'var(--ink)'}">${state.route?badge(state.route,1):''}<h2>${esc(st.name)}${dirTxt(id,state.route)?` <small>${esc(dirTxt(id,state.route))}</small>`:''}</h2><button type="button" class="clr" data-stopclose aria-label="Uždaryti tvarkaraštį">✕</button></div>`   // be dienos mygtukų – lentelėje matomos abi dienos
       :`<button class="back" data-stopback>‹ ${state.route?`${state.route} maršrutas`:'Atgal'}</button>
     <h1 class="sh">${esc(st.name)}</h1>${dirTxt(id)?`<p class="shint">${esc(dirTxt(id))}</p>`:''}${dayTog()}`)+`
     ${bl.length?bl.map(ttBlock).join(''):'<div class="empty">Šios stotelės tvarkaraščio plakate nėra.</div>'}
