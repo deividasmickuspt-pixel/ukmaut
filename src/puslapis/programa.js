@@ -379,28 +379,25 @@ function blkInDir(b,id,r,want,md){ let y=0,n=0;   // tikrinami tik pasirinktos d
     D.trips.forEach(t=>{ if(t.r!==r||!inDay(t,day)) return; t.P.s.forEach((s,i)=>{ if(s===id&&i<t.P.s.length-1&&t.t[i]%1440===mm){const k=legDirName(t,i); if(k===want) y++; else if(k) n++;} }); });}));
   return y>n; }
 // ---- telefono „Maršrutai ir reisai“: maršruto unikalūs reisai (stotelių sekos) pasirinktą dieną; paspaudus – linija žemėlapyje ----
-function rvList(r){ const md=rbMode(r), day=md==='D'?'W':'WE', by=new Map();
-  D.trips.filter(t=>t.r===r&&inDay(t,day)).forEach(t=>{ if(!by.has(t.p)) by.set(t.p,[]); by.get(t.p).push(t); });
+// unikalūs maršruto reisai (stotelių sekos) – visų dienų, dažniausi pirmi
+function rvList(r){ const by=new Map();
+  D.trips.filter(t=>t.r===r).forEach(t=>{ if(!by.has(t.p)) by.set(t.p,[]); by.get(t.p).push(t); });
   const L=[...by.entries()].map(([p,ts])=>({p,ts:ts.sort((a,b)=>a.t[0]-b.t[0]),P:D.pats[p]})).sort((a,b)=>b.ts.length-a.ts.length||a.ts[0].t[0]-b.ts[0].t[0]);
-  const td=dayInfo(isoDate(new Date())).day===day;
-  L.forEach(v=>{ v.rep=(td&&v.ts.find(t=>t.t[0]>=nowMin))||v.ts[0]; const a=v.P.s[0], z=v.P.s.at(-1);
+  L.forEach(v=>{ v.rep=v.ts[0]; const a=v.P.s[0], z=v.P.s.at(-1);
     const ref=L.find(w=>w!==v&&nm(w.P.s[0])===nm(a)&&nm(w.P.s.at(-1))===nm(z));   // tie patys galai – parodome, kuo skiriasi
     const ex=ref?v.P.s.filter(id=>!ref.P.s.some(x=>nm(x)===nm(id))).map(nm):[];
-    v.via=ex.length?'per '+[...new Set(ex)].slice(0,2).join(', '):ref&&ref.P.s.length>v.P.s.length?'trumpesnis':'';
-    v.dur=v.rep.t.at(-1)-v.rep.t[0]; });
-  return {L,md,day}; }
+    v.via=ex.length?'per '+[...new Set(ex)].slice(0,2).join(', '):ref&&ref.P.s.length>v.P.s.length?'trumpesnis':''; });
+  const lab=v=>nm(v.P.s[0])+'|'+nm(v.P.s.at(-1))+'|'+v.via;
+  L.forEach(v=>{ const w=L.find(x=>x!==v&&lab(x)===lab(v)); if(!w) return;   // vienodai pavadinti – parodome skirtumą tarp jų
+    const has=(P,id)=>P.s.some(x=>nm(x)===nm(id)), plus=[...new Set(v.P.s.filter(id=>!has(w.P,id)).map(nm))], minus=[...new Set(w.P.s.filter(id=>!has(v.P,id)).map(nm))];
+    v.via2=plus.length?'per '+plus.slice(0,2).join(', '):minus.length?'be '+minus.slice(0,2).join(', '):''; });
+  L.forEach(v=>{ if(v.via2) v.via=v.via&&!v.via.startsWith('trumpesnis')?v.via+'; '+v.via2:v.via2; });
+  return {L}; }
 const rvSel=r=>{ const {L}=rvList(r); return L.find(v=>v.p===state.rv)||null; };
-function routeVars(r){ const {L,md}=rvList(r), hasW=runsDay(r,'W');
-  const dayLine=`<div class="days vtog" role="group" aria-label="Diena">${[['D','W'],['O','WE']].map(([m,dy])=>{const off=!runsDay(r,dy);
-    return `<button type="button" data-rbday="${m}" class="${md===m?'on':''}" aria-pressed="${md===m}"${off?` disabled title="Šią dieną ${r} maršrutas nevažiuoja"`:''}>${DAYS[dy]}</button>`;}).join('')}</div>${!hasW&&!D.trips.some(t=>t.r===r&&t.d==='WE')?'<p class="sub" style="margin-top:.5rem"><b>Važiuoja tik šeštadieniais.</b></p>':''}`;
-  const card=v=>{ const on=v.p===state.rv, st=v.P.s.length;
-    return `<li><button type="button" class="rvb${on?' on':''}" data-rv="${v.p}" aria-pressed="${on}" style="--rc:${C(r)}"><span class="rvh"><b>${esc(nm(v.P.s[0]))} → ${esc(nm(v.P.s.at(-1)))}</b>${v.via?`<small>${esc(v.via)}</small>`:''}</span>
-      <span class="rvn">${v.ts.length} ${v.ts.length===1?'reisas':v.ts.length<10?'reisai':'reisų'}</span><span class="rvm">${st} ${stotW(st)} · ~${v.dur} min.</span>
-      <span class="rvt">${v.ts.map(t=>hm(t.t[0])).join(' · ')}</span></button></li>`; };
-  const main=L.filter(v=>v.ts.length>=3), rest=L.filter(v=>v.ts.length<3);
-  return `${dayLine}<h3 class="ph sth">Reisai</h3><p class="sub" style="margin-top:.1rem">Paspauskite reisą – jo kelias bus parodytas žemėlapyje. Laikai – išvykimas iš pirmos stotelės.</p>
-    ${L.length?`<ul class="rvlist">${(main.length?main:rest).map(card).join('')}</ul>${main.length&&rest.length?`<details class="rvmore"${rest.some(v=>v.p===state.rv)?' open':''}><summary>Kiti reisai (${rest.length}) – važiuoja 1–2 kartus per dieną</summary><ul class="rvlist">${rest.map(card).join('')}</ul></details>`:''}`
-      :'<div class="empty">Šią dieną šis maršrutas nevažiuoja.</div>'}`;
+function routeVars(r){ const {L}=rvList(r);
+  const card=v=>{ const on=v.p===state.rv;
+    return `<li><button type="button" class="rvb${on?' on':''}" data-rv="${v.p}" aria-pressed="${on}" style="--rc:${C(r)}"><span class="rvh"><b>${esc(nm(v.P.s[0]))} → ${esc(nm(v.P.s.at(-1)))}</b>${v.via?`<small>${esc(v.via)}</small>`:''}</span></button></li>`; };
+  return `<p class="sub" style="margin-top:.1rem">Paspauskite reisą – jo kelias bus parodytas žemėlapyje.</p><ul class="rvlist">${L.map(card).join('')}</ul>`;
 }
 function routeBodyPhone(r){
   const hasW=runsDay(r,'W'), md=rbMode(r), DD=(D.dirs[r]||{})[md]||{};
