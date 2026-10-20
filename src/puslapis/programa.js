@@ -196,7 +196,7 @@ function nextAt(id){
 D.stops.forEach(s=>{
   const m=L.circleMarker([s.lat,s.lon],{radius:6,color:'#14213D',weight:3,fillColor:'#fff',fillOpacity:1,dashArray:s.approx?'3 3':null}).addTo(map);
   m.bindTooltip(esc(sname(s.id)),{direction:'top',offset:[0,-8],className:'tip'});
-  m.on('click',e=>{L.DomEvent.stopPropagation(e); if(simpleMap()) stopPopup(s.id); else openStop(s.id);});
+  m.on('click',e=>{L.DomEvent.stopPropagation(e); if(simpleMap()) stopPopup(s.id); else if(onRoutesPg()&&state.route&&!state.stop&&document.querySelector(`.rtab [data-selstop="${s.id}"]`)) pickStop(s.id); else openStop(s.id);});
   markers[s.id]=m;
 });
 const allBounds=L.latLngBounds(D.stops.map(s=>[s.lat,s.lon]));
@@ -347,9 +347,10 @@ function routeBody(r){
       <ol class="strip vstrip" style="--rc:${C(r)}">${v.seq.filter(([i])=>STOP[i]).map(([i,t],k)=>`<li><button class="srow" data-openstop="${i}"><span class="dot"></span><span>${esc(nm(i))}${HINT[i]?`<small>${esc(HINT[i])}</small>`:''}</span><span class="tm">${hm(t)}</span></button></li>`).join('')}</ol>`:''}</li>`).join('')}</ul>`:'';
   const dirBtns=Object.keys(DR).length>=1?`<div class="days dirs" role="group" aria-label="Kryptis">
     ${['A','B'].filter(d=>DR[d]).map(d=>`<button data-dir="${d}" class="${state.dir===d?'on':''}" aria-pressed="${state.dir===d}">→ ${esc(DR[d].to)}</button>`).join('')}</div>`:'';
-  const item=i=>`<li class="${VAR.has(i)?'var':''}"><button class="srow" data-openstop="${i}"><span class="dot"></span><span>${esc(nm(i))}${HINT[i]?`<small>${esc(HINT[i])}</small>`:''}${VAR.has(i)?'<small>tik dalis reisų</small>':''}</span><span class="xfer">${STOP[i].routes.filter(x=>x!==r).map(x=>badge(x)).join('')}</span></button></li>`;
+  const pick=onRoutesPg(), sel=pick&&selStop&&selStop.r===r?selStop.id:null;   // telefone stotelė pirmiausia tik pažymima
+  const item=i=>`<li class="${VAR.has(i)?'var':''}${i===sel?' sel':''}"><button class="srow${i===sel?' on':''}" ${pick?`data-selstop="${i}" aria-expanded="${i===sel}"`:''} data-openstop="${i}"><span class="dot"></span><span>${esc(nm(i))}${HINT[i]?`<small>${esc(HINT[i])}</small>`:''}${VAR.has(i)?'<small>tik dalis reisų</small>':''}</span><span class="xfer">${STOP[i].routes.filter(x=>x!==r).map(x=>badge(x)).join('')}</span></button>${i===sel?`<button type="button" class="srtt" data-ttstop="${i}">Žiūrėti tvarkaraštį ›</button>`:''}</li>`;
   return `${dayTog(r)}${viewDay!=='W'&&D.trips.some(t=>t.r===r&&t.d==='Sat')&&!D.trips.some(t=>t.r===r&&t.d==='WE')?'<p class="sub" style="margin-top:.5rem"><b>Važiuoja tik šeštadieniais.</b></p>':''}${runsOn(r)?dirBtns:`<div class="empty" style="margin-top:.8rem">Pasirinktą dieną (${DAYS[viewDay].toLowerCase()}) šis maršrutas nevažiuoja.</div>`}
-  <p class="sub" style="margin-top:.6rem">Paspauskite stotelę – pamatysite jos tvarkaraštį.</p>
+  <p class="sub" style="margin-top:.6rem">${pick?'Paspauskite stotelę – ji bus parodyta žemėlapyje, o po ja – mygtukas tvarkaraščiui.':'Paspauskite stotelę – pamatysite jos tvarkaraštį.'}</p>
   <ol class="strip" style="--rc:${C(r)}">${rs.main.map(item).join('')}</ol>
   ${varHtml}
   <p class="note">Spalvoti ženkliukai rodo, kokie kiti maršrutai sustoja toje stotelėje.</p>`;
@@ -360,6 +361,13 @@ const routeTab=r=>{const nw=tabShown!==r; tabShown=r; return `<section class="rt
 function closeRoute(){ if(history.state&&history.state.r) history.back(); else { state={route:null,day:today,trip:null,stop:null,dir:null,variant:null}; render(true); fitAll(); document.getElementById('panel').scrollTop=0; } }
 // telefono maršrutų puslapyje poraštė – sąrašo gale (ne visada matoma)
 function addFoot(el){ if(onRoutesPg()) el.insertAdjacentHTML('beforeend',`<div class="pfoot">${document.getElementById('appfoot').innerHTML}</div>`); }
+// telefono maršruto skirtuke paspausta stotelė pažymima sąraše ir žemėlapyje; tvarkaraštis – atskiru mygtuku
+let selStop=null;
+function pickStop(id){ selStop=selStop&&selStop.id===id&&selStop.r===state.route?null:{r:state.route,id}; render(false);
+  if(!selStop) return; const st=STOP[id]; if(!map.getBounds().pad(-.1).contains([st.lat,st.lon])) map.panTo([st.lat,st.lon],{animate:false});
+  const row=document.querySelector('.rtab li.sel'), pn=document.getElementById('panel');
+  if(row){ const r=row.getBoundingClientRect(), p=pn.getBoundingClientRect(), top=p.top+(document.querySelector('.rthead')||{offsetHeight:0}).offsetHeight+8;
+    if(r.top<top||r.bottom>p.bottom) pn.scrollTop+=r.top-top-40; } }
 function render(fit){
   if(!state.route&&!state.stop) viewDay=dayInfo(isoDate(new Date())).day;
   applyMode();
@@ -429,9 +437,10 @@ function render(fit){
   el.querySelectorAll('[data-share]').forEach(b=>b.onclick=shareTrip);
   el.querySelectorAll('[data-rday]').forEach(b=>b.onclick=()=>{state.day=b.dataset.rday;state.trip=null;render(false);});
   el.querySelectorAll('[data-opt]').forEach(b=>b.onclick=()=>{plan.opt=+b.dataset.opt;render(true);showMapOnPhone();});
-  el.querySelectorAll('[data-openstop]').forEach(b=>{b.onclick=()=>{unhoverStop();openStop(b.dataset.openstop);};
-    b.onmouseenter=b.onfocus=()=>hoverStop(b.dataset.openstop); b.onmouseleave=b.onblur=unhoverStop;});
-  unhoverStop();
+  el.querySelectorAll('[data-openstop]').forEach(b=>{b.onclick=()=>{ if(b.dataset.selstop){ pickStop(b.dataset.selstop); return; } unhoverStop();openStop(b.dataset.openstop);};
+    if(!b.dataset.selstop){ b.onmouseenter=b.onfocus=()=>hoverStop(b.dataset.openstop); b.onmouseleave=b.onblur=unhoverStop; }});
+  el.querySelectorAll('[data-ttstop]').forEach(b=>b.onclick=()=>{unhoverStop();openStop(b.dataset.ttstop);});
+  unhoverStop(); if(onRoutesPg()&&state.route&&!state.stop&&selStop&&selStop.r===state.route) hoverStop(selStop.id);   // pažymėta stotelė žemėlapyje
     el.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>{state={route:null,day:today,trip:null,stop:null};render(true);fitAll();el.scrollTop=0;});
 }
 function findTrips(A,B,date,T){

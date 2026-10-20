@@ -310,6 +310,8 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
   body.pg-routes>#panel{padding-bottom:0!important}
   body.pg-routes>#panel{flex:1 1 auto;min-height:0;height:auto!important;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding-top:0}
   body.pg-routes>#panel::-webkit-scrollbar{display:none}
+  .strip li.sel{background:var(--tint);border-radius:10px}
+  .srtt{display:block;margin:-.2rem .4rem .5rem auto;min-height:36px;padding:.15rem .75rem;border:1.5px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);font:inherit;font-size:.85rem;cursor:pointer}   /* dešinėje, po ženkliukais, neryškus */
   .rtab-in{animation:rtabin .18s ease-out}@keyframes rtabin{from{opacity:0;transform:translateY(12px)}}
   @media (prefers-reduced-motion:reduce){.rtab-in{animation:none}}
   .rthead{position:sticky;top:0;z-index:2;box-shadow:0 -10px 0 var(--card);display:flex;align-items:center;gap:.6rem;padding:.5rem .6rem;margin:0 0 .6rem;border:2px solid var(--rc);border-radius:12px;background:var(--card)}
