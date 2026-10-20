@@ -1,0 +1,537 @@
+{
+"antakalnio-link-centro": {
+"id": "33_V21611",
+"name": "Antakalnio",
+"lat": 55.244448,
+"lon": 24.774234,
+"confirmed": true
+},
+"antakalnio-link-zaliojo-vienkiemio": {
+"id": "33_V21612",
+"name": "Antakalnio",
+"lat": 55.244271,
+"lon": 24.774996,
+"confirmed": true
+},
+"anyksciu": {
+"id": "33_V21463",
+"name": "Anykščių",
+"lat": 55.256894,
+"lon": 24.783307
+},
+"autobusu-stotis": {
+"id": "33_V21369",
+"name": "Autobusų stotis",
+"lat": 55.259569,
+"lon": 24.790478
+},
+"autoservisas": {
+"id": "33_V4138",
+"name": "Autoservisas",
+"lat": 55.2533,
+"lon": 24.77424,
+"confirmed": true
+},
+"basanaviciaus": {
+"id": "33_V3576",
+"name": "Basanavičiaus",
+"lat": 55.251867,
+"lon": 24.770908,
+"confirmed": true
+},
+"baznycios": {
+"id": "33_V21585",
+"name": "Bažnyčios",
+"lat": 55.21444,
+"lon": 24.787645,
+"confirmed": true
+},
+"baznycios-link-pasile": {
+"id": "33_V21584",
+"name": "Bažnyčios",
+"lat": 55.214023,
+"lon": 24.787045,
+"confirmed": true
+},
+"biofabrikas-link-centro": {
+"id": "new:Biofabrikas",
+"name": "Biofabrikas",
+"lat": 55.244029,
+"lon": 24.722682,
+"confirmed": true
+},
+"biofabrikas-link-deltuvos": {
+"id": "new:Biofabrikas",
+"name": "Biofabrikas",
+"lat": 55.244029,
+"lon": 24.722682,
+"confirmed": true
+},
+"boruvka-link-centro": {
+"id": "33_V21616",
+"name": "Boruvka",
+"lat": 55.240387,
+"lon": 24.790864
+},
+"boruvka-link-zaliojo-vienkiemio": {
+"id": "33_V21615",
+"name": "Boruvka",
+"lat": 55.240341,
+"lon": 24.791067
+},
+"deltuva-link-autobusu-stoties": {
+"id": "33_V12439",
+"name": "Deltuva",
+"lat": 55.239283,
+"lon": 24.671152,
+"confirmed": true
+},
+"deltuvos-kapines-link-centro": {
+"id": "new:Deltuvos kapinės c",
+"name": "Deltuvos kapinės",
+"lat": 55.240127,
+"lon": 24.683254,
+"confirmed": true
+},
+"deltuvos-kapines-link-deltuvos": {
+"id": "new:Deltuvos kapinės",
+"name": "Deltuvos kapinės",
+"lat": 55.240102,
+"lon": 24.681762,
+"confirmed": true
+},
+"dukstyna-link-centro": {
+"id": "33_V4904",
+"name": "Dukstyna",
+"lat": 55.273943,
+"lon": 24.815549
+},
+"dukstynos-kaimas-link-dukstynos": {
+"id": "33_V5723",
+"name": "Dukstynos kaimas",
+"lat": 55.267656,
+"lon": 24.806517,
+"confirmed": true
+},
+"dukstyvos_kaimas-link-centro": {
+"id": "33_V10725",
+"name": "Dukstynos kaimas",
+"lat": 55.268,
+"lon": 24.806604
+},
+"gamyklu": {
+"id": "new:Gamyklų",
+"name": "Gamyklų",
+"lat": 55.232835,
+"lon": 24.754472,
+"confirmed": true
+},
+"geliu-link-gamyklu": {
+"id": "new:Gėlių g",
+"name": "Gėlių",
+"lat": 55.236487,
+"lon": 24.768071,
+"confirmed": true
+},
+"geliu-link-pivonijos": {
+"id": "33_V41304",
+"name": "Gėlių",
+"lat": 55.236747,
+"lon": 24.769272,
+"confirmed": true
+},
+"gelzbetonis-dariaus-ir-gireno": {
+"id": "new:Dariaus ir Girėno",
+"name": "Gelžbetonis (Dariaus ir Girėno g.)",
+"lat": 55.240176,
+"lon": 24.785939,
+"confirmed": true
+},
+"gelzbetonis-link-centro": {
+"id": "33_V21613",
+"name": "Gelžbetonis",
+"lat": 55.242207,
+"lon": 24.784594
+},
+"gelzbetonis-savaitgalinis": {
+"id": "33_V21614",
+"name": "Gelžbetonis",
+"lat": 55.241958,
+"lon": 24.785517
+},
+"kauno-link-centro": {
+"id": "33_V3599",
+"name": "Kauno",
+"lat": 55.246454,
+"lon": 24.757529,
+"confirmed": true
+},
+"kauno-link-pienines": {
+"id": "33_V3871",
+"name": "Kauno",
+"lat": 55.246295,
+"lon": 24.756564,
+"confirmed": true
+},
+"kestucio-a-link-autobusu-stoties": {
+"id": "33_V3575",
+"name": "Kęstučio a.",
+"lat": 55.249977,
+"lon": 24.76378
+},
+"kestucio-a-link-pienines": {
+"id": "33_V21469",
+"name": "Kęstučio a.",
+"lat": 55.250134,
+"lon": 24.763766
+},
+"kokliu-link-centro": {
+"id": "33_V21930",
+"name": "Koklių f.",
+"lat": 55.232722,
+"lon": 24.780736,
+"confirmed": true
+},
+"kreksliai": {
+"id": "33_V21619",
+"name": "Krekšliai",
+"lat": 55.246114,
+"lon": 24.795916
+},
+"kreksliai-savaitgalinis": {
+"id": "33_V21619",
+"name": "Krekšliai",
+"lat": 55.246114,
+"lon": 24.795916
+},
+"kudirkos": {
+"id": "33_V3587",
+"name": "Kudirkos",
+"lat": 55.25456,
+"lon": 24.777641,
+"confirmed": true
+},
+"kudirkos_-link_centro": {
+"id": "33_V21554",
+"name": "Kudirkos",
+"lat": 55.255216,
+"lon": 24.778968
+},
+"ligonine": {
+"id": "33_V3865",
+"name": "Ligoninė",
+"lat": 55.258223,
+"lon": 24.786497,
+"confirmed": true
+},
+"ligonine_-link-centro": {
+"id": "33_V3605",
+"name": "Ligoninė",
+"lat": 55.258051,
+"lon": 24.785661,
+"confirmed": true
+},
+"linu-link-gamyklu": {
+"id": "new:Linų",
+"name": "Linų",
+"lat": 55.238518,
+"lon": 24.775393,
+"confirmed": true
+},
+"linu-link-pivonijos": {
+"id": "33_V24176",
+"name": "Linų",
+"lat": 55.238653,
+"lon": 24.775264,
+"confirmed": true
+},
+"lytagros-centras-link-autobusu-stoties": {
+"id": "new:Lytagros c",
+"name": "Lytagros centras",
+"lat": 55.244834,
+"lon": 24.734977,
+"confirmed": true
+},
+"lytagros-centras-link-biofabriko": {
+"id": "new:Lytagros centras",
+"name": "Lytagros centras",
+"lat": 55.244827,
+"lon": 24.733642,
+"confirmed": true
+},
+"misku": {
+"id": "33_V21598",
+"name": "Miškų",
+"lat": 55.229494,
+"lon": 24.783579,
+"confirmed": true
+},
+"misku-link-pasiles": {
+"id": "33_V21610",
+"name": "Miškų",
+"lat": 55.228491,
+"lon": 24.78401
+},
+"muziejaus": {
+"id": "33_V21591",
+"name": "Muziejus",
+"lat": 55.250084,
+"lon": 24.766327,
+"confirmed": true
+},
+"muziejus-savaitgalinis": {
+"id": "33_V21592",
+"name": "Muziejus",
+"lat": 55.249891,
+"lon": 24.7663,
+"confirmed": true
+},
+"narbuto": {
+"id": "new:Narbuto",
+"name": "Narbuto",
+"lat": 55.251565,
+"lon": 24.742523,
+"confirmed": true
+},
+"pasile": {
+"id": "33_V21583",
+"name": "Pašilė",
+"lat": 55.210271,
+"lon": 24.784083,
+"confirmed": true
+},
+"pasile-link-centro": {
+"id": "33_V21583",
+"name": "Pašilė",
+"lat": 55.210271,
+"lon": 24.784083,
+"confirmed": true
+},
+"pasiles-kryzkele": {
+"id": "33_V21588",
+"name": "Pašilės kryžkelė",
+"lat": 55.217971,
+"lon": 24.790797
+},
+"pasiles-kryzkele-link-pasiles": {
+"id": "33_V21586",
+"name": "Pašilės kryžkelė",
+"lat": 55.21774,
+"lon": 24.790478
+},
+"pienine": {
+"id": "33_V21688",
+"name": "Pieninė",
+"lat": 55.238084,
+"lon": 24.730787
+},
+"pivonijos": {
+"id": "33_V21594",
+"name": "Pivonijos",
+"lat": 55.238265,
+"lon": 24.77719
+},
+"pivonijos-link-pasiles": {
+"id": "33_V21593",
+"name": "Pivonijos",
+"lat": 55.238519,
+"lon": 24.776754
+},
+"pramones-link-centro": {
+"id": "33_V3600",
+"name": "Pramonės",
+"lat": 55.243026,
+"lon": 24.747058,
+"confirmed": true
+},
+"pramones-link-pienines": {
+"id": "33_V3898",
+"name": "Pramonės",
+"lat": 55.24309,
+"lon": 24.74687,
+"confirmed": true
+},
+"pusu": {
+"id": "33_V21589",
+"name": "Pušų",
+"lat": 55.235449,
+"lon": 24.779226
+},
+"pusu-link-pasiles": {
+"id": "33_V21590",
+"name": "Pušų",
+"lat": 55.234783,
+"lon": 24.779433
+},
+"saltalankiu-link-centro": {
+"id": "33_V21623",
+"name": "Šaltalankių",
+"lat": 55.246176,
+"lon": 24.803905,
+"confirmed": true
+},
+"saltalankiu-savaitgalinis": {
+"id": "33_V21621",
+"name": "Šaltalankių",
+"lat": 55.246075,
+"lon": 24.8039,
+"confirmed": true
+},
+"senasis-pastas-link-centro": {
+"id": "33_V3918",
+"name": "Senas paštas",
+"lat": 55.244925,
+"lon": 24.752932,
+"confirmed": true
+},
+"senasis-pastas-link-pienines": {
+"id": "33_V3610",
+"name": "Senas paštas",
+"lat": 55.244684,
+"lon": 24.751714,
+"confirmed": true
+},
+"smeliu": {
+"id": "new:Smėlių c",
+"name": "Smėlių",
+"lat": 55.243301,
+"lon": 24.772936,
+"confirmed": true
+},
+"smeliu-link-pasiles": {
+"id": "new:Smėlių",
+"name": "Smėlių",
+"lat": 55.243595,
+"lon": 24.772475,
+"confirmed": true
+},
+"sodai-link-autobusu-stoties": {
+"id": "new:Sodai D c",
+"name": "Sodai (Deltuvos g.)",
+"lat": 55.241986,
+"lon": 24.703923,
+"confirmed": true
+},
+"sodai-link-centro": {
+"id": "33_V9603",
+"name": "Sodai",
+"lat": 55.264018,
+"lon": 24.799898,
+"confirmed": true
+},
+"sodai-link-deltuvos": {
+"id": "33_V16321",
+"name": "Sodai (Deltuvos g.)",
+"lat": 55.242204,
+"lon": 24.705001
+},
+"sodai-link-dukstynos": {
+"id": "33_V6689",
+"name": "Sodai",
+"lat": 55.26433,
+"lon": 24.801099,
+"confirmed": true
+},
+"statikai": {
+"id": "33_V12408",
+"name": "Statikai",
+"lat": 55.244256,
+"lon": 24.728733,
+"confirmed": true
+},
+"statikai-link-autobusu-stoties": {
+"id": "new:Statikai I c",
+"name": "Statikai I",
+"lat": 55.243234,
+"lon": 24.717093,
+"confirmed": true
+},
+"statikai-link-biofabriko": {
+"id": "33_V14315",
+"name": "Statikai",
+"lat": 55.244262,
+"lon": 24.727414,
+"confirmed": true
+},
+"statikai1": {
+"id": "new:Statikai I d",
+"name": "Statikai I",
+"lat": 55.243338,
+"lon": 24.716792,
+"confirmed": true
+},
+"turgus": {
+"id": "33_V21513",
+"name": "Turgus",
+"lat": 55.249521,
+"lon": 24.758672,
+"confirmed": true
+},
+"umega-link-autobusu-stoties": {
+"id": "33_V21479",
+"name": "Umega",
+"lat": 55.240414,
+"lon": 24.739425,
+"confirmed": true
+},
+"umega-link-pienines": {
+"id": "33_V21811",
+"name": "Umega",
+"lat": 55.240301,
+"lon": 24.738539,
+"confirmed": true
+},
+"varine": {
+"id": "new:Varinė",
+"name": "Varinė",
+"lat": 55.207571,
+"lon": 24.781777,
+"confirmed": true
+},
+"vysniu": {
+"id": "33_V21618",
+"name": "Vyšnių",
+"lat": 55.24354,
+"lon": 24.79382
+},
+"vysniu-savaitgalinis": {
+"id": "33_V21617",
+"name": "Vyšnių",
+"lat": 55.243181,
+"lon": 24.793734
+},
+"zaliasis-vienkiemis": {
+"id": "33_V21624",
+"name": "Žaliasis vienkiemis",
+"lat": 55.245587,
+"lon": 24.811694
+},
+"ziedo-link-autobusu-stoties": {
+"id": "new:Žiedo2",
+"name": "Žiedo",
+"lat": 55.245457,
+"lon": 24.741853,
+"confirmed": true
+},
+"ziedo-link-narbuto": {
+"id": "new:Žiedo1",
+"name": "Žiedo",
+"lat": 55.244999,
+"lon": 24.742761,
+"confirmed": true
+},
+"autobusu-stotis-vytauto-g-link-centro": {
+"id": "new:Vytauto c",
+"name": "Autobusų stotis (Vytauto g.)",
+"lat": 55.260051,
+"lon": 24.790526,
+"confirmed": true
+},
+"autobusu-stotis-vytauto-g-link-dukstynos": {
+"id": "new:Vytauto d",
+"name": "Autobusų stotis (Vytauto g.)",
+"lat": 55.259962,
+"lon": 24.790714,
+"confirmed": true
+}
+}
