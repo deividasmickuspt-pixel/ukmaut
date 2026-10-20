@@ -890,11 +890,11 @@ function mapPageView(fit){
     ${r?`<div class="days mbd" role="group" aria-label="Kryptis">${Object.keys(DD).length>1?['A','B'].filter(k=>DD[k]).map(k=>`<button type="button" data-md="${k}" class="${d===k?'on':''}" aria-pressed="${d===k}">→ ${esc(DD[k].to)}</button>`).join(''):''}</div>
 ${(md==='D')!==(today==='W')?`<p class="mbn">${md==='D'?'Darbo dienų':'Poilsio dienų'} maršrutas</p>`:''}`:''}
     <a class="mbsr" href="#marsrutai" data-tolist>Tą pačią informaciją tekstu rasite skiltyje „Maršrutai ir tvarkaraščiai“</a>`;
-  bar.querySelectorAll('[data-mr]').forEach(b=>b.onclick=()=>{ const x=b.dataset.mr; if(state.route===x){state.route=null;state.dir=null;} else { if(state.route!==x) rbDay=null; state.route=x; state.dir=null; } map.closePopup(); render(true); });
+  bar.querySelectorAll('[data-mr]').forEach(b=>b.onclick=()=>{ const x=b.dataset.mr; if(state.route===x){state.route=null;state.dir=null;} else { if(state.route!==x) rbDay=null; state.route=x; state.dir=null; } map.closePopup(); render(false); });   // vaizdas nekeičiamas
   bar.querySelectorAll('[data-md]').forEach(b=>b.onclick=()=>{ state.dir=state.dir===b.dataset.md?null:b.dataset.md; render(false); });
   bar.querySelectorAll('[data-tolist]').forEach(a=>a.onclick=e=>{ e.preventDefault(); setPage('routes','push'); render(true); });
   document.getElementById('left').style.setProperty('--mbh',bar.offsetHeight+'px');   // žemėlapio mygtukai – po maršrutų juosta
-  if(fit) map.fitBounds(pts.length?pts:allBounds,{paddingTopLeft:[20,60],paddingBottomRight:[20,bar.offsetHeight+20],maxZoom:16,animate:false});
+  if(fit) map.fitBounds(homeBounds(),{padding:[10,10],animate:false});   // visada bendras vaizdas, centras – Kęstučio a.; priartina pats žmogus
 }
 function render(fit){
   if(onMapPg()){ mapPageView(fit); syncStopDlg(); return; }
