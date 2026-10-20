@@ -399,7 +399,7 @@ function routeBody(r){
 }
 // telefono maršrutų puslapyje atidarytas maršrutas – skirtukas po antrašte „Maršrutai ir tvarkaraščiai“ (žemėlapis lieka)
 let tabShown=null;
-const routeTab=r=>{const nw=tabShown!==r; tabShown=r; return `<section class="rtab${nw?' rtab-in':''}" aria-label="${r} maršrutas"><div class="rthead" style="--rc:${C(r)}">${badge(r,1)}<h2>${esc(D.meta[r].legend)}</h2><button type="button" class="clr" data-rclose aria-label="Uždaryti maršrutą">✕</button></div>${routeBody(r)}</section>`;};
+const routeTab=r=>{const nw=tabShown!==r; tabShown=r; return `<section class="rtab" aria-label="${r} maršrutas"><button type="button" class="rcard rcard-open" data-rclose aria-label="${r} maršrutas: ${esc(D.meta[r].legend)}. Uždaryti maršrutą">${badge(r,1)}<span>${esc(D.meta[r].legend)}</span><span class="chev" aria-hidden="true">✕</span></button><div${nw?' class="rtab-in"':''}>${routeBody(r)}</div></section>`;};   // atidaryta kortelė atrodo kaip sąraše, tik vietoj › – ✕
 function closeRoute(){ if(history.state&&history.state.r) history.back(); else { state={route:null,day:today,trip:null,stop:null,dir:null,variant:null}; render(true); fitAll(); document.getElementById('panel').scrollTop=0; } }
 const rdays=r=>{const w=D.trips.some(t=>t.r===r&&t.d==='W'),we=D.trips.some(t=>t.r===r&&t.d==='WE'),sa=D.trips.some(t=>t.r===r&&t.d==='Sat');return [w?'darbo dienomis':'',we?'poilsio dienomis':(sa?'tik šeštadieniais':'')].filter(Boolean).join(', ');};
 const rcard=r=>`<button class="rcard" data-sel="${r}">${badge(r,1)}<span>${esc(D.meta[r].legend)}${isPhone()?'':`<small>${rdays(r)}</small>`}</span><span class="chev" aria-hidden="true">›</span></button>`;
@@ -410,7 +410,7 @@ let selStop=null;
 function pickStop(id){ selStop=selStop&&selStop.id===id&&selStop.r===state.route?null:{r:state.route,id}; render(false);
   if(!selStop) return; const st=STOP[id]; if(!map.getBounds().pad(-.1).contains([st.lat,st.lon])) map.panTo([st.lat,st.lon],{animate:false});
   const row=document.querySelector('.rtab li.sel'), pn=document.getElementById('panel');
-  if(row){ const r=row.getBoundingClientRect(), p=pn.getBoundingClientRect(), top=p.top+(document.querySelector('.rthead')||{offsetHeight:0}).offsetHeight+8;
+  if(row){ const r=row.getBoundingClientRect(), p=pn.getBoundingClientRect(), top=p.top+(document.querySelector('.rthead,.rcard-open')||{offsetHeight:0}).offsetHeight+8;
     if(r.top<top||r.bottom>p.bottom) pn.scrollTop+=r.top-top-40; } }
 function render(fit){
   if(!state.route&&!state.stop) viewDay=dayInfo(isoDate(new Date())).day;
@@ -611,7 +611,7 @@ const TOUR=[
  {sel:'.routesbox',t:'Maršrutai ir tvarkaraščiai',x:'Čia – visų maršrutų sąrašas. Paspaudę maršrutą pamatysite jo stoteles eilės tvarka, o paspaudę stotelę – jos tvarkaraštį.',
   xm:'Visų maršrutų sąrašas atsidaro per meniu (☰) – „Maršrutai ir tvarkaraščiai“. Paspaudę maršrutą pamatysite jo stoteles eilės tvarka, o paspaudę stotelę – jos tvarkaraštį. Grįžti – meniu „Maršruto planuoklis“ arba telefono „Atgal“.',
   demo:()=>{tourHome(); if(isPhone()){setPage('routes',''); render(true);}}},
- {sel:'.rhead',selm:'.rthead',also:'.dirs',t:'Kryptis ir diena',x:'Pavyzdžiui, atidarytas 4 maršrutas. Pasirinkite kryptį – žemėlapyje atsiras rodyklės, o sąraše liks tos krypties stotelės. Darbo ir poilsio dienomis maršrutai gali skirtis, todėl pasirinkite dieną.',
+ {sel:'.rhead',selm:'.rcard-open',also:'.dirs',t:'Kryptis ir diena',x:'Pavyzdžiui, atidarytas 4 maršrutas. Pasirinkite kryptį – žemėlapyje atsiras rodyklės, o sąraše liks tos krypties stotelės. Darbo ir poilsio dienomis maršrutai gali skirtis, todėl pasirinkite dieną.',
   demo:()=>{tourHome(); viewDay='W'; selectRoute('4'); state.dir='A'; render(false);}},
  {sel:'.vhead',also:'.vlist',t:'Kiti reisai',x:'Čia – retesni, netipiniai reisai, pavyzdžiui, iki Varinės ar per Dukstyną. Paspaudus parodomas visas reiso kelias žemėlapyje, stotelės ir laikai.',
   demo:()=>{tourHome(); viewDay='W'; selectRoute('4'); const vs=((D.variants['4']||{}).D||[]); const v=vs.find(x=>/Dukstyn/.test(x.label))||vs.find(x=>/Varin/.test(x.label))||vs[0]; if(v){state.variant=v.label;} render(false);}},
