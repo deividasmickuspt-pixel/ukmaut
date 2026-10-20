@@ -343,6 +343,7 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
 <dialog id="menudlg" aria-labelledby="menu-h">
 <div class="mhead"><h2 id="menu-h">Meniu</h2><button type="button" class="mclose" aria-label="Uždaryti meniu">✕</button></div>
 <ul class="mlist">
+<li><button type="button" data-m="plan"><span class="mi" aria-hidden="true">🧭</span>Maršruto planuoklis</button></li>
 <li><button type="button" data-m="routes"><span class="mi" aria-hidden="true">🚌</span>Maršrutai ir tvarkaraščiai</button></li>
 <li class="sep" aria-hidden="true"></li>
 <li><button type="button" data-m="tour"><span class="mi" aria-hidden="true">❓</span>Kaip naudotis</button></li>
@@ -964,6 +965,7 @@ const MENU={
   routes:()=>{ state={route:null,day:today,trip:null,stop:null,dir:null,variant:null};
     if(isPhone()) setPage('routes','push'); render(true); fitAll();
     if(!isPhone()){const pn=document.getElementById('panel'); if(pn) pn.scrollTop=0;} },
+  plan:()=>{ if(page==='routes') toPlan(); else goHome(); },
   tour:tourStart, inst:doInstall, fb:openFeedback,
   a11y:()=>{const d=document.getElementById('a11ydlg'); if(d&&d.showModal) d.showModal();}};
 menu.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{ menu.close(); setTimeout(MENU[b.dataset.m],50); });

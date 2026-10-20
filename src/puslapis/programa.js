@@ -597,6 +597,7 @@ const MENU={
   routes:()=>{ state={route:null,day:today,trip:null,stop:null,dir:null,variant:null};
     if(isPhone()) setPage('routes','push'); render(true); fitAll();
     if(!isPhone()){const pn=document.getElementById('panel'); if(pn) pn.scrollTop=0;} },
+  plan:()=>{ if(page==='routes') toPlan(); else goHome(); },
   tour:tourStart, inst:doInstall, fb:openFeedback,
   a11y:()=>{const d=document.getElementById('a11ydlg'); if(d&&d.showModal) d.showModal();}};
 menu.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{ menu.close(); setTimeout(MENU[b.dataset.m],50); });
