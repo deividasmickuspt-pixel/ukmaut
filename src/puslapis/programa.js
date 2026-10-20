@@ -32,6 +32,15 @@ function legNotes(l){const names=new Set(l.t.P.s.slice(l.i,l.j+1).map(nm)); cons
 // oficiali kryptis (galinė stotelė) kiekvienoje stotelėje – iš reisų, kurie iš jos išvyksta
 const DIRAT={}; D.trips.forEach(t=>t.P.s.forEach((id,i)=>{if(i>=t.P.s.length-1)return; const to=legTo({t,i}).replace(/ \(.*\)$/,'').replace(/ ir atgal į AS$/,''), a=DIRAT[id]||(DIRAT[id]={}), e=a[to]||(a[to]={n:0}); e.n++; e[t.r]=(e[t.r]||0)+1;}));
 const dirList=(id,r)=>{const c=e=>r?e[r]||0:e.n, a=DIRAT[id]||{}, tot=Object.values(a).reduce((s,e)=>s+c(e),0); return Object.entries(a).filter(([,e])=>c(e)&&c(e)>=tot*.2).sort((x,y)=>c(y[1])-c(x[1])).slice(0,3).map(([to])=>to);};
+// kryptys su maršrutų numeriais: kurie maršrutai kur važiuoja iš šios stotelės, kuriems ji galinė
+const ENDS={}; D.trips.forEach(t=>{const e=t.P.s.at(-1); (ENDS[e]||(ENDS[e]={}))[t.r]=(ENDS[e][t.r]||0)+1;});
+function dirParts(id){ const a=DIRAT[id]||{}, rs=STOP[id].routes, dep=r=>Object.values(a).reduce((s,e)=>s+(e[r]||0),0);
+  const ends=rs.filter(r=>(ENDS[id]||{})[r]&&(ENDS[id][r]>=dep(r)));
+  const go={}; rs.filter(r=>dep(r)).forEach(r=>dirList(id,r).forEach(to=>(go[to]||(go[to]=[])).push(r)));
+  return {ends, go:Object.entries(go).map(([to,rs])=>({to,rs})).sort((x,y)=>x.rs[0].localeCompare(y.rs[0],undefined,{numeric:true}))}; }
+const sb=r=>`<span class="b sb" style="background:${C(r)}" aria-label="${r} maršrutas">${r}</span>`;
+function dirHtml(id){ const {ends,go}=dirParts(id);
+  return `<span class="dh">${ends.length?`<span class="dhl"><b>Galinė stotelė</b> ${ends.map(sb).join('')}</span>`:''}${go.map(g=>`<span class="dhl">${g.rs.map(sb).join('')} <span aria-hidden="true">→</span><span class="vh">kryptis</span> ${esc(g.to)}</span>`).join('')}</span>`; }
 const dirTxt=(id,r)=>{const l=r&&dirList(id,r).length?dirList(id,r):dirList(id); return l.length?'kryptis '+l.join(', '):(STOP[id].routes.length?'galinė stotelė':'');};
 const noteTxt=t=>[...t.n,...(t.v?['išvyksta iš Vytauto g. stotelės']:[])];
 let state={route:null,day:today,trip:null,stop:null,dir:null};
@@ -241,7 +250,7 @@ map.on('zoomend',drawArrows);
 function clearHL(){if(hl){map.removeLayer(hl);hl=null;}setArrows([]);}
 // telefono planuoklio žemėlapyje paspausta stotelė niekur neperjungia: langelis „Iš čia / Į čia“
 function stopPopup(id,note){ const st=STOP[id], box=document.createElement('div'); box.className='stoppop'+(onMapPg()?' sp-map':'');
-  box.innerHTML=`${note?`<span class="spnote">${note}</span>`:''}<span class="spn"><b>${esc(st.name)}</b>${(onMapPg()?mapDirOf(id):dirTxt(id))?` <small>${esc(onMapPg()?mapDirOf(id):dirTxt(id))}</small>`:''}</span>
+  box.innerHTML=`${note?`<span class="spnote">${note}</span>`:''}<span class="spn"><b>${esc(st.name)}</b>${onMapPg()?(mapDirOf(id)?` <small>${esc(mapDirOf(id))}</small>`:''):dirHtml(id)}</span>
     ${onMapPg()?`<button type="button" class="sptt" data-tt aria-label="Stotelės ${esc(st.name)} tvarkaraštis">Tvarkaraštis ›</button>`:''}<span class="spb"><button type="button" data-w="from" aria-label="Važiuosiu iš stotelės ${esc(st.name)}">Iš čia</button><button type="button" data-w="to" aria-label="Važiuosiu į stotelę ${esc(st.name)}">Į čia</button></span>${onMapPg()?'':`<button type="button" class="sptt2" data-tt aria-label="Stotelės ${esc(st.name)} tvarkaraštis">Tvarkaraštis ›</button>`}`;   // žemėlapio puslapyje pagrindinis – tvarkaraštis
   const pop=L.popup({closeButton:false,autoPanPadding:[6,6],maxWidth:300,className:'stoppopw'}).setLatLng([st.lat,st.lon]).setContent(box).openOn(map);
   box.querySelectorAll('[data-tt]').forEach(b=>b.onclick=()=>{ map.closePopup(pop); openStop(id); });
@@ -478,7 +487,7 @@ function syncStopDlg(){
   if(!(isPhone()&&state.stop)){ const was=dlg.dataset.id; if(dlg.open){ dlg.close(); setTimeout(()=>{const b=document.querySelector(`#panel [data-openstop="${was}"]`); if(b) b.focus({preventScroll:true});},0); } dlg.dataset.id=''; return; }   // fokusas grįžta į paspaustą stotelę
   const id=state.stop, st=STOP[id], r=state.route, bl0=[...(TTS[id]||[])], bl1=r&&bl0.some(b=>b.r===r)?bl0.filter(b=>b.r===r):bl0, dw=r&&state.dir&&((D.dirs[r]||{})[rbMode(r)]||{})[state.dir], bl2=dw?bl1.filter(b=>b.r!==r||blkInDir(b,id,r,dname(dw.to),rbMode(r))):bl1, bl=mergeBlocks(bl2.length?bl2:bl1).sort((a,b)=>a.r.localeCompare(b.r,undefined,{numeric:true})), dt=dirTxt(id,r), endHere=dw&&!bl2.length&&bl1.length;
   if(!dlg.open||dlg.dataset.id!==id){ dlgDay=null; dlgRoute=null; }
-  c.innerHTML=`<div class="pt-top"><span><b id="stopdlg-h">${esc(st.name)}</b>${dt?`<small>${esc(dt)}</small>`:''}</span><button type="button" class="clr" data-stopclose aria-label="Uždaryti tvarkaraštį">✕</button></div>
+  c.innerHTML=`<div class="pt-top"><span><b id="stopdlg-h">${esc(st.name)}</b>${dirHtml(id)}</span><button type="button" class="clr" data-stopclose aria-label="Uždaryti tvarkaraštį">✕</button></div>
     ${endHere?`<p class="sub">Kryptimi „${esc(dw.to)}“ autobusas čia baigia reisą. Lentelėje – išvykimai iš šios stotelės.</p>`:''}${routeTTHtml(st,bl)}
     ${D.stops.filter(o=>o.name===st.name&&o.id!==id).map(o=>`<button class="back" data-openstop="${o.id}" style="margin-top:1rem">Kita gatvės pusė${dirTxt(o.id,r)?`: ${esc(dirTxt(o.id,r))}`:''} ›</button>`).join('')}
     <p class="note">Jei laikas nesutampa su plakatu stotelėje, teisingas plakatas.</p>`;
