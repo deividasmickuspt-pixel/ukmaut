@@ -352,11 +352,15 @@ function routeBody(r){
   <p class="note">Spalvoti ženkliukai rodo, kokie kiti maršrutai sustoja toje stotelėje.</p>`;
 }
 // telefono maršrutų puslapyje atidarytas maršrutas – skirtukas po antrašte „Maršrutai ir tvarkaraščiai“ (žemėlapis lieka)
-const routeTab=r=>`<section class="rtab" aria-label="${r} maršrutas"><div class="rthead" style="--rc:${C(r)}">${badge(r,1)}<h3>${esc(D.meta[r].legend)}</h3><button type="button" class="clr" data-rclose aria-label="Uždaryti maršrutą">✕</button></div>${routeBody(r)}</section>`;
+const routeTab=r=>`<section class="rtab" aria-label="${r} maršrutas"><div class="rthead" style="--rc:${C(r)}">${badge(r,1)}<h2>${esc(D.meta[r].legend)}</h2><button type="button" class="clr" data-rclose aria-label="Uždaryti maršrutą">✕</button></div>${routeBody(r)}</section>`;
 function closeRoute(){ if(history.state&&history.state.r) history.back(); else { state={route:null,day:today,trip:null,stop:null,dir:null,variant:null}; render(true); fitAll(); document.getElementById('panel').scrollTop=0; } }
+// telefono maršrutų puslapyje poraštė – sąrašo gale (ne visada matoma)
+function addFoot(el){ if(onRoutesPg()) el.insertAdjacentHTML('beforeend',`<div class="pfoot">${document.getElementById('appfoot').innerHTML}</div>`); }
 function render(fit){
   if(!state.route&&!state.stop) viewDay=dayInfo(isoDate(new Date())).day;
   applyMode();
+  // telefono maršrutų puslapis: atidarius maršrutą – mažesnis žemėlapis ir viena antraštė (daugiau vietos sąrašui)
+  const rto=onRoutesPg()&&!!state.route; if(document.body.classList.contains('rtopen')!==rto){ document.body.classList.toggle('rtopen',rto); map.invalidateSize(); }
   const el=document.getElementById('panel'); const sc=el.scrollTop||0;
   const dayBtns=(cur,attr,avail)=>`<div class="days" role="group" aria-label="Diena">${['W','WE'].map(d=>`<button ${attr}="${d}" class="${d===cur?'on':''}"${avail&&!avail(d)?' disabled':''} aria-pressed="${d===cur}">${DAYS[d]}</button>`).join('')}</div>`;
   if(state.stop){
@@ -371,7 +375,7 @@ function render(fit){
     <p class="note">Jei laikas nesutampa su plakatu stotelėje, teisingas plakatas.</p>`;
     el.querySelectorAll('[data-openstop]').forEach(x=>x.onclick=()=>openStop(x.dataset.openstop));
     el.querySelectorAll('[data-stopback]').forEach(x=>x.onclick=()=>{state.stop=null;render(true);});
-    el.scrollTop=0; syncLegend(); return;
+    el.scrollTop=0; addFoot(el); syncLegend(); return;
   }
   if(!state.route||onRoutesPg()){   // telefono maršrutų puslapyje maršrutas atsiveria po savo kortele
     if(state.route) routeView(fit);
@@ -410,7 +414,7 @@ function render(fit){
     <div class="rhead">${badge(r,1)}<h2>${esc(D.meta[r].legend)}</h2></div>
     ${routeBody(r)}`;
   }
-  syncLegend(); markSel();
+  addFoot(el); syncLegend(); markSel();
   if(state.route) el.scrollTop=sc;
   el.querySelectorAll('[data-sel]').forEach(b=>b.onclick=()=>selectRoute(b.dataset.sel));
   el.querySelectorAll('[data-rclose]').forEach(b=>b.onclick=closeRoute);
