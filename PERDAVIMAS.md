@@ -23,7 +23,8 @@ Darbo dienomis visą dieną į Užupį – apylanka per magistralę; poilsio die
 | 6-1 / 6-2 | 6 (AS→Žaliasis) → **7** iki Narbuto → **1** (6:00 / 14:45) → 6 ratai |
 
 ## Planuoklio taisyklės (`computePlan`, `findTrips` – `src/puslapis/programa.js`)
-- Tiesiogiai arba su 1 persėdimu; „likite autobuse“, kai tas pats `blk` tęsia kitu numeriu.
+- Tiesiogiai arba su 1 persėdimu; „likite autobuse“ – tik kai tai **to paties autobuso (`blk`) kitas reisas** (`NEXT` programa.js; anksčiau buvo galima „likti“ ir vėlesniame to paties autobuso reise, nors autobusas tarpe dar važiavo ratą). Tęsinys randamas ir kai reisas baigiasi „Autobusų stotis“, o kitas prasideda „Autobusų stotis (Vytauto g.)“. Savaitgalio reisai `blk` neturi – ten numerio keitimas rodomas kaip persėdimas (reikia AP savaitgalio grafikų).
+- Duomenų patikra (2026-10-20): laikai visuose reisuose didėja, visos stotelės yra; darbo dienų autobusų grandinės nenutrūksta (išskyrus 2-1: 21:59 Žiedo → 23:15 Narbuto, autobusas nuvažiuoja tuščias).
 - Ėjimas: pradžioje (iki 400 m nuo pasirinktos stotelės; ≤120 m = „ta pati vieta“), persėdant (≤400 m), pabaigoje (≤400 m); daugiausia 2 ėjimai.
 - Atmetama: 0 min važiavimai, važiavimai tarp gretimų (≤150 m) stotelių, ėjimai ne trumpesni už visą kelią pėsčiomis, važiavimai >1,6× ilgesni už trumpiausią variantą, kelionės >1,5×+10 min ilgesnės už greičiausią.
 - Lygus atvykimas → trumpesnis kelias (km, min autobuse). Rikiuojama pagal atvykimą; pirmas „⭐ Rekomenduojama“.

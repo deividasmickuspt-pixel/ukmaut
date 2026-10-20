@@ -70,11 +70,14 @@ const WALK=(()=>{const W=new Map(),k=Math.cos(55.25*Math.PI/180);
     const min=Math.ceil(m*1.3/75)+1;   // street detour ×1.3, ~4.5 km/h, +1 min reserve
     if(!W.has(a_.id))W.set(a_.id,[]); W.get(a_.id).push({id:b_.id,m:Math.round(m*1.3/10)*10,min});}));
   return W;})();
+// the same bus (blk, one day type) – its next trip in time order: only there can a rider stay on board
+const NEXT=(()=>{ const by=new Map(), M=new Map(); D.trips.forEach(t=>{ if(!t.b) return; const k=t.d+'|'+t.b; if(!by.has(k)) by.set(k,[]); by.get(k).push(t); });
+  by.forEach(L=>{ L.sort((a,b)=>a.t[0]-b.t[0]); L.forEach((t,i)=>{ if(L[i+1]) M.set(t,L[i+1]); }); }); return M; })();
 function nearStops(id,maxM){const K=Math.cos(55.25*Math.PI/180),a_=STOP[id],out=[]; if(!a_) return out;
   D.stops.forEach(b_=>{ if(b_.name===a_.name) return; const m=Math.hypot((a_.lat-b_.lat)*111320,(a_.lon-b_.lon)*111320*K);
     if(m<=maxM) out.push({id:b_.id,m:Math.round(m*1.3/10)*10,min:Math.ceil(m*1.3/75)+1});}); return out;}
 function computePlan(A,B,day,T,opt={}){ const RAD=opt.walkMax||400;
-  const ts=D.trips.filter(t=>inDay(t,day));
+  const ts=D.trips.filter(t=>inDay(t,day)), tsS=new Set(ts);
   const K=Math.cos(55.25*Math.PI/180), dm=(x,y)=>{const p=STOP[x],q=STOP[y];return p&&q?Math.hypot((p.lat-q.lat)*111320,(p.lon-q.lon)*111320*K):1e9;};
   // where you can board: the chosen stop, or any stop within walking distance of it (≤120 m counts as the same place)
   const ORIG=new Map();
@@ -100,12 +103,14 @@ function computePlan(A,B,day,T,opt={}){ const RAD=opt.walkMax||400;
       const eb=endAt(t,i); if(eb&&eb.walkEnd&&(j<0||eb.z<j)) out.push({...base,legs:[{t,i,j:eb.z}],arr:eb.arr,walkEnd:eb.walkEnd,walk:w0+1});
       const kEnd=j>0?j:s.length;
       for(let k=i+1;k<kEnd;k++){const X=nm(s[k]),a1=t.t[k];
-        (byName.get(X)||[]).forEach(([u,k2])=>{ if(u===t) return; const same=u.P.s[k2]===s[k];
-          const cont=t.b&&u.b===t.b&&k===s.length-1&&k2===0;   // the same bus carries on (possibly with another number)
+        const nx=k===s.length-1&&NEXT.get(t);   // the same bus carries on (possibly with another number) – only its very next trip
+        const tryU=(u,k2)=>{ if(u===t) return; const same=u.P.s[k2]===s[k], cont=u===nx&&k2===0;
           if(u.r===t.r&&!(same&&k===s.length-1)&&!cont) return;
           const w=(u.r===t.r||cont)?0:same?1:2; if(u.t[k2]<a1+w||u.t[k2]>a1+60) return;
           const eb=endAt(u,k2); if(!eb) return; const nw=w0+(eb.walkEnd?1:0); if(nw>2) return;
-          out.push({...base,legs:[{t,i,j:k},{t:u,i:k2,j:eb.z,cont}],arr:eb.arr,walkEnd:eb.walkEnd,walk:nw});});
+          out.push({...base,legs:[{t,i,j:k},{t:u,i:k2,j:eb.z,cont}],arr:eb.arr,walkEnd:eb.walkEnd,walk:nw});};
+        (byName.get(X)||[]).forEach(([u,k2])=>tryU(u,k2));
+        if(nx&&nm(nx.P.s[0])!==X&&tsS.has(nx)) tryU(nx,0);   // e.g. ends at „Autobusų stotis“, carries on from „Autobusų stotis (Vytauto g.)“
         // transfer on foot to a nearby stop with another name
         if(w0) continue;   // at most two walks per trip
         (WALK.get(s[k])||[]).forEach(wk=>{ if(nm(wk.id)===B||nm(wk.id)===A) return;
