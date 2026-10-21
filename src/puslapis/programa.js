@@ -282,6 +282,9 @@ function applyMode(){ if(wasSimple!==isPhone()){ wasSimple=isPhone(); D.stops.fo
   const el=document.getElementById('modeinfo'); if(el) el.innerHTML=MODE()==='D'?'<b>Darbo dienų schema</b><span class="mi2"><br>į Užupį – apylanka per magistralę, visą dieną</span>':'<b>Poilsio dienų schema</b><span class="mi2"><br>be apylankos, tiltu abiem kryptimis</span>';}
 function fade(on){lineLayers.forEach(({x,pl})=>pl.setStyle(on?{opacity:.12}:{opacity:.9}));
   D.stops.forEach(s=>markers[s.id].setStyle(on?{opacity:.25,fillOpacity:.25,radius:simpleMap()?3:4}:stopBase()));}
+// ėjimo linija gatvėmis (iš anksto apskaičiuota – ejimo_keliai.py); jei nėra – tiesiai
+function walkLine(p,q){ const k1=p.id+'|'+q.id, k2=q.id+'|'+p.id, w=WALKG[k1]||(WALKG[k2]&&[...WALKG[k2]].reverse());
+  return w||[[p.lat,p.lon],[q.lat,q.lon]]; }
 function drawLegs(legs,fit){
   clearHL(); fade(true); hl=L.layerGroup().addTo(map); const all=[];
   legs.forEach(l=>{const p=l.t.P,seg=p.line.slice(p.idx[l.i],p.idx[l.j]+1);all.push(...seg);
@@ -289,16 +292,20 @@ function drawLegs(legs,fit){
     for(let k=l.i;k<=l.j;k++){const s=STOP[p.s[k]];L.circleMarker([s.lat,s.lon],{radius:k===l.i||k===l.j?8:5,color:C(l.t.r),weight:3,fillColor:'#fff',fillOpacity:1}).on('click',e=>{L.DomEvent.stopPropagation(e); if(simpleMap()) stopPopup(s.id); else openStop(s.id);}).addTo(hl).bindTooltip(`${esc(s.name)} <b>${hm(l.t.t[k])}</b>`,{direction:'top',className:'tip'});}});
   setArrows(legs.map(l=>({pts:l.t.P.line.slice(l.t.P.idx[l.i],l.t.P.idx[l.j]+1),color:C(l.t.r)})));
   legs.forEach((l,k)=>{ if(!k||!l.walk) return; const p=STOP[legs[k-1].t.P.s[legs[k-1].j]], q=STOP[l.walk.id];
-    if(p&&q){ L.polyline([[p.lat,p.lon],[q.lat,q.lon]],{color:'#3b4252',weight:4,dashArray:'2 8',lineCap:'round',interactive:false}).addTo(hl); all.push([p.lat,p.lon],[q.lat,q.lon]); }});
-  const o0=plan.res[plan.opt]; if(o0&&o0.walkStart){const p=STOP[o0.walkStart.from],q=STOP[o0.walkStart.to];
-    if(p&&q){ L.polyline([[p.lat,p.lon],[q.lat,q.lon]],{color:'#3b4252',weight:4,dashArray:'2 8',lineCap:'round',interactive:false}).addTo(hl); all.push([p.lat,p.lon],[q.lat,q.lon]); }}
-  const oo=plan.res[plan.opt]; if(oo&&oo.walkEnd){const l=legs[legs.length-1],p=STOP[l.t.P.s[l.j]],q=STOP[oo.walkEnd.to];
-    if(p&&q){ L.polyline([[p.lat,p.lon],[q.lat,q.lon]],{color:'#3b4252',weight:4,dashArray:'2 8',lineCap:'round',interactive:false}).addTo(hl); all.push([p.lat,p.lon],[q.lat,q.lon]); }}
-  const pin=(id,cls,txt)=>{const s=STOP[id];L.marker([s.lat,s.lon],{zIndexOffset:1000,icon:L.divIcon({className:'',html:`<div class="pin ${cls}"></div>`,iconSize:[28,28],iconAnchor:[14,14]})}).on('click',e=>{L.DomEvent.stopPropagation(e); if(simpleMap()) stopPopup(id); else openStop(id);}).addTo(hl).bindTooltip(txt,{permanent:true,direction:'top',offset:[0,-14],className:'tip'});};
+    if(p&&q){ const w=walkLine(p,q); L.polyline(w,{color:'#3b4252',weight:4,dashArray:'2 8',lineCap:'round',interactive:false}).addTo(hl); all.push(...w); }});
+  const o0=onRoutesPg()?null:plan.res[plan.opt]; if(o0&&o0.walkStart){const p=STOP[o0.walkStart.from],q=STOP[o0.walkStart.to];
+    if(p&&q){ const w=walkLine(p,q); L.polyline(w,{color:'#3b4252',weight:4,dashArray:'2 8',lineCap:'round',interactive:false}).addTo(hl); all.push(...w); }}
+  const oo=onRoutesPg()?null:plan.res[plan.opt]; if(oo&&oo.walkEnd){const l=legs[legs.length-1],p=STOP[l.t.P.s[l.j]],q=STOP[oo.walkEnd.to];
+    if(p&&q){ const w=walkLine(p,q); L.polyline(w,{color:'#3b4252',weight:4,dashArray:'2 8',lineCap:'round',interactive:false}).addTo(hl); all.push(...w); }}
+  const pin=(id,cls,txt)=>{const s=STOP[id];const m=L.marker([s.lat,s.lon],{zIndexOffset:1000,icon:L.divIcon({className:'',html:`<div class="pin ${cls}"></div>`,iconSize:[28,28],iconAnchor:[14,14]})}).on('click',e=>{L.DomEvent.stopPropagation(e); if(simpleMap()) stopPopup(id); else openStop(id);}).addTo(hl); if(txt) m.bindTooltip(txt,{permanent:true,direction:'top',offset:[0,-14],className:'tip ttime'});};
   const a=legs[0],z=legs.at(-1);
-  pin(a.t.P.s[a.i],'start',`<b>${hm(a.t.t[a.i])}</b> ${badge(a.t.r)} ${esc(nm(a.t.P.s[a.i]))}`);
-  if(legs.length>1&&legs[1].t.r!==legs[0].t.r&&!legs[1].cont){const b=legs[1];pin(b.t.P.s[b.i],'xfer',`🔁 <b>${hm(b.t.t[b.i])}</b> ${badge(b.t.r)} ${esc(nm(b.t.P.s[b.i]))}`);}
-  pin(z.t.P.s[z.j],'end',`<b>${hm(z.t.t[z.j])}</b> ${esc(nm(z.t.P.s[z.j]))}`);
+  const ph=isPhone();   // telefone – tik laikas (mažas žemėlapis)
+  const ws=oo&&oo.walkStart&&!oo.walkStart.near?oo.walkStart:null, we=oo&&oo.walkEnd;   // su ėjimu: žalias / raudonas – pradžios ir tikslo stotelės, išlipimo / įlipimo stotelė – baltas taškas
+  if(ws) pin(ws.from,'start',`<b>${hm(oo.dep)}</b>`);
+  pin(a.t.P.s[a.i],ws?'off':'start',ws&&ph?'':ph?`<b>${hm(a.t.t[a.i])}</b>`:`<b>${hm(a.t.t[a.i])}</b> ${badge(a.t.r)} ${esc(nm(a.t.P.s[a.i]))}`);
+  if(legs.length>1&&legs[1].t.r!==legs[0].t.r&&!legs[1].cont){const b=legs[1];pin(b.t.P.s[b.i],'xfer',ph?`🔁 <b>${hm(b.t.t[b.i])}</b>`:`🔁 <b>${hm(b.t.t[b.i])}</b> ${badge(b.t.r)} ${esc(nm(b.t.P.s[b.i]))}`);}
+  if(we) pin(we.to,'end',`<b>${hm(oo.arr)}</b>`);
+  pin(z.t.P.s[z.j],we?'off':'end',we&&ph?'':ph?`<b>${hm(z.t.t[z.j])}</b>`:`<b>${hm(z.t.t[z.j])}</b> ${esc(nm(z.t.P.s[z.j]))}`);
   if(fit) map.fitBounds(all,isPhone()&&!mapBig?{paddingTopLeft:[18,50],paddingBottomRight:[18,14],maxZoom:16}:{padding:[60,60],maxZoom:16});   // mažame žemėlapyje viršuje vieta mygtukui „Padidinti“
 }
 let stopShown=null;
@@ -690,7 +697,8 @@ function tripSteps(o){ const S=[], st=(ic,h,t,sm)=>S.push(`<li><span class="si" 
       else { const pid=prev.t.P.s[prev.j]; st('🔁','',pid===a?`Persėskite toje pačioje stotelėje${wait>0?`, laukite ${wait} min.`:''}`:`Pereikite į stotelę <b>„${esc(nm(a))}“</b>${nm(pid)===nm(a)?' kitoje gatvės pusėje':''}${wait>0?`, laukite ${wait} min.`:''}`); } }
     if(!k||l.walk||!l.cont){ const x=[satOnly(l.t)?'<b>tik šeštadieniais</b>':'',...legNotes(l).map(esc)].filter(Boolean);
       st('🚏',hm(l.t.t[l.i]),`Įlipkite į ${nb(l.t.r)} autobusą stotelėje <b>„${esc(nm(a))}“</b>`,`kryptis ${esc(legTo(l))}${x.length?' · '+x.join(' · '):''}`); }
-    const ns=l.j-l.i; st('🚌','',`Važiuokite ${l.t.t[l.j]-l.t.t[l.i]} min. (${ns} ${stotW(ns)})`);
+    const ns=l.j-l.i, pass=l.t.P.s.slice(l.i+1,l.j+1).map((id,q)=>`<li${q===ns-1?' class="rlast"':''}><span class="rt">${hm(l.t.t[l.i+1+q])}</span>${esc(nm(id))}</li>`).join('');   // paspaudus – pravažiuojamos stotelės
+    S.push(`<li><span class="si" aria-hidden="true">🚌</span><span class="sx"><details class="ridest"><summary>Važiuokite ${l.t.t[l.j]-l.t.t[l.i]} min. (<span class="rns">${ns} ${stotW(ns)}</span>)</summary><ol class="rstops" style="--rc:${C(l.t.r)}">${pass}</ol></details></span></li>`);
     if(!(nx&&!nx.walk&&nx.cont)) st('🛑',hm(l.t.t[l.j]),`Išlipkite stotelėje <b>„${esc(nm(z))}“</b>`); });
   if(o.walkEnd) st('🚶','',`Nueikite ~${o.walkEnd.m} m (≈${o.walkEnd.min} min.) iki stotelės <b>„${esc(nm(o.walkEnd.to))}“</b> – būsite ~${hm(o.arr)}`);
   return S.join(''); }

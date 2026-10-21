@@ -62,6 +62,9 @@ li.end .dot{width:26px;height:26px;margin-left:4px}
 .ocard .opt{border:0;border-radius:0;box-shadow:none;cursor:pointer}
 .osum{display:flex;align-items:center;flex-wrap:wrap;gap:4px}.osum .b{font-size:.75rem;min-width:1.8em;height:1.8em}.osum .ometa{margin-left:.3rem}.ocont,.oxf{color:var(--muted);font-weight:700}
 .oexp{align-self:flex-end;font-size:.85rem;font-weight:700;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.ridest summary{cursor:pointer;list-style:none;min-height:32px}.ridest summary::-webkit-details-marker{display:none}
+.ridest summary .rns{text-decoration:underline;text-underline-offset:3px;font-weight:700}.ridest summary .rns::after{content:'\00a0▾';text-decoration:none;display:inline-block}.ridest[open] summary .rns::after{content:'\00a0▴'}
+.rstops{list-style:none;margin:.3rem 0 .2rem;padding:0 0 0 .2rem;border-left:4px solid var(--rc);font-size:.9rem}.steps .rstops li{display:flex;gap:.5rem;padding:.1rem 0 .1rem .55rem;border:0;font-size:.88rem;line-height:1.3}.rstops .rt{font-variant-numeric:tabular-nums;color:var(--muted);min-width:2.8em}.rstops .rlast{font-weight:700}
 .steps{list-style:none;margin:0;padding:.2rem .8rem .8rem;border-top:1px solid var(--line)}
 .steps li{display:flex;gap:.6rem;align-items:flex-start;padding:.45rem 0;border-bottom:1px dashed var(--line);font-size:.95rem;line-height:1.35}.steps li:last-child{border-bottom:0}
 .steps .si{flex:none;width:1.6em;text-align:center;font-size:1.05rem}.steps .sh{font-size:1.02rem}.steps small{display:block;color:var(--muted);font-size:.82rem}.steps .b{font-size:.72rem;min-width:1.7em;height:1.7em;vertical-align:middle}
@@ -74,7 +77,7 @@ li.end .dot{width:26px;height:26px;margin-left:4px}
 .onmap{font-size:.8rem;font-weight:700;color:#7A5A00}
 .empty{margin-top:.8rem;padding:.7rem;border:1px dashed var(--line);border-radius:10px}
 .pin{width:28px;height:28px;border-radius:50%;border:4px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)}
-.pin.start{background:#0B7A3E}.pin.end{background:#B42318}.pin.xfer{background:#F5B800}
+.pin.off{background:#fff;border-color:#14213D;width:20px;height:20px;margin:4px}.pin.start{background:#0B7A3E}.pin.end{background:#B42318}.pin.xfer{background:#F5B800}
 
 .sub{margin:.2rem 0 .8rem}
 .when{margin-top:.4rem}.tin{min-height:50px}
@@ -202,7 +205,7 @@ li.end .dot{width:26px;height:26px;margin-left:4px}
 .rvn{align-self:start;font-weight:700;font-size:.85rem;white-space:nowrap}.rvm{grid-column:1/-1;font-size:.8rem;color:var(--muted)}.rvt{grid-column:1/-1;font-size:.85rem;font-variant-numeric:tabular-nums;line-height:1.4}
 .rvmore{margin-top:.7rem}.rvmore summary{list-style:none;cursor:pointer;font-weight:700;min-height:40px;display:flex;align-items:center}
 .rvmore summary::before{content:'▸';margin-right:.45rem;transition:transform .15s}.rvmore[open] summary::before{transform:rotate(90deg)}.rvb{scroll-margin-top:12px;scroll-margin-bottom:12px}
-.allbtn{display:block;margin:.8rem auto 0;font-size:.95rem}
+.allbtn{display:flex!important;align-items:center;justify-content:center;width:100%;min-height:48px!important;margin:.7rem 0 0!important;padding:.6rem .8rem!important;border:2px solid var(--line)!important;border-radius:14px;background:var(--card)!important;color:var(--ink);font-weight:700!important;font-size:.98rem!important;text-decoration:none!important;cursor:pointer}
 .alist{list-style:none;margin:0;padding:0}.alist li{border-bottom:1px solid var(--line)}
 .arow{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"t b" "m m";gap:2px .6rem;align-items:center;width:100%;min-height:52px;padding:.45rem .2rem;border:0;background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
 .arow .at{grid-area:t;font-size:1.05rem}.arow .ab{grid-area:b;display:flex;gap:3px;justify-content:flex-end}.arow .ab .b{font-size:.7rem;min-width:1.7em;height:1.7em}.arow .am{grid-area:m;font-size:.8rem;color:var(--muted)}
@@ -333,7 +336,8 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
   body.mapbig #left #map{height:72vh!important}
   .mapexp{display:none;min-height:36px;padding:.2rem .7rem;border:2px solid var(--ink);border-radius:10px;background:var(--card);color:var(--ink);font:700 .85rem "Atkinson Hyperlegible",system-ui,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
   body:not(.mapbig) .onmap{display:none}
-  body:not(.mapbig) .leaflet-tooltip{display:none}
+  body:not(.mapbig) .leaflet-tooltip:not(.ttime){display:none}
+  .leaflet-tooltip.ttime{font-size:.85rem;padding:2px 6px}   /* telefone – tik išvykimo / atvykimo laikas */
   .stoppopw .leaflet-popup-content{margin:8px 10px;font:inherit;font-size:.88rem;color:var(--ink)}
   .stoppop{display:flex;flex-direction:column;gap:6px}
   .stoppop .spn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}.stoppop small{color:var(--muted)}

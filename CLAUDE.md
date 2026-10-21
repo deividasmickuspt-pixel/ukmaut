@@ -29,6 +29,7 @@ Visos komandos leidžiamos iš `src/` (skriptai naudoja kelius `duomenys/…`, `
 - `planuoklio_reisai.py` → `tarpiniai/planuoklio_duomenys.json` (reisai planuokliui);
 - `zemelapio_linijos.py` (+ `--geom`: trūkstamos atkarpos per `gatviu_marsrutai.py`) – linijos, kryptys;
 - `atkarpu_galai.py` – atkarpų galai iki stotelių; `autobuso_ratai.py` – 1 maršruto Dukstynos ratai;
+- `ejimo_keliai.py` – pėsčiųjų keliai OSM gatvėmis tarp artimų stotelių (planuoklio ėjimo linijos);
 - `surinkti_puslapi.py` – `puslapis/sablonas.html` + duomenys + `puslapis/programa.js` → `../index.html`.
 
 `src/puslapis/` – `sablonas.html` (HTML/CSS „galva“, baigiasi `<script>`; čia ir favicon bei Vercel Web Analytics) ir `programa.js` (visa logika: planuoklis `computePlan`/`findTrips`, instrukcija `TOUR`, žemėlapis).

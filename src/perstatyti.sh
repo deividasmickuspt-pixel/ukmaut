@@ -10,5 +10,6 @@ python3 skriptai/zemelapio_linijos.py --geom         # trūkstamos atkarpos OSM 
 python3 skriptai/atkarpu_galai.py > /dev/null        # atkarpų galai iki stotelių
 python3 skriptai/planuoklio_reisai.py > /dev/null
 python3 skriptai/zemelapio_linijos.py                # linijos, kryptys, „Kiti reisai“
+python3 skriptai/ejimo_keliai.py                    # pėsčiųjų keliai tarp artimų stotelių -> tarpiniai/ejimo_keliai.json
 python3 skriptai/surinkti_puslapi.py                 # -> ../index.html (tai, ką rodo Vercel)
 echo "Paruošta: ../index.html"
