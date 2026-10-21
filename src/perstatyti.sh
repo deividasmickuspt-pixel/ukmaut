@@ -12,4 +12,5 @@ python3 skriptai/planuoklio_reisai.py > /dev/null
 python3 skriptai/zemelapio_linijos.py                # linijos, kryptys, „Kiti reisai“
 python3 skriptai/ejimo_keliai.py                    # pėsčiųjų keliai tarp artimų stotelių -> tarpiniai/ejimo_keliai.json
 python3 skriptai/surinkti_puslapi.py                 # -> ../index.html (tai, ką rodo Vercel)
+python3 skriptai/senoji_versija.py                  # senoji versija su naujais duomenimis -> ../senas/index.html
 echo "Paruošta: ../index.html"

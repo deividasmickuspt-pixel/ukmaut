@@ -991,6 +991,7 @@ const MENU={
   plan:()=>{ if(page!=='plan') toPlan(); else goHome(); },
   map:()=>{ state={route:null,day:today,trip:null,stop:null,dir:null,variant:null}; setPage('map','push'); render(true); },
   tour:tourStart, inst:doInstall, fb:openFeedback,
+  old:()=>{ location.href='/senas/'; },   // senoji versija (laikina, su naujais duomenimis)
   a11y:()=>{const d=document.getElementById('a11ydlg'); if(d&&d.showModal) d.showModal();}};
 menu.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{ menu.close(); setTimeout(MENU[b.dataset.m],50); });
 if(!FEEDBACK_URL) menu.querySelector('[data-m="fb"]').hidden=true;

@@ -524,6 +524,7 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
 <li><button type="button" data-m="fb"><span class="mi" aria-hidden="true">❗</span>Pranešti apie klaidą ar pasiūlyti</button></li>
 <li><button type="button" data-m="inst"><span class="mi" aria-hidden="true">📲</span>Įsidėti į telefono ekraną</button></li>
 <li><button type="button" data-m="a11y"><span class="mi" aria-hidden="true">♿</span>Prieinamumo deklaracija</button></li>
+<li><button type="button" data-m="old"><span class="mi" aria-hidden="true">🕰️</span>Senoji versija</button></li>
 </ul>
 
 </dialog>
@@ -1536,6 +1537,7 @@ const MENU={
   plan:()=>{ if(page!=='plan') toPlan(); else goHome(); },
   map:()=>{ state={route:null,day:today,trip:null,stop:null,dir:null,variant:null}; setPage('map','push'); render(true); },
   tour:tourStart, inst:doInstall, fb:openFeedback,
+  old:()=>{ location.href='/senas/'; },   // senoji versija (laikina, su naujais duomenimis)
   a11y:()=>{const d=document.getElementById('a11ydlg'); if(d&&d.showModal) d.showModal();}};
 menu.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{ menu.close(); setTimeout(MENU[b.dataset.m],50); });
 if(!FEEDBACK_URL) menu.querySelector('[data-m="fb"]').hidden=true;
