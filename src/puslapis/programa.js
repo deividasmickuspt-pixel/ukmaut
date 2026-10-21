@@ -310,17 +310,17 @@ function drawLegs(legs,fit){
   const a=legs[0],z=legs.at(-1);
   const ph=isPhone();   // telefone – tik laikas (mažas žemėlapis)
   const ws=oo&&oo.walkStart&&!oo.walkStart.near?oo.walkStart:null, we=oo&&oo.walkEnd;   // su ėjimu: žalias / raudonas – pradžios ir tikslo stotelės, išlipimo / įlipimo stotelė – baltas taškas
-  if(ws) pin(ws.from,'start',`<b>${hm(oo.dep)}</b>`);
-  pin(a.t.P.s[a.i],ws?'off':'start',ws&&ph?'':ph?`<b>${hm(a.t.t[a.i])}</b>`:`<b>${hm(a.t.t[a.i])}</b> ${badge(a.t.r)} ${esc(nm(a.t.P.s[a.i]))}`);
+  if(ws) pin(ws.from,'start',`<b>${hm(oo.dep)}</b>${ph?'':' '+esc(nm(ws.from))}`);
+  pin(a.t.P.s[a.i],ws?'off':'start',ws?'':ph?`<b>${hm(a.t.t[a.i])}</b>`:`<b>${hm(a.t.t[a.i])}</b> ${badge(a.t.r)} ${esc(nm(a.t.P.s[a.i]))}`);
   if(legs.length>1&&legs[1].t.r!==legs[0].t.r&&!legs[1].cont){const b=legs[1];pin(b.t.P.s[b.i],'xfer',ph?`🔁 <b>${hm(b.t.t[b.i])}</b>`:`🔁 <b>${hm(b.t.t[b.i])}</b> ${badge(b.t.r)} ${esc(nm(b.t.P.s[b.i]))}`);}
-  if(we) pin(we.to,'end',`<b>${hm(oo.arr)}</b>`);
-  pin(z.t.P.s[z.j],we?'off':'end',we&&ph?'':ph?`<b>${hm(z.t.t[z.j])}</b>`:`<b>${hm(z.t.t[z.j])}</b> ${esc(nm(z.t.P.s[z.j]))}`);
+  if(we) pin(we.to,'end',`<b>${hm(oo.arr)}</b>${ph?'':' '+esc(nm(we.to))}`);
+  pin(z.t.P.s[z.j],we?'off':'end',we?'':ph?`<b>${hm(z.t.t[z.j])}</b>`:`<b>${hm(z.t.t[z.j])}</b> ${esc(nm(z.t.P.s[z.j]))}`);
   if(fit) map.fitBounds(all,isPhone()&&!mapBig?{paddingTopLeft:[18,50],paddingBottomRight:[18,14],maxZoom:16}:{padding:[60,60],maxZoom:16});   // mažame žemėlapyje viršuje vieta mygtukui „Padidinti“
 }
 let stopShown=null;
 function closeStop(){ if(history.state&&history.state.s) history.back(); else { state.stop=null; render(false); } }
-function openStop(id){ const had=!!state.stop; state.stop=id;   // telefone laikai – lange virš bet kurio puslapio
-  if(isPhone()&&tourI<0){ const hs={pg:page,r:state.route,s:id}; if(had&&history.state&&history.state.s) history.replaceState(hs,'',location.href); else history.pushState(hs,'',location.href); }   // telefono „Atgal“ uždaro tvarkaraštį
+function openStop(id){ const had=!!state.stop; state.stop=id;   // laikai – lange virš bet kurio puslapio (ir kompiuteryje)
+  if(tourI<0){ const hs={pg:page,r:state.route,s:id}; if(had&&history.state&&history.state.s) history.replaceState(hs,'',location.href); else history.pushState(hs,'',location.href); }   // telefono „Atgal“ uždaro tvarkaraštį
   render(false);announce(`Stotelės ${sname(id)} tvarkaraštis.`);}
 const DCOL=[['W','Darbo dienomis'],['WE','Poilsio dienomis']];
 function ttBlock(b,k,all,dlg){   // dlg – telefono lange: pirmame bloke stotelės pavadinimas ir ✕
@@ -536,7 +536,7 @@ function posterHtml(st,bl){
 }
 function syncStopDlg(){
   const dlg=document.getElementById('stopdlg'), c=document.getElementById('stopdlg-c');
-  if(!(isPhone()&&state.stop)){ const was=dlg.dataset.id; if(dlg.open){ dlg.close(); setTimeout(()=>{const b=document.querySelector(`#panel [data-openstop="${was}"]`); if(b) b.focus({preventScroll:true});},0); } dlg.dataset.id=''; return; }   // fokusas grįžta į paspaustą stotelę
+  if(!state.stop){ const was=dlg.dataset.id; if(dlg.open){ dlg.close(); setTimeout(()=>{const b=document.querySelector(`#panel [data-openstop="${was}"]`); if(b) b.focus({preventScroll:true});},0); } dlg.dataset.id=''; return; }   // fokusas grįžta į paspaustą stotelę
   const id=state.stop, st=STOP[id], r=state.route, bl0=[...(TTS[id]||[])], bl1=r&&bl0.some(b=>b.r===r)?bl0.filter(b=>b.r===r):bl0, dw=r&&state.dir&&((D.dirs[r]||{})[rbMode(r)]||{})[state.dir], bl2=dw?bl1.filter(b=>b.r!==r||blkInDir(b,id,r,dname(dw.to),rbMode(r))):bl1, bl=mergeBlocks(bl2.length?bl2:bl1).sort((a,b)=>a.r.localeCompare(b.r,undefined,{numeric:true})), dt=dirTxt(id,r), endHere=dw&&!bl2.length&&bl1.length;
   if(!dlg.open||dlg.dataset.id!==id){ dlgDay=null; dlgRoute=null; }
   c.innerHTML=`<div class="pt-top"><span><b id="stopdlg-h">${esc(st.name)}</b></span><button type="button" class="clr" data-stopclose aria-label="Uždaryti tvarkaraštį">✕</button></div>
@@ -581,7 +581,7 @@ function render(fit){
   const el=document.getElementById('panel'); const sc=el.scrollTop||0;
   const dayBtns=(cur,attr,avail)=>`<div class="days" role="group" aria-label="Diena">${['W','WE'].map(d=>`<button ${attr}="${d}" class="${d===cur?'on':''}"${avail&&!avail(d)?' disabled':''} aria-pressed="${d===cur}">${DAYS[d]}</button>`).join('')}</div>`;
   syncStopDlg();
-  if(state.stop&&!isPhone()){
+  if(false&&state.stop){   // senas kompiuterio stotelės vaizdas – nebenaudojamas (tvarkaraštis lange kaip telefone)
     const id=state.stop, st=STOP[id], bl0=[...(TTS[id]||[])], bl=(onRoutesPg()&&state.route&&bl0.some(b=>b.r===state.route)?bl0.filter(b=>b.r===state.route):bl0).sort((x,y)=>(x.r===state.route?-1:0)-(y.r===state.route?-1:0));
     clearHL(); fade(true);
     markers[id].setStyle({opacity:1,fillOpacity:1,radius:9,fillColor:'#F5B800',color:'#14213D'}).bringToFront();
