@@ -705,6 +705,14 @@ function closeAllDay(){ const dlg=document.getElementById('alldlg'); if(!dlg.ope
 // ---- kelionė žingsnis po žingsnio (išskleidus variantą) ----
 const stotW=n=>n%10===1&&n%100!==11?'stotelė':n%10>=2&&(n%100<10||n%100>20)?'stotelės':'stotelių';
 const nb=r=>`<span class="b" style="background:${C(r)}" aria-hidden="true">${r}</span><span class="vh">Nr. ${r}</span>`;   // numeris žingsniuose: matomas ženkliukas, skaitytuvui „Nr. 2“
+// ilgai laukiant persėdimo: tą patį kitą autobusą galima pagauti ir kitoje netoliese esančioje stotelėje (pvz. išlipti „Muziejus“ ir nueiti į „Kęstučio a.“)
+function altXfer(prev,l){ let best=null;
+  for(let q=prev.i+1;q<prev.j;q++){ const x=prev.t.P.s[q], tx=prev.t.t[q];
+    (WALK.get(x)||[]).forEach(w=>{ if(w.m>250) return;   // tik trumpas ėjimas; iš kelių – trumpiausias
+      for(let y=0;y<l.j;y++){ if(l.t.P.s[y]!==w.id||nm(w.id)===nm(l.t.P.s[l.i])) continue;
+      const ty=l.t.t[y], wt=ty-tx-w.min; if(wt<0) continue;
+      if(!best||w.m<best.w.m||(w.m===best.w.m&&wt<best.wt)) best={x,w,ty,tx,wt}; } }); }
+  return best?`arba: išlipkite „${esc(nm(best.x))}“ (${hm(best.tx)}) ir nueikite ~${best.w.m} m (≈${best.w.min} min.) į „${esc(nm(best.w.id))}“ – tas pats ${nb(l.t.r)} autobusas ten bus ${hm(best.ty)}`:''; }
 function tripSteps(o){ const S=[], st=(ic,h,t,sm)=>S.push(`<li><span class="si" aria-hidden="true">${ic}</span><span class="sx">${h?`<b class="sh">${h}</b> `:''}${t}${sm?`<small>${sm}</small>`:''}</span></li>`);
   if(o.walkStart) o.walkStart.near?st('🚏','',`Autobusas išvyksta iš stotelės <b>„${esc(nm(o.walkStart.to))}“</b> (~${o.walkStart.m} m nuo „${esc(nm(o.walkStart.from))}“)`)
     :st('🚶','',`Nueikite ~${o.walkStart.m} m (≈${o.walkStart.min} min.) iki stotelės <b>„${esc(nm(o.walkStart.to))}“</b>`);
@@ -712,7 +720,8 @@ function tripSteps(o){ const S=[], st=(ic,h,t,sm)=>S.push(`<li><span class="si" 
     if(k){ const wait=l.t.t[l.i]-prev.t.t[prev.j]-(l.walk?l.walk.min:0);
       if(l.walk) st('🚶','',`Nueikite ~${l.walk.m} m (≈${l.walk.min} min.) iki stotelės <b>„${esc(nm(l.walk.id))}“</b>${wait>0?`, laukite ${wait} min.`:''}`);
       else if(l.cont) st('🔄','',l.t.r===prev.t.r?`Likite autobuse – stotelėje „${esc(nm(a))}“ jis tęsia kitą ratą`:`Likite autobuse – stotelėje „${esc(nm(a))}“ jis tęsia kaip ${nb(l.t.r)}`);
-      else { const pid=prev.t.P.s[prev.j]; st('🔁','',pid===a?`Persėskite toje pačioje stotelėje${wait>0?`, laukite ${wait} min.`:''}`:`Pereikite į stotelę <b>„${esc(nm(a))}“</b>${nm(pid)===nm(a)?' kitoje gatvės pusėje':''}${wait>0?`, laukite ${wait} min.`:''}`); } }
+      else { const pid=prev.t.P.s[prev.j], alt=wait>=10?altXfer(prev,l):'';
+        st('🔁','',pid===a?`Persėskite toje pačioje stotelėje${wait>0?`, laukite ${wait} min.`:''}`:`Pereikite į stotelę <b>„${esc(nm(a))}“</b>${nm(pid)===nm(a)?' kitoje gatvės pusėje':''}${wait>0?`, laukite ${wait} min.`:''}`,alt); } }
     if(!k||l.walk||!l.cont){ const x=[satOnly(l.t)?'<b>tik šeštadieniais</b>':'',...legNotes(l).map(esc)].filter(Boolean);
       st('🚏',hm(l.t.t[l.i]),`Įlipkite į ${nb(l.t.r)} autobusą stotelėje <b>„${esc(nm(a))}“</b>`,`kryptis ${esc(legTo(l))}${x.length?' · '+x.join(' · '):''}`); }
     const ns=l.j-l.i, pass=l.t.P.s.slice(l.i+1,l.j+1).map((id,q)=>`<li${q===ns-1?' class="rlast"':''}><span class="rt">${hm(l.t.t[l.i+1+q])}</span>${esc(nm(id))}</li>`).join('');   // paspaudus – pravažiuojamos stotelės
