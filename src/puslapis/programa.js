@@ -408,7 +408,7 @@ function keepPos(before,after,fn){ const a=document.querySelector(before), y=a&&
 function routeVars(r){ const {L}=rvList(r);
   const card=v=>{ const on=v.p===state.rv;
     return `<li><button type="button" class="rvb${on?' on':''}" data-rv="${v.p}" aria-pressed="${on}" style="--rc:${C(r)}"><span class="rvh"><b>${esc(nm(v.P.s[0]))} → ${esc(nm(v.P.s.at(-1)))}</b>${v.via?`<small>${esc(v.via)}</small>`:''}</span></button></li>`; };
-  return `<p class="sub" style="margin-top:.1rem">Paspauskite reisą – jo kelias bus parodytas žemėlapyje.</p><ul class="rvlist">${L.map(card).join('')}</ul>`;
+  return `<ul class="rvlist" aria-label="Reisai – paspaudus kelias parodomas žemėlapyje">${L.map(card).join('')}</ul>`;
 }
 function routeBodyPhone(r){
   const hasW=runsDay(r,'W'), md=rbMode(r), DD=(D.dirs[r]||{})[md]||{};
