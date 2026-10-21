@@ -327,7 +327,7 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
 .mclose{width:40px;height:40px;border-radius:50%;border:2px solid var(--line);background:var(--card);color:var(--ink);font-size:1.05rem;cursor:pointer}
 .mlist{list-style:none;margin:0;padding:6px 0;flex:1;overflow-y:auto}
 .mlist button{display:flex;gap:.75rem;align-items:center;width:100%;min-height:52px;padding:.4rem 1rem;border:0;background:none;color:var(--ink);font:inherit;font-size:1rem;text-align:left;cursor:pointer}
-.mlist button:hover,.mlist button:focus-visible{background:var(--tint)}
+.mlist button:hover,.mlist button:focus-visible{background:var(--tint)}.mlist button[hidden]{display:none}
 .mlist .mi{width:1.6rem;text-align:center;font-size:1.15rem}
 .mlist li.sep{border-top:1px solid var(--line);margin:6px 0}
 .mfoot{padding:12px 16px;font-size:.8rem;color:var(--muted);border-top:1px solid var(--line)}
@@ -429,18 +429,16 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
 }
 .okr{display:inline-block;margin:0 .15rem;padding:0 .45rem;border-radius:999px;background:var(--tint);color:var(--ink);font-size:.78em;font-weight:400;white-space:nowrap;vertical-align:.08em}   /* išvykimo stotelės kryptis pagal maršruto galinę stotelę */
 
-/* ---- kompiuteris: žemėlapis kairėje per visą aukštį; dešinėje skirtukai, planuoklis ir rezultatai (kaip telefone) ---- */
-#pctabs{display:none}
+/* ---- kompiuteris: žemėlapis kairėje per visą aukštį; dešinėje planuoklis ir rezultatai; meniu ☰ kaip telefone ---- */
 @media (min-width:821px){
   body{grid-template-columns:minmax(0,1fr) 440px!important;grid-template-rows:auto auto auto minmax(0,1fr) auto!important;height:100vh;height:100dvh}
   #apphead{grid-column:1/-1;grid-row:1}
   #left{display:contents}
   #left #map{grid-column:1;grid-row:2/5;margin:12px!important;height:auto!important;min-height:0}
-  #pctabs{grid-column:2;grid-row:2;display:flex;gap:6px;padding:12px 16px 4px;background:var(--card);border-left:2px solid var(--line)}
-  #pctabs button{flex:1;min-height:44px;border:2px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:inherit;font-weight:700;cursor:pointer}
-  #pctabs button[aria-current]{background:var(--ink);border-color:var(--ink);color:#fff}
-  #pctabs button:hover:not([aria-current]){border-color:var(--ink)}
-  #planbar{grid-column:2;grid-row:3;margin:0!important;border-left:2px solid var(--line);flex-wrap:wrap!important;gap:8px;padding:8px 16px 12px!important;border-bottom:2px solid var(--line)!important}
+  .menubtn{display:block;position:relative;width:44px!important;height:40px!important;border-radius:8px;font-size:1.3rem;line-height:1}
+  .menubtn.new::after{content:'';position:absolute;top:-4px;right:-4px;width:11px;height:11px;border-radius:50%;background:var(--yellow);border:2px solid var(--card)}
+  #tourbtn,#fbbtn{display:none}
+  #planbar{grid-column:2;grid-row:3;margin:0!important;border-left:2px solid var(--line);flex-wrap:wrap!important;gap:8px;padding:14px 16px 12px!important;border-bottom:2px solid var(--line)!important}
   #planbar .pfld{flex:1 1 calc(50% - 36px)!important;min-width:0!important}
   #planbar .pdt{flex:1 1 260px!important}
   #planbar .recent{display:flex;flex:1 1 100%;flex-wrap:wrap;gap:6px}
@@ -469,7 +467,7 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
 <a class="skip" href="#planbar">Pereiti prie kelionės paieškos</a><a class="skip" href="#panel">Pereiti prie maršrutų ir tvarkaraščių</a>
 <header id="apphead"><div class="ah-title"><h1><a href="/" id="homelink" title="Į pradžią">Ukmergės miesto autobusai</a></h1><span class="beta" title="Puslapis dar tikrinamas – galimi netikslumai">bandomoji versija</span></div>
 <div class="ah-btns"><button type="button" id="tourbtn" class="hbtn" title="Kaip naudotis?" aria-label="Kaip naudotis? Atidaryti instrukciją">?</button><button type="button" id="fbbtn" class="hbtn" aria-label="Pranešk apie netikslumus arba pasiūlyk patobulinimą">!</button></div><button type="button" id="menubtn" class="hbtn menubtn" aria-label="Meniu" aria-haspopup="dialog" aria-controls="menudlg" aria-expanded="false">☰</button></header>
-<div id="left"><div id="mapbar"></div><nav id="pctabs" aria-label="Skiltys"><button type="button" data-pt="plan" aria-current="page"><span aria-hidden="true">🧭</span> Planuoklis</button><button type="button" data-pt="routes"><span aria-hidden="true">🚌</span> Maršrutai ir reisai</button></nav><div id="planbar" role="search" aria-label="Kelionės planuoklis"></div><div id="map" role="region" aria-label="Maršrutų žemėlapis. Žemėlapis papildomas – visa informacija pateikta ir tekstu: maršrutų sąrašuose, tvarkaraščiuose ir planuoklio rezultatuose."></div></div>
+<div id="left"><div id="mapbar"></div><div id="planbar" role="search" aria-label="Kelionės planuoklis"></div><div id="map" role="region" aria-label="Maršrutų žemėlapis. Žemėlapis papildomas – visa informacija pateikta ir tekstu: maršrutų sąrašuose, tvarkaraščiuose ir planuoklio rezultatuose."></div></div>
 <main id="panel" tabindex="-1" aria-label="Maršrutai, tvarkaraščiai ir kelionės rezultatai"></main>
 <footer id="appfoot"><span>Žemėlapis: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (ODbL), Esri, <a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a></span><span class="sep" aria-hidden="true">·</span><span>Projekto autorius: <b>Deividas Mickus</b></span><span class="sep fa11y" aria-hidden="true">·</span><button type="button" class="a11ylink fa11y" data-a11y>Prieinamumo deklaracija</button></footer>
 <dialog id="a11ydlg" aria-labelledby="a11y-h">

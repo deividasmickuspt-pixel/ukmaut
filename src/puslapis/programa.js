@@ -59,7 +59,6 @@ const onMapPg=()=>isPhone()&&page==='map';   // telefono žemėlapio puslapis (#
 const PGHASH={routes:'marsrutai',map:'zemelapis'}, hashPg=()=>location.hash==='#marsrutai'||location.hash==='#stoteles'?'routes':'plan';   // telefone liko tik planuoklis (maršrutų, stotelių ir žemėlapio puslapiai išjungti; senos #stoteles, #marsrutai, #zemelapis nuorodos atidaro planuoklį)
 function setPage(p,how){   // how: 'push' – naujas žingsnis naršyklės istorijoje (veikia telefono „Atgal“), kitaip – tik pakeičiamas adresas
   const was=page; page=p; document.body.classList.toggle('pg-routes',p==='routes'); document.body.classList.toggle('pg-map',p==='map');
-  document.querySelectorAll('#pctabs [data-pt]').forEach(b=>{ if(b.dataset.pt===p) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); });   // kompiuterio skirtukai
   try{const u=new URL(location.href); u.hash=PGHASH[p]||''; const url=u.href.replace(/#$/,'');
     if(how==='push'&&was!==p) history.pushState({pg:p},'',url); else history.replaceState(history.state,'',url);}catch(e){}
   if(was!==p){ scrollTo(0,0); map.invalidateSize(); } }
@@ -962,7 +961,7 @@ function doInstall(){
 document.querySelector('.instclose').onclick=()=>document.getElementById('instdlg').close();
 const menu=document.getElementById('menudlg'), menuBtn=document.getElementById('menubtn');
 if(!store.get('ap-menu')) menuBtn.classList.add('new');   // geltonas taškelis, kol meniu dar neatidarytas
-menuBtn.onclick=()=>{ menu.querySelector('[data-m="inst"]').hidden=standalone()||!!store.get('ap-inst');
+menuBtn.onclick=()=>{ menu.querySelector('[data-m="inst"]').hidden=standalone()||!!store.get('ap-inst')||!isPhone();   // „Įsidėti į telefono ekraną“ – tik telefone
   store.set('ap-menu',1); menuBtn.classList.remove('new'); menuBtn.setAttribute('aria-expanded','true'); menu.showModal(); };
 menu.addEventListener('close',()=>menuBtn.setAttribute('aria-expanded','false'));
 menu.addEventListener('click',e=>{ if(e.target===menu) menu.close(); });
@@ -976,7 +975,6 @@ const MENU={
   tour:tourStart, inst:doInstall, fb:openFeedback,
   a11y:()=>{const d=document.getElementById('a11ydlg'); if(d&&d.showModal) d.showModal();}};
 menu.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{ menu.close(); setTimeout(MENU[b.dataset.m],50); });
-document.querySelectorAll('#pctabs [data-pt]').forEach(b=>b.onclick=()=>{ if(b.dataset.pt!==page||b.dataset.pt==='routes') MENU[b.dataset.pt](); });   // kompiuteryje – skirtukai vietoj meniu
 if(!FEEDBACK_URL) menu.querySelector('[data-m="fb"]').hidden=true;
 
 // ---- pavadinimas = mygtukas į pradžią: be atidaryto maršruto ar stotelės, žemėlapis sumažintas, puslapio viršus ----
