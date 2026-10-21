@@ -632,9 +632,11 @@ function computePlan(A,B,day,T,opt={}){ const RAD=opt.walkMax||400;
   let walkAB=null;
   D.stops.filter(s=>s.name===A).forEach(sa=>(WALK.get(sa.id)||[]).forEach(w=>{ if(nm(w.id)===B&&(!walkAB||w.m<walkAB.m)) walkAB={m:w.m,min:w.min,a:sa.id,b:w.id}; }));
   // drop nonsense: 0-minute rides or rides between neighbouring stops; walks not shorter than walking the whole way
+  // visas kelias pėsčiomis: jei variante einama beveik tiek pat (≥80 %) – jis beprasmis (pvz. Pušų → Dariaus ir Girėno: 740 m pėsčiomis + 1 stotelė autobusu)
+  const wRef=walkAB||(dAB<=2000?{m:rAB,min:Math.ceil(rAB/75)+1}:null), wNear=walkAB;
   const sane=o=>o.legs.every(l=>l.t.t[l.j]-l.t.t[l.i]>=1&&dm(l.t.P.s[l.i],l.t.P.s[l.j])>150)
-    && !(walkAB&&((o.walkEnd&&o.walkEnd.m>=0.8*walkAB.m)||o.legs.some(l=>l.walk&&l.walk.m>=0.8*walkAB.m)||(o.walkStart&&!o.walkStart.near&&o.walkStart.m>=0.8*walkAB.m)))
-    && !(walkAB&&o.arr-o.dep>walkAB.min+5);
+    && !(wRef&&((o.walkEnd&&o.walkEnd.m>=0.8*wRef.m)||o.legs.some(l=>l.walk&&l.walk.m>=0.8*wRef.m)||(o.walkStart&&!o.walkStart.near&&o.walkStart.m>=0.8*wRef.m)))
+    && !(wNear&&o.arr-o.dep>wNear.min+5);
   let cand=out.filter(sane);
   if(opt.arriveBy!=null) cand=cand.filter(o=>o.arr<=opt.arriveBy);   // „atvykti iki“
   // geography: a ride several times longer than the straight distance is only kept if nothing sensible exists
@@ -1116,7 +1118,7 @@ function render(fit){
     }
     el.innerHTML=`
     ${plan.from&&plan.to&&!onRoutesPg()?`<section class="planner"><div class="phead"><h2 class="ph"><span class="plbl">Pasiūlymai kelionei </span><span class="pnames">${esc(plan.from)} → ${esc(plan.to)}</span></h2><span class="pbtns">${canShare()?'<button class="clr" data-share aria-label="Dalintis šios kelionės nuoroda" title="Dalintis nuoroda">🔗</button>':''}<button class="clr" data-clear aria-label="Išvalyti paiešką">✕</button></span></div>
-      ${plan.res.nextDate?`<p class="walkhint">Šiandien po ${hm(plan.time)} reisų nebėra. Artimiausi – ${plan.res.nextDate} (${dayInfo(plan.res.nextDate).label}).</p>`:''}${plan.res.wide?`<p class="walkhint">🚶 Tiesioginių reisų šiuo metu nėra – siūlome variantus su ilgesniu ėjimu pėsčiomis. Visus dienos reisus rasite apačioje: „Visi šios dienos reisai“.</p>`:''}<p class="sub">${plan.date} (${dayInfo(plan.date).label}), ${plan.mode==='arr'?'atvykti iki':'nuo'} ${hm(plan.time)}</p>${res}${plan.from!==plan.to?`<button type="button" class="srtt allbtn" data-allday>Visi šios dienos reisai ›</button>`:''}</section>`:''}
+      ${plan.res.nextDate?`<p class="walkhint">Šiandien po ${hm(plan.time)} reisų nebėra. Artimiausi – ${plan.res.nextDate} (${dayInfo(plan.res.nextDate).label}).</p>`:''}${plan.res.wide?`<p class="walkhint">🚶 Tiesioginių reisų šiuo metu nėra – siūlome variantus su ilgesniu ėjimu pėsčiomis. Visus dienos reisus rasite apačioje: „Visi šios dienos reisai“.</p>`:''}<p class="sub">${plan.date} (${dayInfo(plan.date).label}), ${plan.mode==='arr'?'atvykti iki':'nuo'} ${hm(plan.time)}</p>${res}${plan.from!==plan.to&&!(!plan.res.length&&plan.res.walkAB&&!(plan.res.all||(plan.res.all=allDay(plan.from,plan.to,plan.date))).length)?`<button type="button" class="srtt allbtn" data-allday>Visi šios dienos reisai ›</button>`:''}</section>`:''}
     <div class="routesbox" ${plan.from&&plan.to&&!onRoutesPg()?"hidden":""}>
     ${isPhone()&&!onRoutesPg()?'':`<h2 class="ph" style="margin-top:${onRoutesPg()?'.2rem':'1.4rem'}">${onRoutesPg()?'Maršrutai ir reisai':'Maršrutai ir tvarkaraščiai'}</h2>`}
 
@@ -1186,7 +1188,7 @@ const allRows=(L,refT,attr)=>`<ul class="alist">${L.map(o=>{ const past=o.dep<re
 function openAllDay(dd){ const dlg=document.getElementById('alldlg'), c=document.getElementById('alldlg-c'); adDate=typeof dd==='string'?dd:plan.date; const L=allDay(plan.from,plan.to,adDate), isToday=adDate===isoDate(new Date());
   c.innerHTML=`<div class="pt-top"><span><b id="alldlg-h">${esc(plan.from)} → ${esc(plan.to)}</b><small>visi dienos reisai</small></span><button type="button" class="clr" data-allclose aria-label="Uždaryti">✕</button></div>
     ${L.length?allRows(L,isToday?nowMin:-1,'data-allpick')
-      :'<div class="empty">Šią dieną reisų nerasta.</div>'}
+      :`<div class="empty">${plan.res.walkAB?`Autobusu važiuoti neverta – pėsčiomis ${kmTxt(plan.res.walkAB.m)} (≈${plan.res.walkAB.min} min.).`:'Šią dieną reisų nerasta.'}</div>`}
     <p class="note">Paspauskite reisą – jis bus parodytas planuoklyje ir žemėlapyje.</p>`;
   c.querySelector('[data-allclose]').onclick=()=>closeAllDay();
   c.querySelectorAll('[data-allpick]').forEach(b=>b.onclick=()=>{ const t=+b.dataset.allpick; closeAllDay(); plan.mode='dep'; plan.date=adDate; plan.day=dayInfo(adDate).day; plan.time=t; plan.userTime=true; plan.autoArr=0; renderBar(); updPlan(); showMapOnPhone(); });
