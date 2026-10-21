@@ -645,7 +645,7 @@ function render(fit){
   el.querySelectorAll('[data-share]').forEach(b=>b.onclick=shareTrip);
   el.querySelectorAll('[data-rday]').forEach(b=>b.onclick=()=>{state.day=b.dataset.rday;state.trip=null;render(false);});
   el.querySelectorAll('[data-allday]').forEach(b=>b.onclick=openAllDay);
-  el.querySelectorAll('[data-inpick]').forEach(b=>b.onclick=()=>{ plan.time=+b.dataset.inpick; plan.userTime=true; plan.autoArr=0; renderBar(); updPlan(); showMapOnPhone(); });
+  el.querySelectorAll('[data-inpick]').forEach(b=>b.onclick=()=>pickOpt(plan.res.all[+b.dataset.inpick],plan.date));
   el.querySelectorAll('[data-opt]').forEach(b=>b.onclick=()=>{const n=+b.dataset.opt; if(plan.opt===n&&plan.exp===n) plan.exp=null; else {plan.opt=n; plan.exp=n;} render(true); const f=document.querySelector(`[data-opt="${n}"]`); if(f) f.focus({preventScroll:true}); showMapOnPhone();});   // paspaudus – rodoma žemėlapyje ir išskleidžiama
   el.querySelectorAll('[data-openstop]').forEach(b=>{b.onclick=()=>{ if(b.dataset.selstop){ pickStop(b.dataset.selstop); return; } unhoverStop();openStop(b.dataset.openstop);};
     if(!b.dataset.selstop){ b.onmouseenter=b.onfocus=()=>hoverStop(b.dataset.openstop); b.onmouseleave=b.onblur=unhoverStop; }});
@@ -680,7 +680,7 @@ function drawWalk(o,fit){ clearHL(); fade(true); hl=L.layerGroup().addTo(map); c
   if(fit) map.fitBounds(w,isPhone()&&!mapBig?{paddingTopLeft:[18,50],paddingBottomRight:[18,14],maxZoom:16}:{padding:[60,60],maxZoom:16}); }
 const walkM=o=>(o.walkEnd?o.walkEnd.m:0)+o.legs.reduce((S,l)=>S+(l.walk?l.walk.m:0),0)+(o.walkStart&&!o.walkStart.near?o.walkStart.m:0);
 let adDate=null;
-const allRows=(L,refT,attr)=>`<ul class="alist">${L.map(o=>{ const past=o.dep<refT, wm=walkM(o); return `<li><button type="button" class="arow${past?' past':''}" ${attr}="${o.dep}">
+const allRows=(L,refT,attr)=>`<ul class="alist">${L.map((o,i)=>{ const past=o.dep<refT, wm=walkM(o); return `<li><button type="button" class="arow${past?' past':''}" ${attr}="${i}">
       <span class="at"><b>${hm(o.dep)}</b> – ${hm(o.arr)}</span><span class="ab">${o.legs.filter(l=>!l.walk).map(l=>badge(l.t.r)).filter((x,i,a)=>a.indexOf(x)===i).join('')}</span>
       <span class="am">${o.arr-o.dep} min.${o.legs.length>1&&o.legs.some((l,k)=>k&&!l.cont)?' · persėdimas':''}${wm?` · 🚶 ~${wm} m pėsčiomis`:''}${past?' · jau išvyko':''}</span></button></li>`;}).join('')}</ul>`;
 function openAllDay(dd){ const dlg=document.getElementById('alldlg'), c=document.getElementById('alldlg-c'); adDate=typeof dd==='string'?dd:plan.date; const L=allDay(plan.from,plan.to,adDate), isToday=adDate===isoDate(new Date());
@@ -689,10 +689,17 @@ function openAllDay(dd){ const dlg=document.getElementById('alldlg'), c=document
       :`<div class="empty">${plan.res.walkAB?`Autobusu važiuoti neverta – pėsčiomis ${kmTxt(plan.res.walkAB.m)} (≈${plan.res.walkAB.min} min.).`:'Šią dieną reisų nerasta.'}</div>`}
     <p class="note">Paspauskite reisą – jis bus parodytas planuoklyje ir žemėlapyje.</p>`;
   c.querySelector('[data-allclose]').onclick=()=>closeAllDay();
-  c.querySelectorAll('[data-allpick]').forEach(b=>b.onclick=()=>{ const t=+b.dataset.allpick; closeAllDay(); plan.mode='dep'; plan.date=adDate; plan.day=dayInfo(adDate).day; plan.time=t; plan.userTime=true; plan.autoArr=0; renderBar(); updPlan(); showMapOnPhone(); });
+  c.querySelectorAll('[data-allpick]').forEach(b=>b.onclick=()=>{ closeAllDay(); pickOpt(L[+b.dataset.allpick],adDate); });
   if(!dlg.open){ dlg.showModal(); if(tourI<0) history.pushState({all:1},'',location.href); }
   dlg.scrollTop=0; const nx=c.querySelector('.arow:not(.past)'); if(typeof dd!=='string'){ (nx||c.querySelector('[data-allclose]')).focus(); if(nx&&isToday) nx.scrollIntoView({block:'center'}); }
 }
+// paspaustas „visų dienos reisų“ variantas: paieška nuo jo išvykimo, jis pažymimas, išskleidžiamas ir rodomas žemėlapyje
+// (jei planuoklis pirmu pasiūlytų kitą – pvz. su ilgesniu ėjimu – paspaustas vis tiek įdedamas į sąrašą)
+function pickOpt(o,date){ if(!o) return; plan.mode='dep'; plan.date=date; plan.day=dayInfo(date).day; plan.time=o.dep; plan.userTime=true; plan.autoArr=0; renderBar(); updPlan();
+  const key=x=>x.dep+'|'+x.arr+'|'+x.legs.map(l=>(l.walk?'~':'')+l.t.r+'@'+l.t.t[l.i]).join();
+  let n=plan.res.findIndex(x=>key(x)===key(o)); if(n<0){ plan.res.unshift(o); n=0; }
+  plan.opt=n; plan.exp=n; render(true); showMapOnPhone();
+  const f=document.querySelector(`[data-opt="${n}"]`); if(f){ f.focus({preventScroll:true}); f.scrollIntoView({block:'nearest'}); } }
 function closeAllDay(){ const dlg=document.getElementById('alldlg'); if(!dlg.open) return; dlg.close(); if(history.state&&history.state.all) history.back(); }
 // ---- kelionė žingsnis po žingsnio (išskleidus variantą) ----
 const stotW=n=>n%10===1&&n%100!==11?'stotelė':n%10>=2&&(n%100<10||n%100>20)?'stotelės':'stotelių';
