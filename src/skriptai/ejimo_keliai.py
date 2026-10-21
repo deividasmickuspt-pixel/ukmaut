@@ -1,7 +1,9 @@
 # Pėsčiųjų keliai tarp artimų stotelių OSM gatvėmis (planuoklio ėjimo linijoms žemėlapyje)
-# -> tarpiniai/ejimo_keliai.json: {"idA|idB": [[lat,lon],...]} (tik viena kryptis, idA < idB)
+# -> tarpiniai/ejimo_keliai.json: {"g":{"idA|idB": [[lat,lon],...]}, "d":{"idA|idB": metrai}} (viena kryptis, idA < idB)
+#    g – linijos poroms iki MAXM, d – tikri atstumai gatvėmis poroms iki MAXD (planuoklio ėjimo atstumai ir laikas)
 import xml.etree.ElementTree as ET, math, heapq, json, collections
-MAXM=850   # stotelių poros iki tiek metrų tiesiai (planuoklis eina iki 800 m)
+MAXM=850   # linijos: stotelių poros iki tiek metrų tiesiai (planuoklis eina iki 800 m)
+MAXD=2100  # atstumai: iki tiek (pasiūlymas „pėsčiomis greičiau“ – iki 2 km)
 def dist(a,b): return math.hypot((a[0]-b[0])*111320,(a[1]-b[1])*63600)
 N={};ways=[]
 for ev,el in ET.iterparse('duomenys/osm_gatves.osm'):
@@ -57,18 +59,21 @@ def rdp(P,eps=4):
     if d>best[0]: best=(d,i)
   if best[0]<=eps: return [a,b]
   return rdp(P[:best[1]+1],eps)[:-1]+rdp(P[best[1]:],eps)
-out={}; ids=sorted(ST)
+G={}; DD={}; ids=sorted(ST)
 for i,a in enumerate(ids):
   if 'S:'+a not in N: continue
-  near=[b for b in ids[i+1:] if 'S:'+b in N and dist(ST[a],ST[b])<=MAXM]
+  near=[b for b in ids[i+1:] if 'S:'+b in N and dist(ST[a],ST[b])<=MAXD]
   if not near: continue
-  Dd,Pv=dijkstra('S:'+a,MAXM*2.5)
+  Dd,Pv=dijkstra('S:'+a,MAXD*2.5)
   for b in near:
     t='S:'+b
     if t not in Dd: continue
+    # nuo stotelės iki gatvės ir atgal + kelias gatvėmis
+    DD[a+'|'+b]=round(Dd[t]+dist(ST[a],N['S:'+a])+dist(ST[b],N[t]))
+    if dist(ST[a],ST[b])>MAXM: continue
     path=[t]
     while path[-1]!='S:'+a: path.append(Pv[path[-1]])
     P=[ST[b]]+[N[n] for n in path]+[ST[a]]; P=rdp(P[::-1])
-    out[a+'|'+b]=[[round(x,5),round(y,5)] for x,y in P]
-json.dump(out,open('tarpiniai/ejimo_keliai.json','w'),separators=(',',':'))
-print('ėjimo keliai:',len(out))
+    G[a+'|'+b]=[[round(x,5),round(y,5)] for x,y in P]
+json.dump({'g':G,'d':DD},open('tarpiniai/ejimo_keliai.json','w'),separators=(',',':'))
+print('ėjimo keliai:',len(G),'atstumai:',len(DD))
