@@ -307,6 +307,18 @@ body{grid-template-rows:auto minmax(0,1fr) auto}
 .dh{display:block;margin-top:3px}.dhl{display:flex;align-items:center;flex-wrap:wrap;gap:3px;margin-top:3px;font-size:.88rem;color:var(--ink);line-height:1.2}
 .b.sb{font-size:.68rem;min-width:1.65em;height:1.65em}
 .stoppop .spn{white-space:normal!important;max-width:none!important}.stoppop .spn>b{font-size:1.05rem}.stoppop:has(.dh){min-width:250px}.dhl{flex-wrap:nowrap;white-space:nowrap}
+/* stotelės langelis (ir kompiuteryje – kaip telefone) */
+.stoppopw .leaflet-popup-content{margin:8px 10px;font:inherit;font-size:.88rem;color:var(--ink)}
+.stoppop{display:flex;flex-direction:column;gap:6px}
+.stoppop .spn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}.stoppop small{color:var(--muted)}
+.stoppop .spb{display:flex;gap:6px}
+.stoppop:not(.sp-map) .spn>b{display:block;font-size:1.1rem;line-height:1.2}.stoppop:not(.sp-map) .spn small{display:block;margin-top:2px;font-size:.85rem;white-space:normal}   /* 1 eil. – pavadinimas, 2 – kryptis, 3 – mygtukai */
+.stoppop:not(.sp-map) .spn{white-space:normal!important}
+.stoppop:not(.sp-map) .spb button,.stoppop:not(.sp-map) .spb button:first-child{display:inline-flex;align-items:center;gap:5px;flex:1 1 auto;justify-content:center;min-height:40px;padding:.15rem .5rem;background:var(--card);color:var(--ink);font-size:.82rem}
+.spi{width:11px;height:11px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px #14213D}.spg{background:#0B7A3E}.spr{background:#B42318}.spc{flex:none}
+.stoppop button{min-height:36px;padding:.15rem .7rem;border:2px solid var(--ink);border-radius:10px;background:var(--card);color:var(--ink);font:inherit;font-weight:700;font-size:.85rem;white-space:nowrap;cursor:pointer}
+.stoppop .spb button:first-child{background:var(--ink);color:#fff}
+.stoppop .spnote{font-size:.8rem;color:var(--muted)}
 .rtabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 .2rem}
 .rtb{min-width:48px;height:44px;padding:0 .7rem;border:2px solid var(--rc);border-radius:10px 10px 0 0;border-bottom:0;background:var(--card);color:var(--rc);font:700 1.1rem "Atkinson Hyperlegible",system-ui,sans-serif;cursor:pointer}
 .rtb.on{background:var(--rc);color:#fff}
