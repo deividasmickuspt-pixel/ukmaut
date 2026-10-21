@@ -1273,7 +1273,7 @@ function optList(W){
         <span class="oexp" aria-hidden="true">${ex?'Slėpti ▴':'Kaip eiti ▾'}</span></button>
         <ol class="steps" id="ost-w"${ex?'':' hidden'}><li><span class="si" aria-hidden="true">🚶</span><span class="sx">Nueikite ${kmTxt(W.m)} (≈${W.min} min.) nuo „${esc(nm(W.a))}“ iki stotelės <b>„${esc(nm(W.b))}“</b> – būsite ~${hm(W.arr)}</span></li></ol></li>`; })():'';
   const ar=plan.mode==='arr', at=W?plan.res.findIndex(o=>ar?W.dep>o.dep:W.arr<o.arr):-1, k=at<0?bus.length:at;
-  return `<ul class="opts">${[...bus.slice(0,k),wcard,...bus.slice(k)].join('')}</ul>`; }
+  return `<ul class="opts">${[...bus.slice(0,k),wcard,...bus.slice(k)].filter(Boolean).slice(0,Math.max(3,plan.opt+1)).join('')}</ul>`; }   // kartu su „Pėsčiomis“ – ne daugiau 3 (pasirinktas iš „visų reisų“ – visada matomas)
 function updPlan(){ setTimeout(()=>{ if(!(plan.from&&plan.to)) return; const r=plan.res;
     announce(r.walkAB&&!r.length?`Siūloma eiti pėsčiomis: ${kmTxt(r.walkAB.m)}, apie ${r.walkAB.min} min.`:r.length?`${r.walkAB?`Pėsčiomis – ${kmTxt(r.walkAB.m)}, apie ${r.walkAB.min} min. `:''}Rasta kelionės autobusu variantų: ${r.length}. Greičiausias: ${hm(r[0].dep)}–${hm(r[0].arr)}${r[0].legs.length>1?', su persėdimu':''}.`:`Kelionių iš ${plan.from} į ${plan.to} nerasta.`);},0);plan.res=(plan.from&&plan.to&&plan.from!==plan.to)?findTrips(plan.from,plan.to,plan.date,plan.time):[];plan.opt=0;plan.exp=null; { const w=wOpt(); if(w&&w.best) plan.opt=-1; }
   if(plan.from&&plan.to){state={route:null,day:today,trip:null,stop:null}; if(plan.from!==plan.to&&tourI<0) remember(); else renderBar();}
