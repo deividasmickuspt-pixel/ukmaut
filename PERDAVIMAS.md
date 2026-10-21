@@ -63,6 +63,14 @@ axe-core (WCAG 2.0/2.1/2.2 A+AA) – 0 pažeidimų. Žemėlapio elementai be fok
 
 2026-10-20: Narbuto 14:45 (4-2) ir 23:15 (2-1) reisai padalinti Autobusų stotyje (Vytauto g.): iki jos – 5 maršrutas, toliau – 4 (tas pats autobusas; taip rodo ir naujas AP plakatas Kęstučio a. – 14:54 ir 23:24 prie 5). Reikia patvirtinti AS, kur tiksliai keičiasi numeris.
 
+## Patikra pagal AP Excel (2026-10-21)
+Palyginti visi išvykimai (stotelė + laikas) iš AP darbo grafikų („nauji darbo dienomis“ nuo 2026-10-19, savaitgalio grafikas) su `reisai.json`. Excel failai į saugyklą nekeliami (vidiniai). Sutampa iki minutės: 1-1, 1-2, savaitgalio 1, 3, 4, 6 maršrutai; kitur pataisyta:
+- 2 maršrutas (2-1: 6:42, 7:52, 11:02, 12:12, 13:32; 2-2: 6:02, 7:22, 8:32, 11:57, 13:07, 14:27) stoja **„Autobusų stotis (Vytauto g.)“**, ne stoties aikštelėje.
+- 6 maršruto reisai, išvykstantys iš Autobusų stoties, tą pačią minutę stoja ir Vytauto g. stotelėje (kaip 4) – pridėta 16 reisų.
+- 1-2 17:15 reisas iš Dukstynos baigiasi Vytauto g. stotelėje.
+- Savaitgalį trūko 2 maršruto reiso 11:40 Autobusų stotis → Pušų (kaip 7:00) – pridėtas.
+Palikta kaip buvo (Excel klaidos ar mūsų sprendimai): 2-2 Gelžbetonis „6.29“ (turi būti 6:19), 4-1 4:45 Sodai „4.45“ (paliktas 4:47 kaip kituose reisuose), 2-1 lape perteklinis stulpelis 4:40 AS→Biofabrikas (laikai nedidėja), 4-2 lape du grįžimai iš Pašilės 6:51 ir 6:55 į tą pačią 7:15 (paliktas 6:55), „Sodai“ prie Deltuvos – `Sodai (Deltuvos g.)`, 2-1 15:09 Gelžbetonis Excel tuščias. Savaitgalį 2 maršrutas Turguje stovi 9:35–9:40; `reisai.json` išvykimas iš Turgaus nepažymėtas (`nodep`) – klausimas AS. Excel 4-2 lape yra ir 4:45 „greitasis“ reisas – du 4:45 reisai tikri; 4-1 lape pastaba „narbutas pietinis 5, plius 4“ patvirtina 14:45 Narbuto reisą (5, toliau 4).
+
 ## Atviri klausimai AS
 2026-10-19 Excel'yje rasta ir pataisyta: 2-2 Dariaus ir Girėno 6:29→6:19, 2-1P 15:24→15:09, 4-1 4:45 reise Sodai/Dukstynos k. 4:45/4:47→4:47/4:48; 4-2 lape du 6:51/6:55 stulpeliai – galioja 6:55; 2-1 lape senas 4:40 rytinis – galioja 4:15; 2-1P 13:38 reise Smėlių 14:02 → Kęstučio a. 14:03 (1 min) – palikta kaip Excel'yje.
 2-1 naktiniai numeriai (23:15, 0:06); 14:45 nuo Narbuto („TIKRINTI“); ~~4:37 iš Kęstučio a.~~ (nuo 10-19 nebėra); „narbutas pietinis“; Biofabrikas link Deltuvos – atskira stotelė?; įvertintas atvykimas Narbuto 21:56.

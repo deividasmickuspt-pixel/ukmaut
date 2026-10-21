@@ -1542,6 +1542,43 @@
 ]
 },
 {
+"dest": "Autobusų stotis - Koklių f.",
+"stops": [
+[
+"autobusu-stotis",
+"11:40"
+],
+[
+"ligonine_-link-centro",
+"11:42"
+],
+[
+"kudirkos_-link_centro",
+"11:43"
+],
+[
+"autoservisas",
+"11:45"
+],
+[
+"muziejus-savaitgalinis",
+"11:50"
+],
+[
+"smeliu-link-pasiles",
+"11:54"
+],
+[
+"pivonijos-link-pasiles",
+"11:56"
+],
+[
+"pusu-link-pasiles",
+"11:57"
+]
+]
+},
+{
 "dest": "Biofabrikas (Deltuva)",
 "stops": [
 [
@@ -7803,7 +7840,7 @@
 "17:13"
 ],
 [
-"autobusu-stotis",
+"autobusu-stotis-vytauto-g-link-centro",
 "17:15"
 ]
 ],
@@ -11869,6 +11906,10 @@
 "07:10"
 ],
 [
+"autobusu-stotis-vytauto-g-link-dukstynos",
+"07:10"
+],
+[
 "sodai-link-dukstynos",
 "07:12"
 ],
@@ -11936,6 +11977,10 @@
 "stops": [
 [
 "autobusu-stotis",
+"07:50"
+],
+[
+"autobusu-stotis-vytauto-g-link-dukstynos",
 "07:50"
 ],
 [
@@ -12009,6 +12054,10 @@
 "09:10"
 ],
 [
+"autobusu-stotis-vytauto-g-link-dukstynos",
+"09:10"
+],
+[
 "sodai-link-dukstynos",
 "09:12"
 ],
@@ -12076,6 +12125,10 @@
 "stops": [
 [
 "autobusu-stotis",
+"09:50"
+],
+[
+"autobusu-stotis-vytauto-g-link-dukstynos",
 "09:50"
 ],
 [
@@ -12149,6 +12202,10 @@
 "10:35"
 ],
 [
+"autobusu-stotis-vytauto-g-link-dukstynos",
+"10:35"
+],
+[
 "sodai-link-dukstynos",
 "10:37"
 ],
@@ -12216,6 +12273,10 @@
 "stops": [
 [
 "autobusu-stotis",
+"11:15"
+],
+[
+"autobusu-stotis-vytauto-g-link-dukstynos",
 "11:15"
 ],
 [
@@ -12289,6 +12350,10 @@
 "12:10"
 ],
 [
+"autobusu-stotis-vytauto-g-link-dukstynos",
+"12:10"
+],
+[
 "sodai-link-dukstynos",
 "12:12"
 ],
@@ -12356,6 +12421,10 @@
 "stops": [
 [
 "autobusu-stotis",
+"12:50"
+],
+[
+"autobusu-stotis-vytauto-g-link-dukstynos",
 "12:50"
 ],
 [
@@ -12429,6 +12498,10 @@
 "15:15"
 ],
 [
+"autobusu-stotis-vytauto-g-link-dukstynos",
+"15:15"
+],
+[
 "sodai-link-dukstynos",
 "15:17"
 ],
@@ -12496,6 +12569,10 @@
 "stops": [
 [
 "autobusu-stotis",
+"15:50"
+],
+[
+"autobusu-stotis-vytauto-g-link-dukstynos",
 "15:50"
 ],
 [
@@ -12569,6 +12646,10 @@
 "17:05"
 ],
 [
+"autobusu-stotis-vytauto-g-link-dukstynos",
+"17:05"
+],
+[
 "sodai-link-dukstynos",
 "17:07"
 ],
@@ -12636,6 +12717,10 @@
 "stops": [
 [
 "autobusu-stotis",
+"17:50"
+],
+[
+"autobusu-stotis-vytauto-g-link-dukstynos",
 "17:50"
 ],
 [
@@ -12709,6 +12794,10 @@
 "18:35"
 ],
 [
+"autobusu-stotis-vytauto-g-link-dukstynos",
+"18:35"
+],
+[
 "sodai-link-dukstynos",
 "18:37"
 ],
@@ -12776,6 +12865,10 @@
 "stops": [
 [
 "autobusu-stotis",
+"19:20"
+],
+[
+"autobusu-stotis-vytauto-g-link-dukstynos",
 "19:20"
 ],
 [
@@ -12850,6 +12943,10 @@
 "04:57"
 ],
 [
+"autobusu-stotis-vytauto-g-link-dukstynos",
+"04:57"
+],
+[
 "sodai-link-dukstynos",
 "04:59"
 ],
@@ -12870,6 +12967,10 @@
 "stops": [
 [
 "autobusu-stotis",
+"13:25"
+],
+[
+"autobusu-stotis-vytauto-g-link-dukstynos",
 "13:25"
 ],
 [
@@ -13350,7 +13451,7 @@
 "06:40"
 ],
 [
-"autobusu-stotis",
+"autobusu-stotis-vytauto-g-link-dukstynos",
 "06:42"
 ],
 [
@@ -13493,7 +13594,7 @@
 "07:50"
 ],
 [
-"autobusu-stotis",
+"autobusu-stotis-vytauto-g-link-dukstynos",
 "07:52"
 ],
 [
@@ -13788,7 +13889,7 @@
 "11:00"
 ],
 [
-"autobusu-stotis",
+"autobusu-stotis-vytauto-g-link-dukstynos",
 "11:02"
 ],
 [
@@ -13930,7 +14031,7 @@
 "12:10"
 ],
 [
-"autobusu-stotis",
+"autobusu-stotis-vytauto-g-link-dukstynos",
 "12:12"
 ],
 [
@@ -14105,7 +14206,7 @@
 "13:30"
 ],
 [
-"autobusu-stotis",
+"autobusu-stotis-vytauto-g-link-dukstynos",
 "13:32"
 ]
 ],
@@ -15027,6 +15128,10 @@
 "06:02"
 ],
 [
+"autobusu-stotis-vytauto-g-link-dukstynos",
+"06:02"
+],
+[
 "sodai-link-dukstynos",
 "06:04"
 ],
@@ -15198,7 +15303,7 @@
 "07:20"
 ],
 [
-"autobusu-stotis",
+"autobusu-stotis-vytauto-g-link-dukstynos",
 "07:22"
 ],
 [
@@ -15341,7 +15446,7 @@
 "08:30"
 ],
 [
-"autobusu-stotis",
+"autobusu-stotis-vytauto-g-link-dukstynos",
 "08:32"
 ],
 [
@@ -15669,7 +15774,7 @@
 "11:55"
 ],
 [
-"autobusu-stotis",
+"autobusu-stotis-vytauto-g-link-dukstynos",
 "11:57"
 ],
 [
@@ -15812,7 +15917,7 @@
 "13:05"
 ],
 [
-"autobusu-stotis",
+"autobusu-stotis-vytauto-g-link-dukstynos",
 "13:07"
 ],
 [
@@ -15987,7 +16092,7 @@
 "14:25"
 ],
 [
-"autobusu-stotis",
+"autobusu-stotis-vytauto-g-link-dukstynos",
 "14:27"
 ],
 [
