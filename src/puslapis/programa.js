@@ -10,7 +10,7 @@ const badge=(r,lg,btn)=>`<${btn?'button':'span'} class="b${lg?' lg':''}" style="
 const hm=m=>{m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')};
 const nm=id=>STOP[id].name;
 const DAYS={W:'Darbo diena',WE:'Poilsio diena'};
-const inDay=(t,d)=>d==='W'?t.d==='W':(t.d==='Sat'||t.d==='WE');
+const inDay=(t,d)=>d==='W'?t.d==='W':d==='Sun'?t.d==='WE':(t.d==='Sat'||t.d==='WE');   // 'Sun' – sekmadienis ar šventė: be „tik šeštadieniais“ reisų
 const satOnly=t=>t.d==='Sat';
 const isPhone=()=>innerWidth<=820;
 const now=new Date(); const today=(now.getDay()===0||now.getDay()===6)?'WE':'W';
@@ -642,15 +642,15 @@ function render(fit){
     el.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>{state={route:null,day:today,trip:null,stop:null};render(true);fitAll();el.scrollTop=0;});
 }
 function findTrips(A,B,date,T){
-  if(plan.mode==='arr'){ const day=dayInfo(date).day, o={window:180,arriveBy:T}; let r=computePlan(A,B,day,T-180,o); if(r.length||r.walkAB) return r;   // atvykti iki T: išvykimai per 3 val. iki jo
+  if(plan.mode==='arr'){ const day=pDay(date), o={window:180,arriveBy:T}; let r=computePlan(A,B,day,T-180,o); if(r.length||r.walkAB) return r;   // atvykti iki T: išvykimai per 3 val. iki jo
     const w=computePlan(A,B,day,T-180,{...o,walkMax:800}); if(w.length){w.wide=1; return w;} return r; }
-  let r=computePlan(A,B,dayInfo(date).day,T); if(r.length||r.walkAB) return r;
+  let r=computePlan(A,B,pDay(date),T); if(r.length||r.walkAB) return r;
   // nothing nearby: allow a longer walk to a better served stop
-  let w=computePlan(A,B,dayInfo(date).day,T,{walkMax:800}); if(w.length){w.wide=1; return w;}
+  let w=computePlan(A,B,pDay(date),T,{walkMax:800}); if(w.length){w.wide=1; return w;}
   // šią dieną reisų nebeliko: kitų dienų nesiūlome – rodomi visi tos dienos reisai (matosi, kas jau praėjo)
   r.noMore=1; return r;}
 // ---- „Visi šios dienos reisai“: visi variantai iš A į B nuo ryto iki vakaro (langas virš planuoklio) ----
-function allDay(A,B,date){ const day=dayInfo(date).day, out=[], seen=new Set();
+function allDay(A,B,date){ const day=pDay(date), out=[], seen=new Set();
   for(const o0 of [{},{walkMax:800}]) for(let T=0;T<1500;T+=30) computePlan(A,B,day,T,{window:60,...o0}).forEach(o=>{   // diena tikrinama valandos langais; ir variantai su ilgesniu ėjimu
     const k=o.dep+'|'+o.arr+'|'+o.legs.map(l=>l.walk?'w':l.t.r).join(); if(!seen.has(k)){seen.add(k); out.push(o);} });
   // paliekami tik prasmingi: vėliau išvykstantis ir ne vėliau atvykstantis išstumia ankstesnį
@@ -705,6 +705,8 @@ function isHoliday(dt){const y=dt.getFullYear(),md=`${dt.getMonth()+1}-${dt.getD
 const isoDate=dt=>`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
 function dayInfo(iso){const [y,m,d]=iso.split('-').map(Number),dt=new Date(y,m-1,d),wd=dt.getDay(),hol=isHoliday(dt);
   return {day:(wd===0||wd===6||hol)?'WE':'W',label:hol?'šventinė diena':(wd===0||wd===6)?'poilsio diena':'darbo diena'};}
+// planuokliui: šeštadienį – ir „tik šeštadieniais“ reisai, sekmadienį ir šventėmis – be jų
+const pDay=iso=>{ const di=dayInfo(iso); if(di.day==='W') return 'W'; const [y,m,d]=iso.split('-').map(Number), dt=new Date(y,m-1,d); return dt.getDay()===6&&!isHoliday(dt)?'WE':'Sun'; };
 plan.date=isoDate(now); plan.day=dayInfo(plan.date).day;
 // phone: after a search / choosing a trip, show the map first (results are below it)
 function showMapOnPhone(){ if(isPhone()&&mapBig) document.getElementById('planbar').scrollIntoView({behavior:SMOOTH,block:'start'}); }   // planner on top, map right under it

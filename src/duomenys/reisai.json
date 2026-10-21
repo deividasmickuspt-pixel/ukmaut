@@ -1757,13 +1757,6 @@
 {
 "dest": "Biofabrikas (Deltuva)",
 "note": "iki Turgaus, toliau į Pašilę",
-"nodep": [
-"turgus"
-],
-"tail": {
-"at": "kestucio-a-link-autobusu-stoties",
-"dest": "Pašilė"
-},
 "stops": [
 [
 "kokliu-link-centro",
@@ -1784,6 +1777,15 @@
 [
 "turgus",
 "09:35"
+]
+]
+},
+{
+"dest": "Pašilė",
+"stops": [
+[
+"turgus",
+"09:40"
 ],
 [
 "kestucio-a-link-autobusu-stoties",

@@ -16,15 +16,16 @@ for t in T:
 import os
 for o in (json.load(open('duomenys/reisai.json')) if os.path.exists('duomenys/reisai.json') else []):
     days=('WE','Sat') if o['day'] in ('WE','Sat') else ('W',)
+    wblk=None if o['day']=='W' else o['route']+'-'+o['day']   # savaitgalį maršrutą važiuoja vienas autobusas – visi jo reisai viena grandinė
     T[:]=[t for t in T if not (t['route']==o['route'] and t['day'] in days and t['stops'][0]['poster'] not in o.get('keep',[]))]
     from autobuso_ratai import chain, TURN
     if o['route'] in TURN:   # same bus continues through the turnaround: one trip for the planner
-        blk={(tr['stops'][0][0],tr['stops'][0][1]):tr.get('blk') for tr in o['trips']}
+        blk={(tr['stops'][0][0],tr['stops'][0][1]):tr.get('blk') or wblk for tr in o['trips']}
         for st in chain(o['route'],[tr['stops'] for tr in o['trips']]):
             T.append(dict(route=o['route'],day=o['day'],headsign='',notes=[],blk=blk.get((st[0][0],st[0][1])),stops=[dict(poster=p,t=t) for p,t in st]))
         continue
     for tr in o['trips']:
-        T.append(dict(route=o['route'],day=o['day'],headsign=tr['dest'],notes=[tr['note']] if tr.get('note') else [],blk=tr.get('blk'),stops=[dict(poster=p,t=t) for p,t in tr['stops']]))
+        T.append(dict(route=o['route'],day=o['day'],headsign=tr['dest'],notes=[tr['note']] if tr.get('note') else [],blk=tr.get('blk') or wblk,stops=[dict(poster=p,t=t) for p,t in tr['stops']]))
 # AS: the first route-7 run drives from the bus station to Žaliasis vienkiemis as route 6,
 # and only becomes route 7 at Žaliasis vienkiemis
 for t in list(T):
