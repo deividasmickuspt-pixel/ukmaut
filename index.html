@@ -638,11 +638,13 @@ function computePlan(A,B,day,T,opt={}){ const RAD=opt.walkMax||400;
   const better=(p,o)=>p.dep>=o.dep&&p.arr<=o.arr&&p.legs.length<=o.legs.length&&(p.walk||0)<=(o.walk||0)&&(p.dep>o.dep||p.arr<o.arr||p.legs.length<o.legs.length||(p.walk||0)<(o.walk||0));
   // time spent riding and distance ridden: used to prefer the shorter, more direct way when arrival is equal
   cand.forEach(o=>{o.ride=o.legs.reduce((S,l)=>S+l.t.t[l.j]-l.t.t[l.i],0); o.len=rideLen(o);});
-  const better2=(p,o)=>better(p,o)||(p.dep===o.dep&&p.arr===o.arr&&p.legs.length===o.legs.length&&(p.walk||0)===(o.walk||0)&&(p.len<o.len-300||(Math.abs(p.len-o.len)<=300&&p.ride<o.ride)));
+  // persėdimai: „likite autobuse“ (tas pats autobusas tęsia) – ne persėdimas; tokiam pat laikui pirmiau be persėdimo, tada trumpesnis kelias
+  const xf=o=>o.legs.filter((l,k)=>k&&!l.cont).length;
+  const better2=(p,o)=>better(p,o)||(p.dep===o.dep&&p.arr===o.arr&&p.legs.length===o.legs.length&&(p.walk||0)===(o.walk||0)&&(xf(p)<xf(o)||(xf(p)===xf(o)&&(p.len<o.len-300||(Math.abs(p.len-o.len)<=300&&p.ride<o.ride)))));
   const keep=cand.filter(o=>!cand.some(p=>p!==o&&better2(p,o)));
   const seen=new Set();
-  const res=keep.sort(opt.arriveBy!=null?(a,b)=>b.dep-a.dep||(a.legs.length-b.legs.length)||((a.walk||0)-(b.walk||0))||(a.len-b.len)||b.arr-a.arr   // atvykimui – vėliausiai išvykstantis pirmas
-    :(a,b)=>a.arr-b.arr||(a.legs.length-b.legs.length)||((a.walk||0)-(b.walk||0))||(a.len-b.len)||b.dep-a.dep)
+  const res=keep.sort(opt.arriveBy!=null?(a,b)=>b.dep-a.dep||(xf(a)-xf(b))||(a.legs.length-b.legs.length)||((a.walk||0)-(b.walk||0))||(a.len-b.len)||b.arr-a.arr   // atvykimui – vėliausiai išvykstantis pirmas
+    :(a,b)=>a.arr-b.arr||(xf(a)-xf(b))||(a.legs.length-b.legs.length)||((a.walk||0)-(b.walk||0))||(a.len-b.len)||b.dep-a.dep)
     .filter(o=>{const k=o.dep+'|'+o.arr+'|'+o.legs.map(l=>l.t.r).join();if(seen.has(k))return false;seen.add(k);return true;}).slice(0,5);
   if(res.length) res[0].best=1;   // the earliest arrival is listed first and marked as recommended
   // stops up to ~1.2 km apart: if the bus takes much longer than walking, say so (e.g. against a one-way loop)

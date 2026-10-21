@@ -27,7 +27,7 @@ Darbo dienomis visą dieną į Užupį – apylanka per magistralę; poilsio die
 - Duomenų patikra (2026-10-20): laikai visuose reisuose didėja, visos stotelės yra; darbo dienų autobusų grandinės nenutrūksta (išskyrus 2-1: 21:59 Žiedo → 23:15 Narbuto, autobusas nuvažiuoja tuščias).
 - Ėjimas: pradžioje (iki 400 m nuo pasirinktos stotelės; ≤120 m = „ta pati vieta“), persėdant (≤400 m), pabaigoje (≤400 m); daugiausia 2 ėjimai.
 - Atmetama: 0 min važiavimai, važiavimai tarp gretimų (≤150 m) stotelių, ėjimai ne trumpesni už visą kelią pėsčiomis, važiavimai >1,6× ilgesni už trumpiausią variantą, kelionės >1,5×+10 min ilgesnės už greičiausią.
-- Lygus atvykimas → trumpesnis kelias (km, min autobuse). Rikiuojama pagal atvykimą; pirmas „⭐ Rekomenduojama“.
+- Lygus atvykimas → pirmiau mažiau persėdimų („likite autobuse“ – ne persėdimas, `xf` computePlan), tada trumpesnis kelias (km, min autobuse). Rikiuojama pagal atvykimą; pirmas „⭐ Rekomenduojama“.
 - „Pėsčiomis bus greičiau“: stotelės ≤1,2 km ir autobusas gerokai lėtesnis (ratai šalinami); 1,2–2 km – pasiūlymas šalia.
 - Atsarginiai variantai: ilgesnis ėjimas (≤800 m) → kitos dienos (iki 3 d., visa diena).
 - Data → dienos tipas automatiškai (savaitgaliai + LT valstybinės šventės, Velykos).
