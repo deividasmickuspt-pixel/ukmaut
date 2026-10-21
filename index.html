@@ -210,7 +210,7 @@ li.end .dot{width:26px;height:26px;margin-left:4px}
 .alist{list-style:none;margin:0;padding:0}.alist li{border-bottom:1px solid var(--line)}
 .arow{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"t b" "m m";gap:2px .6rem;align-items:center;width:100%;min-height:52px;padding:.45rem .2rem;border:0;background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
 .arow .at{grid-area:t;font-size:1.05rem}.arow .ab{grid-area:b;display:flex;gap:3px;justify-content:flex-end}.arow .ab .b{font-size:.7rem;min-width:1.7em;height:1.7em}.arow .am{grid-area:m;font-size:.8rem;color:var(--muted)}
-.arow.past .at{color:var(--muted)}.arow.past .at b{font-weight:400}
+.arow.past .at{color:var(--muted)}.arow.past .at b{font-weight:400}div.arow{cursor:default}div.arow .ab{opacity:.55}
 .oarr{display:block;font-size:.85rem;font-weight:700;color:#0B7A3E}
 .dtbox{display:flex;border:2px solid var(--ink);border-radius:10px;overflow:hidden;background:var(--card)}
 .dtbox input{font:inherit;border:0;min-height:42px;padding:0 .4rem;background:transparent;color:var(--ink)}
@@ -1207,9 +1207,10 @@ function drawWalk(o,fit){ clearHL(); fade(true); hl=L.layerGroup().addTo(map); c
   if(fit) map.fitBounds(w,isPhone()&&!mapBig?{paddingTopLeft:[18,50],paddingBottomRight:[18,14],maxZoom:16}:{padding:[60,60],maxZoom:16}); }
 const walkM=o=>(o.walkEnd?o.walkEnd.m:0)+o.legs.reduce((S,l)=>S+(l.walk?l.walk.m:0),0)+(o.walkStart&&!o.walkStart.near?o.walkStart.m:0);
 let adDate=null;
-const allRows=(L,refT,attr)=>`<ul class="alist">${L.map((o,i)=>{ const past=o.dep<refT, wm=walkM(o); return `<li><button type="button" class="arow${past?' past':''}" ${attr}="${i}">
+const allRows=(L,refT,attr)=>`<ul class="alist">${L.map((o,i)=>{ const past=o.dep<refT, wm=walkM(o); const tag=past?'div':'button';   // praėjęs reisas – tik laikas, pasirinkti negalima
+    return `<li><${tag}${past?'':' type="button"'} class="arow${past?' past':''}"${past?'':` ${attr}="${i}"`}>
       <span class="at"><b>${hm(o.dep)}</b> – ${hm(o.arr)}</span><span class="ab">${o.legs.filter(l=>!l.walk).map(l=>badge(l.t.r)).filter((x,i,a)=>a.indexOf(x)===i).join('')}</span>
-      <span class="am">${o.arr-o.dep} min.${o.legs.length>1&&o.legs.some((l,k)=>k&&!l.cont)?' · persėdimas':''}${wm?` · 🚶 ~${wm} m pėsčiomis`:''}${past?' · jau išvyko':''}</span></button></li>`;}).join('')}</ul>`;
+      <span class="am">${o.arr-o.dep} min.${o.legs.length>1&&o.legs.some((l,k)=>k&&!l.cont)?' · persėdimas':''}${wm?` · 🚶 ~${wm} m pėsčiomis`:''}${past?' · jau išvyko':''}</span></${tag}></li>`;}).join('')}</ul>`;
 function openAllDay(dd){ const dlg=document.getElementById('alldlg'), c=document.getElementById('alldlg-c'); adDate=typeof dd==='string'?dd:plan.date; const L=allDay(plan.from,plan.to,adDate), isToday=adDate===isoDate(new Date());
   c.innerHTML=`<div class="pt-top"><span><b id="alldlg-h">${esc(plan.from)} → ${esc(plan.to)}</b><small>visi dienos reisai</small></span><button type="button" class="clr" data-allclose aria-label="Uždaryti">✕</button></div>
     ${L.length?allRows(L,isToday?nowMin:-1,'data-allpick')

@@ -680,9 +680,10 @@ function drawWalk(o,fit){ clearHL(); fade(true); hl=L.layerGroup().addTo(map); c
   if(fit) map.fitBounds(w,isPhone()&&!mapBig?{paddingTopLeft:[18,50],paddingBottomRight:[18,14],maxZoom:16}:{padding:[60,60],maxZoom:16}); }
 const walkM=o=>(o.walkEnd?o.walkEnd.m:0)+o.legs.reduce((S,l)=>S+(l.walk?l.walk.m:0),0)+(o.walkStart&&!o.walkStart.near?o.walkStart.m:0);
 let adDate=null;
-const allRows=(L,refT,attr)=>`<ul class="alist">${L.map((o,i)=>{ const past=o.dep<refT, wm=walkM(o); return `<li><button type="button" class="arow${past?' past':''}" ${attr}="${i}">
+const allRows=(L,refT,attr)=>`<ul class="alist">${L.map((o,i)=>{ const past=o.dep<refT, wm=walkM(o); const tag=past?'div':'button';   // praėjęs reisas – tik laikas, pasirinkti negalima
+    return `<li><${tag}${past?'':' type="button"'} class="arow${past?' past':''}"${past?'':` ${attr}="${i}"`}>
       <span class="at"><b>${hm(o.dep)}</b> – ${hm(o.arr)}</span><span class="ab">${o.legs.filter(l=>!l.walk).map(l=>badge(l.t.r)).filter((x,i,a)=>a.indexOf(x)===i).join('')}</span>
-      <span class="am">${o.arr-o.dep} min.${o.legs.length>1&&o.legs.some((l,k)=>k&&!l.cont)?' · persėdimas':''}${wm?` · 🚶 ~${wm} m pėsčiomis`:''}${past?' · jau išvyko':''}</span></button></li>`;}).join('')}</ul>`;
+      <span class="am">${o.arr-o.dep} min.${o.legs.length>1&&o.legs.some((l,k)=>k&&!l.cont)?' · persėdimas':''}${wm?` · 🚶 ~${wm} m pėsčiomis`:''}${past?' · jau išvyko':''}</span></${tag}></li>`;}).join('')}</ul>`;
 function openAllDay(dd){ const dlg=document.getElementById('alldlg'), c=document.getElementById('alldlg-c'); adDate=typeof dd==='string'?dd:plan.date; const L=allDay(plan.from,plan.to,adDate), isToday=adDate===isoDate(new Date());
   c.innerHTML=`<div class="pt-top"><span><b id="alldlg-h">${esc(plan.from)} → ${esc(plan.to)}</b><small>visi dienos reisai</small></span><button type="button" class="clr" data-allclose aria-label="Uždaryti">✕</button></div>
     ${L.length?allRows(L,isToday?nowMin:-1,'data-allpick')
