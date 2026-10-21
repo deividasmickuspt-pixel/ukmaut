@@ -3,7 +3,7 @@
 #    g – linijos poroms iki MAXM, d – tikri atstumai gatvėmis poroms iki MAXD (planuoklio ėjimo atstumai ir laikas)
 import xml.etree.ElementTree as ET, math, heapq, json, collections
 MAXM=850   # linijos: stotelių poros iki tiek metrų tiesiai (planuoklis eina iki 800 m)
-MAXD=2100  # atstumai: iki tiek (pasiūlymas „pėsčiomis greičiau“ – iki 2 km)
+MAXD=2100  # atstumai: iki tiek (pasiūlymas „pėsčiomis greičiau“ – iki 2 km); toliau nei MAXM – linija tik trumpiausiai porai tarp tų pačių pavadinimų
 def dist(a,b): return math.hypot((a[0]-b[0])*111320,(a[1]-b[1])*63600)
 N={};ways=[]
 for ev,el in ET.iterparse('duomenys/osm_gatves.osm'):
@@ -70,10 +70,20 @@ for i,a in enumerate(ids):
     if t not in Dd: continue
     # nuo stotelės iki gatvės ir atgal + kelias gatvėmis
     DD[a+'|'+b]=round(Dd[t]+dist(ST[a],N['S:'+a])+dist(ST[b],N[t]))
-    if dist(ST[a],ST[b])>MAXM: continue
     path=[t]
     while path[-1]!='S:'+a: path.append(Pv[path[-1]])
     P=[ST[b]]+[N[n] for n in path]+[ST[a]]; P=rdp(P[::-1])
-    G[a+'|'+b]=[[round(x,5),round(y,5)] for x,y in P]
-json.dump({'g':G,'d':DD},open('tarpiniai/ejimo_keliai.json','w'),separators=(',',':'))
+    G[a+'|'+b]=[(round(x*1e5),round(y*1e5)) for x,y in P]
+# toli esančios poros: paliekama tik trumpiausia tarp tų pačių pavadinimų (žemėlapyje – kortelė „Pėsčiomis“)
+NM={s['id']:s['name'] for s in D['stops']}; best={}
+for k in G:
+  a,b=k.split('|')
+  if dist(ST[a],ST[b])>MAXM:
+    nk=tuple(sorted((NM[a],NM[b])))
+    if nk not in best or DD[k]<DD[best[nk]]: best[nk]=k
+keepf=set(best.values())
+G={k:v for k,v in G.items() if dist(ST[k.split('|')[0]],ST[k.split('|')[1]])<=MAXM or k in keepf}
+# kompaktiškai: 1e5 sveikieji skaičiai, nuo antro taško – skirtumai
+GE={k:[x for i,p in enumerate(v) for x in (p if i==0 else (p[0]-v[i-1][0],p[1]-v[i-1][1]))] for k,v in G.items()}
+json.dump({'g':GE,'d':DD},open('tarpiniai/ejimo_keliai.json','w'),separators=(',',':'))
 print('ėjimo keliai:',len(G),'atstumai:',len(DD))
