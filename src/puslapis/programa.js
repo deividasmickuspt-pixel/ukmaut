@@ -231,9 +231,9 @@ D.stops.forEach(s=>{
   markers[s.id]=m;
 });
 const allBounds=L.latLngBounds(D.stops.map(s=>[s.lat,s.lon]));
-// telefone pradinis vaizdas – miesto centras (Kęstučio a.) žemėlapio viduryje, matomos visos stotelės
+// pradinis vaizdas (telefone ir kompiuteryje) – miesto centras (Kęstučio a.) žemėlapio viduryje, matomos visos stotelės
 const CENTER=(s=>s?[s.lat,s.lon]:null)(D.stops.find(s=>s.name==='Kęstučio a.'));
-const homeBounds=()=>{ if(!CENTER||!isPhone()) return allBounds;
+const homeBounds=()=>{ if(!CENTER) return allBounds;
   const dl=Math.max(CENTER[0]-allBounds.getSouth(),allBounds.getNorth()-CENTER[0]), dn=Math.max(CENTER[1]-allBounds.getWest(),allBounds.getEast()-CENTER[1]);
   return L.latLngBounds([CENTER[0]-dl,CENTER[1]-dn],[CENTER[0]+dl,CENTER[1]+dn]); };
 map.fitBounds(homeBounds(),{padding:[20,20]});
@@ -478,7 +478,7 @@ function stopList(){ const L=[...D.stops].filter(s=>TTS[s.id]).sort((a,b)=>a.nam
   return `<p class="sub" style="margin:.1rem 0 .6rem">Paspauskite stotelę – pamatysite jos laikus.</p><ul class="slist">${L.map(st=>`<li><button type="button" class="slrow" data-openstop="${st.id}"><span class="sln"><b>${esc(st.name)}</b>${dirTxt(st.id)?`<small>${esc(dirTxt(st.id))}</small>`:''}</span><span class="xfer">${st.routes.map(x=>badge(x)).join('')}</span><span class="chev" aria-hidden="true">›</span></button></li>`).join('')}</ul>`; }
 const rcard=r=>`<button class="rcard" data-sel="${r}">${badge(r,1)}<span>${esc(D.meta[r].legend)}</span><span class="chev" aria-hidden="true">›</span></button>`;
 // telefono maršrutų puslapyje poraštė – sąrašo gale (ne visada matoma)
-function addFoot(el){ if(onRoutesPg()) el.insertAdjacentHTML('beforeend',`<div class="pfoot">${document.getElementById('appfoot').innerHTML}</div>`); }
+function addFoot(el){ if(onRoutesPg()&&isPhone()) el.insertAdjacentHTML('beforeend',`<div class="pfoot">${document.getElementById('appfoot').innerHTML}</div>`); }
 // telefono maršruto skirtuke paspausta stotelė pažymima sąraše ir žemėlapyje; tvarkaraštis – atskiru mygtuku
 let selStop=null;
 function pickStop(id){ selStop=selStop&&selStop.id===id&&selStop.r===state.route?null:{r:state.route,id}; render(false);
@@ -825,7 +825,7 @@ function locateMe(){
   },{enableHighAccuracy:true,timeout:12000,maximumAge:60000}); }
 function setMapBig(o){ mapBig=o; document.body.classList.toggle('mapbig',o); mapExp.setAttribute('aria-expanded',String(o));
   mapExp.innerHTML=o?'<span aria-hidden="true">⤡</span> Sumažinti':'<span aria-hidden="true">⤢</span> Padidinti';
-  map.options.zoomSnap=isPhone()&&!o?0.25:1;   // mažame žemėlapyje tikslesnis priartinimas
+  map.options.zoomSnap=!o?0.25:1;   // tikslesnis priartinimas – visos stotelės telpa kuo stambiau
   map.invalidateSize();
   if(state.stop){const st=STOP[state.stop]; map.setView([st.lat,st.lon],o?16:15);} else if(state.route||plan.res.length) render(true); else map.fitBounds(homeBounds(),{padding:isPhone()&&!o?[4,4]:[20,20],animate:false}); }   // be animacijos – kitaip ji vėliau perrašo kelionės priartinimą
 setMapBig(false);
