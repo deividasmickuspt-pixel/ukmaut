@@ -1,4 +1,5 @@
 {
+  "redirects": [{ "source": "/senas/:path*", "destination": "/", "permanent": false }, { "source": "/senas", "destination": "/", "permanent": false }],
   "rewrites": [{ "source": "/favicon.ico", "destination": "/favicon.svg" }],
   "headers": [
     { "source": "/sw.js", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },

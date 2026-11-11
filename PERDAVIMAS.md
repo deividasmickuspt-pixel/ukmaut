@@ -2,7 +2,7 @@
 
 ## Kas tai
 Statinis puslapis **ukmaut.vercel.app** (failas `index.html`, ~460 KB): žemėlapis, maršrutai, stotelių tvarkaraščiai, kelionės planuoklis, interaktyvi instrukcija. Be serverio ir duomenų bazės. Kodas: GitHub `deividasmickuspt-pixel/ukmaut`, Vercel projektas `ukmaut` (komanda „MyDep's“), atnaujinama per push į `main`; kitos šakos – peržiūros nuorodos.
-Autorius: Deividas Mickus (asmeninė iniciatyva, bandomoji versija). Atsiliepimai – Google forma (mygtukas „!“, `FEEDBACK_URL` `src/puslapis/programa.js` pradžioje).
+Autorius: Deividas Mickus (asmeninė iniciatyva). Nuo 2026-11-10 nuoroda į puslapį yra Ukmergės autobusų parko svetainėje (meniu „Autobusų tvarkaraščiai“), užrašas „bandomoji versija“ nuimtas. Atsiliepimai – Google forma (mygtukas „!“, `FEEDBACK_URL` `src/puslapis/programa.js` pradžioje).
 
 ## Duomenų šaltiniai
 1. **AP darbo grafikai nuo 2026-10-05, atnaujinti nuo 2026-10-19** (Excel iš J. Skapienės; `2.xlsx`, `4.xlsx`, `nauji_darbo_dienomis.xlsx`, savaitgalio failas; 2026-10-20 gauti nauji `nauji_darbo_dienomis.xlsx` ir `NAUJAUSIAS (AST MIEST. Savaitgaliais)` – Excel failai į saugyklą nekeliami). Visi 7 maršrutai, darbo ir poilsio dienos → `src/duomenys/reisai.json`. Plakatų laikai nebenaudojami.
@@ -34,7 +34,7 @@ Darbo dienomis visą dieną į Užupį – apylanka per magistralę; poilsio die
 - Auditas (visos poros × 4 laikai, 8 648 paieškos): 92 % protinga, 6 % pėsčiomis, 1,5 % ilgas ratas be alternatyvos (retai aptarnaujamos stotelės: Gamyklų, Gėlių, Narbuto, Deltuva), 0 „nieko nerasta“.
 
 ## Sąsaja
-- Antraštė (pavadinimas, „Bandomoji versija“, mygtukai „?“ instrukcija ir „!“ forma) ir poraštė (autorius, žemėlapio autoriai, prieinamumo deklaracija) per visą plotį.
+- Antraštė (pavadinimas, mygtukai „?“ instrukcija ir „!“ forma) ir poraštė (autorius, žemėlapio autoriai, prieinamumo deklaracija) per visą plotį.
 - **Kompiuteryje (2026-10-21, kaip telefone):** kairėje žemėlapis per visą aukštį (tik stotelių taškai, `simpleMap` ir kompiuteryje); viršuje dešinėje – tas pats meniu ☰ kaip telefone (vietoj „?“ ir „!“; „Įsidėti į telefono ekraną“ kompiuteryje nerodomas); dešinėje (440 px) planuoklio forma (`#planbar`, maršrutų skiltyje paslėpta) ir rezultatai / maršrutų sąrašas su unikaliais reisais (`#panel`). Išdėstymas – CSS tinklelis, `#left{display:contents}`. Senas kompiuterio maršruto vaizdas (`routeView`, kryptys, stotelių juosta) nebenaudojamas; stotelės tvarkaraštis ir kompiuteryje – lange `stopdlg` su maršrutų skirtukais (senas kompiuterio stotelės vaizdas išjungtas, `if(false&&state.stop)` – kodas dar likęs); žemėlapio pagrindo perjungiklis paslėptas; įlipimo / išlipimo stotelės (balti taškai) – be užrašų, kad neuždengtų laikų. Instrukcija pati nebesirodo, kol bus perdaryta. Pradinis vaizdas ir kompiuteryje centruotas į Kęstučio a. (`homeBounds`, `zoomSnap` 0,25). Poraštė: „Žemėlapis: … · Projekto autorius: …“ (prieinamumo deklaracija – tik meniu); kompiuteryje maršrutų skiltyje poraštė nekartojama (`addFoot` – tik telefone); meniu apačioje užrašų nebėra. Telefone: antraštė → planuoklis → žemėlapis → rezultatai/maršrutai.
 - Pradinis vaizdas rodo šiandienos schemą; dienos mygtukai tik maršruto ir stotelės vaizde. Rodant planuoklio rezultatus maršrutų sąrašas paslėptas.
 - Visada šviesus dizainas (tamsus režimas išjungtas: `color-scheme: light only`).
@@ -78,8 +78,8 @@ Palyginti visi išvykimai (stotelė + laikas) iš AP darbo grafikų („nauji da
 - Savaitgalį trūko 2 maršruto reiso 11:40 Autobusų stotis → Pušų (kaip 7:00) – pridėtas.
 Palikta kaip buvo (Excel klaidos ar mūsų sprendimai): 2-2 Gelžbetonis „6.29“ (turi būti 6:19), 4-1 4:45 Sodai „4.45“ (paliktas 4:47 kaip kituose reisuose), 2-1 lape perteklinis stulpelis 4:40 AS→Biofabrikas (laikai nedidėja), 4-2 lape du grįžimai iš Pašilės 6:51 ir 6:55 į tą pačią 7:15 (paliktas 6:55), „Sodai“ prie Deltuvos – `Sodai (Deltuvos g.)`, 2-1 15:09 Gelžbetonis Excel tuščias. Savaitgalį 2 maršrutas Turguje stovi 9:35–9:40 ir ten galima įlipti (patvirtino Deividas) – reisas padalintas: Koklių f. 9:25 → Turgus 9:35 ir Turgus 9:40 → Pašilė 9:58. Excel 4-2 lape yra ir 4:45 „greitasis“ reisas – du 4:45 reisai tikri; 4-1 lape pastaba „narbutas pietinis 5, plius 4“ patvirtina 14:45 Narbuto reisą (5, toliau 4).
 
-## Senoji versija (/senas/)
-Perkėlus naująją versiją į `main`, senoji (2026-10-15 puslapis) lieka adresu **ukmaut.vercel.app/senas/**. Jos programa nekeičiama (`src/senas/senoji_2026-10-15.html`), bet perstatant (`skriptai/senoji_versija.py`) į ją įdedami naujausi reisų ir tvarkaraščių duomenys – laikai abiejose versijose vienodi. Senojoje vietoj „bandomoji versija“ – nuoroda „senoji versija · išbandykite naują →“; naujojoje meniu – „🕰️ Senoji versija“. Vercel Web Analytics peržiūras skaičiuoja pagal adresą (`/` ir `/senas/`). `sw.js` (CACHE v2) senosios versijos kopiją saugo atskirai. Senąją versiją planuojama laikyti kelias savaites; jos planuoklyje yra senos klaidos (pvz. „likite autobuse“ ir vėlesniame to paties autobuso reise).
+## Senoji versija (/senas/) – pašalinta
+2026-10-15 puslapis buvo laikomas adresu /senas/ (su naujais duomenimis) iki 2026-11-11; tada pašalintas (`senas/`, `src/senas/`, `skriptai/senoji_versija.py`, meniu punktas). `vercel.json` adresą /senas/ nukreipia į pradžią; `sw.js` CACHE v3.
 
 ## Atviri klausimai AS
 2026-10-19 Excel'yje rasta ir pataisyta: 2-2 Dariaus ir Girėno 6:29→6:19, 2-1P 15:24→15:09, 4-1 4:45 reise Sodai/Dukstynos k. 4:45/4:47→4:47/4:48; 4-2 lape du 6:51/6:55 stulpeliai – galioja 6:55; 2-1 lape senas 4:40 rytinis – galioja 4:15; 2-1P 13:38 reise Smėlių 14:02 → Kęstučio a. 14:03 (1 min) – palikta kaip Excel'yje.
